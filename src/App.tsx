@@ -1,28 +1,39 @@
-import "./App.css";
-import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { theme } from "./styles/theme";
 
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      "Pretendard",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "system-ui",
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-  },
-});
+// 블로그 페이지
+import BlogHome from "./pages/Blog/BlogHome";
+
+// 포트폴리오 페이지
+import PortfolioHome from "./pages/Portfolio/PortfolioHome";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* MUI의 기본 스타일을 초기화 */}
-      <div>
-        <h1>portfolio</h1>
-      </div>
+      {/* MUI의 기본 CSS 리셋 및 글로벌 스타일 적용 */}
+      <CssBaseline />
+
+      {/* BrowserRouter: HTML5 History API를 사용한 라우터 */}
+      <Router>
+        {/* Routes: Route들을 감싸는 컨테이너 */}
+        <Routes>
+          {/* Route: 경로와 컴포넌트를 매칭 */}
+
+          {/* / 경로 → 블로그 */}
+          <Route path="/" element={<BlogHome />} />
+
+          {/* /portfolio 경로 → 포트폴리오 */}
+          <Route path="/portfolio" element={<PortfolioHome />} />
+
+          {/* 404 페이지 */}
+          <Route
+            path="*"
+            element={<div>404 - 페이지를 찾을 수 없습니다</div>}
+          />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
