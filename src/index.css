@@ -1,10 +1,41 @@
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Pretendard", -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+/* 전역 변수 및 폰트 설정 */
+:root {
+  /* MUI와 톤을 맞추기 위한 전역 설정 */
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, 
+    system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", 
+    "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", 
+    "Segoe UI Symbol", sans-serif;
+  /* 부드러운 텍스트 렌더링 설정 */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 레이아웃 기반 설정 */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
 }
 
 body {
   background-color: #ffffff;
+  color: #222222;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
 }
