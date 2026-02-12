@@ -8,7 +8,7 @@
  * 1. 기존 카테고리에 items 배열에 추가하거나
  * 2. 새 카테고리 객체를 배열에 추가하면 됩니다.
  */
-import type { Skill } from "../types/portfolio";
+import type { Skill } from "@/types/portfolio";
 
 export const skills: Skill[] = [
   {

@@ -11,7 +11,7 @@
  */
 import { Box, Typography, LinearProgress, Paper } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import type { Skill } from "../../../types/portfolio";
+import type { Skill } from "@/types/portfolio";
 
 /** SkillSection의 props 타입 */
 interface SkillSectionProps {

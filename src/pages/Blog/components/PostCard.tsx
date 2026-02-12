@@ -14,9 +14,9 @@ import {
   Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import type { Post } from "../../../types/blog";
-import { formatDate, getRelativeTime } from "../../../utils/date";
-import { extractExcerpt } from "../../../utils/markdown";
+import type { Post } from "@/types/blog";
+import { formatDate, getRelativeTime } from "@/utils/date";
+import { extractExcerpt } from "@/utils/markdown";
 
 /** PostCard의 props 타입 - 표시할 포스트 데이터를 받음 */
 interface PostCardProps {

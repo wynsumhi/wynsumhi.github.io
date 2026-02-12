@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LaunchIcon from "@mui/icons-material/Launch";
-import type { Project } from "../../../types/portfolio";
+import type { Project } from "@/types/portfolio";
 
 /** ProjectCard의 props 타입 */
 interface ProjectCardProps {
