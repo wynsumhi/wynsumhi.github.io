@@ -45,7 +45,7 @@ jobs:
 
       # 5. Notion에서 블로그 글 가져오기
       - name: Fetch posts from Notion
-        run: pnpm fetch-notion
+        run: pnpm tsx scripts/fetch-notion.ts
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
