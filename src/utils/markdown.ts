@@ -2,6 +2,8 @@ export const extractExcerpt = (
   markdown: string,
   length: number = 150,
 ): string => {
+  if (!markdown) return "";
+
   // Markdown 제거하고 본문만 추출
   const plain = markdown
     .replace(/#{1,6}\s/g, "") // 헤더 제거
