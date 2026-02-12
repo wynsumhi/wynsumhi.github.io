@@ -11,7 +11,7 @@
  *   Notion → fetch-notion.ts → posts.json → usePosts (동적 import) → 컴포넌트
  */
 import { useState, useEffect } from "react";
-import type { Post, PostCategory } from "../types/blog";
+import type { Post, PostCategory } from "@/types/blog";
 
 export const usePosts = () => {
   // posts: 로드된 포스트 배열, loading: 로딩 상태, error: 에러 메시지
@@ -24,9 +24,11 @@ export const usePosts = () => {
     const loadPosts = async () => {
       try {
         // 동적 import: 빌드 시 코드 스플리팅되어 필요할 때만 JSON을 로드
-        const data = await import("../data/posts.json");
+        const data = await import("@/data/posts.json");
         // data.default: ES 모듈의 기본 내보내기 (JSON 배열)
-        setPosts(data.default as Post[]);
+        // JSON 동적 import 시 TS가 추론하는 타입과 Post[]가 완전히 일치하지 않으므로
+        // unknown을 거쳐 안전하게 변환 (빌드 시점에 fetch-notion이 올바른 구조를 보장)
+        setPosts(data.default as unknown as Post[]);
       } catch (err) {
         console.error("포스트 데이터 로드 실패:", err);
         setError("포스트 데이터를 불러오는 데 실패했습니다.");
