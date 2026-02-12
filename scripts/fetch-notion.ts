@@ -3,7 +3,7 @@ import { NotionToMarkdown } from "notion-to-md";
 import fs from "fs";
 import path from "path";
 
-// Notion 클라이언트 초기화
+// Notion 클라이언트 초기화 (notion-to-md에서 사용)
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
@@ -11,6 +11,7 @@ const notion = new Client({
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
 const DATABASE_ID = process.env.NOTION_DATABASE_ID!;
+const NOTION_TOKEN = process.env.NOTION_TOKEN!;
 
 interface Post {
   id: string;
@@ -25,62 +26,75 @@ interface Post {
 
 async function fetchPosts() {
   try {
-    // Notion 데이터베이스 쿼리
-    const response = await notion.databases.query({
-      database_id: DATABASE_ID,
-      filter: {
-        property: "Published",
-        checkbox: {
-          equals: true,
+    // SDK v5의 dataSources.query()가 호환 문제가 있어 REST API 직접 호출
+    const response = await fetch(
+      `https://api.notion.com/v1/databases/${DATABASE_ID}/query`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${NOTION_TOKEN}`,
+          "Notion-Version": "2022-06-28",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          sorts: [
+            {
+              property: "date",
+              direction: "descending",
+            },
+          ],
+        }),
       },
-      sorts: [
-        {
-          property: "Date",
-          direction: "descending", // 최신순
-        },
-      ],
-    });
+    );
 
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Notion API 에러: ${response.status} ${errorBody}`);
+    }
+
+    const data = await response.json();
     const posts: Post[] = [];
 
     // 각 페이지(글)마다 처리
-    for (const page of response.results) {
-      if (!("properties" in page)) continue;
+    for (const page of data.results) {
+      if (page.object !== "page") continue;
 
       const properties = page.properties;
 
       // 제목 추출
       const title =
-        properties.Name?.type === "title"
-          ? properties.Name.title[0]?.plain_text || ""
+        properties.title?.type === "title"
+          ? properties.title.title[0]?.plain_text || ""
           : "";
 
       // 카테고리 추출
       const category =
-        properties.Category?.type === "select"
-          ? properties.Category.select?.name || ""
+        properties.category?.type === "select"
+          ? properties.category.select?.name || ""
           : "";
 
       // 태그 추출
       const tags =
-        properties.Tags?.type === "multi_select"
-          ? properties.Tags.multi_select.map((tag) => tag.name)
+        properties.tags?.type === "multi_select"
+          ? properties.tags.multi_select.map((tag: { name: string }) => tag.name)
           : [];
 
       // 날짜 추출
       const date =
-        properties.Date?.type === "date"
-          ? properties.Date.date?.start || ""
+        properties.date?.type === "date"
+          ? properties.date.date?.start || ""
           : "";
 
-      // 썸네일 추출
+      // published 상태 추출
+      const published =
+        properties.published?.type === "status"
+          ? properties.published.status?.name !== "비활성"
+          : true;
+
+      // 썸네일 추출 (url 타입)
       const thumbnail =
-        properties.Thumbnail?.type === "files" &&
-        properties.Thumbnail.files.length > 0
-          ? properties.Thumbnail.files[0].type === "external"
-            ? properties.Thumbnail.files[0].external.url
-            : properties.Thumbnail.files[0].file.url
+        properties.thumbnail?.type === "url"
+          ? properties.thumbnail.url || undefined
           : undefined;
 
       // 본문 내용을 Markdown으로 변환
@@ -93,7 +107,7 @@ async function fetchPosts() {
         category,
         tags,
         date,
-        published: true,
+        published,
         thumbnail,
         content,
       });

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "fetch-notion": "tsx scripts/fetch-notion.ts",
+    "fetch-notion": "tsx --env-file=.env scripts/fetch-notion.ts",
     "prebuild": "pnpm fetch-notion"
   },
   "dependencies": {
