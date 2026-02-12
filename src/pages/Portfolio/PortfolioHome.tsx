@@ -9,7 +9,7 @@
  */
 import { Container, Typography, Box, Divider } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useProjects } from "../../hooks/useProjects";
+import { useProjects } from "@/hooks/useProjects";
 import ProjectCard from "./components/ProjectCard";
 import SkillSection from "./components/SkillSection";
 

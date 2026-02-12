@@ -16,15 +16,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { theme } from "./styles/theme";
+import { theme } from "@/styles/theme";
 
 // 공통 레이아웃 컴포넌트
-import Navbar from "./components/layout/Navbar";
+import Navbar from "@/components/layout/Navbar";
 
 // 페이지 컴포넌트
-import BlogHome from "./pages/Blog/BlogHome";
-import BlogPost from "./pages/Blog/BlogPost";
-import PortfolioHome from "./pages/Portfolio/PortfolioHome";
+import BlogHome from "@/pages/Blog/BlogHome";
+import BlogPost from "@/pages/Blog/BlogPost";
+import PortfolioHome from "@/pages/Portfolio/PortfolioHome";
 
 function App() {
   return (

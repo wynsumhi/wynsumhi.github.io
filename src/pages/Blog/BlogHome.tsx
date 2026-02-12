@@ -11,7 +11,7 @@
  * - 정상 → 포스트 카드 그리드
  */
 import { Container, Typography, Box, Alert } from "@mui/material";
-import { usePosts } from "../../hooks/usePosts";
+import { usePosts } from "@/hooks/usePosts";
 import PostList from "./components/PostList";
 
 const BlogHome = () => {

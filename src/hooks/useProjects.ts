@@ -9,8 +9,8 @@
  * 사용법:
  *   const { projects, skills } = useProjects();
  */
-import { projects } from "../data/projects";
-import { skills } from "../data/skills";
+import { projects } from "@/data/projects";
+import { skills } from "@/data/skills";
 
 export const useProjects = () => {
   return {

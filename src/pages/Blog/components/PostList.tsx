@@ -9,7 +9,7 @@
  * MUI의 Grid 시스템은 12칸 기반이므로, size 값이 12를 어떻게 나누느냐에 따라 열 수가 결정됩니다.
  */
 import Grid from "@mui/material/Grid";
-import type { Post } from "../../../types/blog";
+import type { Post } from "@/types/blog";
 import PostCard from "./PostCard";
 
 /** PostList의 props 타입 */

@@ -6,7 +6,7 @@
  *
  * 각 필드 설명은 src/types/portfolio.ts의 Project 인터페이스를 참고하세요.
  */
-import type { Project } from "../types/portfolio";
+import type { Project } from "@/types/portfolio";
 
 export const projects: Project[] = [
   {

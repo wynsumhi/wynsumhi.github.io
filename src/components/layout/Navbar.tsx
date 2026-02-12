@@ -18,8 +18,8 @@ import {
   Box,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ROUTES } from "../../constants/routes";
-import { CONFIG } from "../../constants/config";
+import { ROUTES } from "@/constants/routes";
+import { CONFIG } from "@/constants/config";
 
 const Navbar = () => {
   // useNavigate: 프로그래밍 방식으로 페이지 이동

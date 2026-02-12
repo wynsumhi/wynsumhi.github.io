@@ -22,8 +22,8 @@ import {
   Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { usePosts } from "../../hooks/usePosts";
-import { formatDate, getRelativeTime } from "../../utils/date";
+import { usePosts } from "@/hooks/usePosts";
+import { formatDate, getRelativeTime } from "@/utils/date";
 
 const BlogPost = () => {
   // useParams: URL의 동적 파라미터를 객체로 추출 (예: /blog/abc → { id: "abc" })
