@@ -21,6 +21,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       # 1. 코드 체크아웃
       - name: Checkout
