@@ -22,6 +22,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: github-pages
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       # 1. 코드 체크아웃
       - name: Checkout
@@ -37,7 +39,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: "pnpm"
 
       # 4. 의존성 설치
