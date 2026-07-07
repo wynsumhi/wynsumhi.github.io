@@ -22,7 +22,6 @@ const Navbar = () => {
 
   // 상단 메뉴 목록
   const navItems = [
-    { label: "Home", path: ROUTES.HOME },
     { label: "Blog", path: ROUTES.BLOG },
     { label: "Portfolio", path: ROUTES.PORTFOLIO },
     { label: "Resume", path: ROUTES.RESUME },
@@ -54,18 +53,18 @@ const Navbar = () => {
             gap: 2,
           }}
         >
-          {/* 사이트 제목 */}
+          {/* 홈 이동 로고 */}
           <Typography
-            fontWeight={900}
+            fontWeight={800}
             onClick={() => navigate(ROUTES.HOME)}
             sx={{
               cursor: "pointer",
-              letterSpacing: 0,
-              fontSize: { xs: "1rem", md: "1.05rem" },
+              letterSpacing: "0.08em",
+              fontSize: { xs: "0.95rem", md: "1rem" },
               whiteSpace: "nowrap",
             }}
           >
-            김현아
+            HYUNA
           </Typography>
 
           {/* 주요 메뉴 */}

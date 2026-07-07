@@ -17,11 +17,12 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  ArticleOutlined,
   ArchiveOutlined,
   DarkModeOutlined,
   EmailOutlined,
   GitHub,
-  Home,
+  HomeOutlined,
   LightModeOutlined,
   PersonOutline,
   WorkOutline,
@@ -32,7 +33,8 @@ import { ROUTES } from "@/constants/routes";
 
 // 블로그 사이드 메뉴 목록
 const navItems = [
-  { label: "BLOG", icon: <Home fontSize="small" />, path: ROUTES.BLOG },
+  { label: "HOME", icon: <HomeOutlined fontSize="small" />, path: ROUTES.HOME },
+  { label: "BLOG", icon: <ArticleOutlined fontSize="small" />, path: ROUTES.BLOG },
   {
     label: "ARCHIVES",
     icon: <ArchiveOutlined fontSize="small" />,
@@ -102,21 +104,22 @@ const Sidebar = () => {
           }}
         />
 
-        {/* 사이트 제목 */}
+        {/* 홈 이동 로고 */}
         <Typography
           variant="h6"
-          fontWeight={700}
+          fontWeight={800}
           onClick={() => navigate(ROUTES.HOME)}
           sx={{
             color: "#1e293b",
             fontSize: "1rem",
+            letterSpacing: "0.08em",
             lineHeight: 1.4,
             cursor: "pointer",
             transition: "color 0.2s",
             "&:hover": { color: "#2563eb" },
           }}
         >
-          {CONFIG.SITE_TITLE}
+          HYUNA
         </Typography>
 
         {/* 한 줄 소개 */}
@@ -130,7 +133,7 @@ const Sidebar = () => {
             mt: 0.5,
           }}
         >
-          프론트엔드 개발자의 기록
+          Portfolio & Tech Blog
         </Typography>
       </Box>
 
