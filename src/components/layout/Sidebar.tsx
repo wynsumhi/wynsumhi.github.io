@@ -249,7 +249,7 @@ const Sidebar = () => {
             href={`mailto:${CONFIG.EMAIL}`}
             sx={{
               color: "#94a3b8",
-              "&:hover": { color: "#2563eb", bgcolor: "#eff4ff" },
+              "&:hover": { color: "#1e293b", bgcolor: "#f1f5f9" },
               transition: "all 0.2s",
             }}
           >

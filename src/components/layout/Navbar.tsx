@@ -136,7 +136,8 @@ const Navbar = () => {
                 border: "1px solid #d8d1c4",
                 bgcolor: "#fff",
                 "&:hover": {
-                  bgcolor: "#ffd6d6",
+                  bgcolor: "#171717",
+                  color: "#fff",
                   borderColor: "#171717",
                 },
               }}
