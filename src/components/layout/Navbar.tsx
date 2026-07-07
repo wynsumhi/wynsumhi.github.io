@@ -11,7 +11,10 @@ import {
   Container,
   Box,
   Stack,
+  IconButton,
 } from "@mui/material";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { CONFIG } from "@/constants/config";
@@ -96,23 +99,50 @@ const Navbar = () => {
           </Stack>
 
           {/* 외부 링크 */}
-          <Box sx={{ display: { xs: "none", md: "block" } }}>
-            <Button
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+              gap: 0.75,
+            }}
+          >
+            <IconButton
               href={CONFIG.GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="GitHub 열기"
               sx={{
+                width: 38,
+                height: 38,
                 color: "#171717",
-                fontWeight: 800,
-                border: "1px solid #171717",
-                borderRadius: 999,
-                px: 2,
-                py: 0.6,
-                "&:hover": { bgcolor: "#171717", color: "#fff" },
+                border: "1px solid #d8d1c4",
+                bgcolor: "#fff",
+                "&:hover": {
+                  bgcolor: "#171717",
+                  color: "#fff",
+                  borderColor: "#171717",
+                },
               }}
             >
-              GitHub
-            </Button>
+              <GitHubIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              href={`mailto:${CONFIG.EMAIL}`}
+              aria-label="메일 보내기"
+              sx={{
+                width: 38,
+                height: 38,
+                color: "#171717",
+                border: "1px solid #d8d1c4",
+                bgcolor: "#fff",
+                "&:hover": {
+                  bgcolor: "#ffd6d6",
+                  borderColor: "#171717",
+                },
+              }}
+            >
+              <EmailOutlinedIcon fontSize="small" />
+            </IconButton>
           </Box>
         </Toolbar>
       </Container>
