@@ -80,17 +80,17 @@ const HomePage = () => {
                 component="h1"
                 sx={{
                   mt: 1.5,
-                  fontSize: { xs: "2.9rem", md: "5.8rem" },
+                  fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
                   fontWeight: 900,
-                  lineHeight: 1.02,
+                  lineHeight: 1.08,
                   letterSpacing: 0,
                 }}
               >
                 안녕하세요,
                 <br />
-                프론트엔드 개발자
+                사용자 경험을 기술로 구현하는
                 <br />
-                김현아입니다.
+                개발자 김현아입니다.
               </Typography>
               <Typography
                 sx={{
@@ -101,9 +101,8 @@ const HomePage = () => {
                   lineHeight: 1.8,
                 }}
               >
-                사용자 경험을 기술로 구현하는 개발자입니다. 디자인 관점에서
-                화면의 흐름을 이해하고, 프론트엔드 코드로 실제 서비스에 맞는
-                UI를 구현합니다.
+                디자인 관점에서 화면의 흐름을 이해하고, 프론트엔드 코드로 실제
+                서비스에 맞는 UI를 구현합니다.
               </Typography>
 
               <Stack
@@ -173,15 +172,19 @@ const HomePage = () => {
       </Box>
 
       {/* 핵심 역량 */}
-      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
+      <Container
+        maxWidth="lg"
+        component="section"
+        sx={{ py: { xs: 7, md: 10 } }}
+      >
         <Grid container spacing={{ xs: 4, md: 8 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h3" fontWeight={900}>
               핵심 역량
             </Typography>
-              <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              실무 프로젝트에서 쌓은 웹 구현 경험과 Notion에 정리한 학습
-              기록을 바탕으로 프론트엔드 역량을 확장하고 있습니다.
+            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              실무 프로젝트에서 쌓은 웹 구현 경험과 Notion에 정리한 학습 기록을
+              바탕으로 프론트엔드 역량을 확장하고 있습니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
@@ -230,7 +233,11 @@ const HomePage = () => {
       <Divider sx={{ borderColor: "#e8e3d8" }} />
 
       {/* 대표 프로젝트 */}
-      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
+      <Container
+        maxWidth="lg"
+        component="section"
+        sx={{ py: { xs: 7, md: 10 } }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -270,7 +277,9 @@ const HomePage = () => {
             >
               <Grid container spacing={3} alignItems="center">
                 <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography color="#777167">{project.period.start}</Typography>
+                  <Typography color="#777167">
+                    {project.period.start}
+                  </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 5 }}>
                   <Typography variant="h5" fontWeight={900}>
@@ -296,7 +305,11 @@ const HomePage = () => {
       <Divider sx={{ borderColor: "#e8e3d8" }} />
 
       {/* 최신 블로그 글 */}
-      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
+      <Container
+        maxWidth="lg"
+        component="section"
+        sx={{ py: { xs: 7, md: 10 } }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -345,7 +358,9 @@ const HomePage = () => {
             >
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography color="#777167">{formatDate(post.date)}</Typography>
+                  <Typography color="#777167">
+                    {formatDate(post.date)}
+                  </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 7 }}>
                   <Typography
