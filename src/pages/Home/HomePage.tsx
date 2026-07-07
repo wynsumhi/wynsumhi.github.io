@@ -45,8 +45,8 @@ const strengths = [
 const highlightTextSx = {
   display: "inline",
   color: "#050505",
-  background: "linear-gradient(transparent 52%, #ffd6d6 52%)",
-  px: 0.35,
+  background: "linear-gradient(transparent 42%, #ffd6d6 42%, #ffd6d6 88%, transparent 88%)",
+  px: 0.25,
 };
 
 const HomePage = () => {
@@ -84,7 +84,7 @@ const HomePage = () => {
                 sx={{
                   fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
                   fontWeight: 800,
-                  lineHeight: 1.16,
+                  lineHeight: 1.24,
                   letterSpacing: 0,
                 }}
               >
@@ -161,7 +161,7 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 7, md: 10 } }}
+        sx={{ py: { xs: 8, md: 12 } }}
       >
         <Grid container spacing={{ xs: 3, md: 5 }}>
           <Grid size={{ xs: 12, md: 4 }}>
@@ -206,7 +206,7 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 8, md: 12 } }}
+        sx={{ py: { xs: 9, md: 14 } }}
       >
         <Grid container spacing={{ xs: 4, md: 8 }}>
           <Grid size={{ xs: 12, md: 4 }}>
@@ -244,7 +244,7 @@ const HomePage = () => {
         id="home-projects"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 8, md: 12 } }}
+        sx={{ py: { xs: 9, md: 14 } }}
       >
         <Box
           sx={{
@@ -316,7 +316,7 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 8, md: 12 } }}
+        sx={{ py: { xs: 9, md: 14 } }}
       >
         <Box
           sx={{
@@ -391,7 +391,7 @@ const HomePage = () => {
 
       {/* 연락 섹션 */}
       <Box component="section" sx={{ bgcolor: "#171717", color: "#fff" }}>
-        <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 9, md: 12 } }}>
           <Typography variant="h3" fontWeight={800}>
             함께 이야기해요
           </Typography>
