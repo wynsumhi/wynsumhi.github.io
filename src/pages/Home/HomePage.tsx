@@ -83,7 +83,7 @@ const HomePage = () => {
                 component="h1"
                 sx={{
                   fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
-                  fontWeight: 700,
+                  fontWeight: 800,
                   lineHeight: 1.08,
                   letterSpacing: 0,
                 }}
