@@ -25,19 +25,19 @@ import { formatDate } from "@/utils/date";
 
 const strengths = [
   {
-    title: "화면 구조 설계",
+    title: "UI/UX를 고려한 화면 구현",
     description:
-      "사용자가 이동하는 흐름을 기준으로 페이지와 컴포넌트 구조를 정리합니다.",
+      "디자인 전공과 실무 경험을 바탕으로 사용자가 이해하기 쉬운 화면 흐름을 구현합니다.",
   },
   {
-    title: "React UI 구현",
+    title: "웹 표준 기반 마크업",
     description:
-      "반응형 레이아웃, 상태 처리, 데이터 기반 화면을 안정적으로 구현합니다.",
+      "HTML, CSS, SCSS, JavaScript로 반응형 웹 페이지와 동적 UI를 안정적으로 만듭니다.",
   },
   {
-    title: "기록과 개선",
+    title: "기록하며 성장하는 개발",
     description:
-      "Notion 기반 Tech Blog로 학습 과정과 문제 해결 과정을 꾸준히 남깁니다.",
+      "Notion 기반 Tech Blog에 학습 과정과 문제 해결 과정을 정리하며 개선점을 찾습니다.",
   },
 ];
 
@@ -101,9 +101,9 @@ const HomePage = () => {
                   lineHeight: 1.8,
                 }}
               >
-                사용자가 마주하는 화면을 만들고, 오래 관리할 수 있는 구조를
-                고민합니다. React와 TypeScript 기반의 UI 구현, 기록, 개선에
-                집중하고 있습니다.
+                디자인 관점에서 화면의 흐름을 이해하고, 프론트엔드 코드로
+                실제 서비스에 맞는 UI를 구현합니다. 반응형 웹, 동적 인터랙션,
+                협업 가능한 구조를 꾸준히 다듬고 있습니다.
               </Typography>
 
               <Stack
@@ -179,8 +179,9 @@ const HomePage = () => {
             <Typography variant="h3" fontWeight={900}>
               핵심 역량
             </Typography>
-            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              화면을 만드는 기술과 기록하는 습관을 함께 쌓아가고 있습니다.
+              <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              실무 프로젝트에서 쌓은 웹 구현 경험과 학습 기록을 바탕으로
+              프론트엔드 역량을 확장하고 있습니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>

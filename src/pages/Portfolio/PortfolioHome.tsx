@@ -25,7 +25,7 @@ const PortfolioHome = () => {
           Portfolio
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          프로젝트와 기술 스택을 소개합니다.
+          프론트엔드 구현 경험과 UI/UX 기반 프로젝트를 정리합니다.
         </Typography>
       </Box>
 
