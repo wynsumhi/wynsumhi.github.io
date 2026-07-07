@@ -51,6 +51,11 @@ const HomePage = () => {
   const featuredProjects = projects.slice(0, 3);
   const mainSkills = skills.flatMap((skill) => skill.items).slice(0, 10);
 
+  // 섹션 스크롤 이동
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717" }}>
       {/* 첫 화면 소개 */}
@@ -65,12 +70,12 @@ const HomePage = () => {
       >
         <Container maxWidth="lg">
           <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
-            <Grid size={{ xs: 12, md: 8 }}>
+            <Grid size={{ xs: 12, md: 10 }}>
               <Typography
                 variant="overline"
                 sx={{
                   color: "#5f6f52",
-                  fontWeight: 800,
+                  fontWeight: 700,
                   letterSpacing: "0.18em",
                 }}
               >
@@ -81,7 +86,7 @@ const HomePage = () => {
                 sx={{
                   mt: 1.5,
                   fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
-                  fontWeight: 900,
+                  fontWeight: 700,
                   lineHeight: 1.08,
                   letterSpacing: 0,
                 }}
@@ -113,7 +118,7 @@ const HomePage = () => {
                 <Button
                   variant="contained"
                   endIcon={<ArrowForwardIcon />}
-                  onClick={() => navigate(ROUTES.PORTFOLIO)}
+                  onClick={() => scrollToSection("home-projects")}
                   sx={{
                     bgcolor: "#171717",
                     "&:hover": { bgcolor: "#313131" },
@@ -138,53 +143,23 @@ const HomePage = () => {
                 </Button>
               </Stack>
             </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Box
-                sx={{
-                  borderLeft: { xs: "none", md: "1px solid #d8d1c4" },
-                  pl: { xs: 0, md: 4 },
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{ color: "#777167", fontWeight: 700 }}
-                >
-                  현재 집중하는 것
-                </Typography>
-                <Stack spacing={2.5} sx={{ mt: 2 }}>
-                  {strengths.map((item) => (
-                    <Box key={item.title}>
-                      <Typography fontWeight={800}>{item.title}</Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ mt: 0.6, color: "#625d54", lineHeight: 1.7 }}
-                      >
-                        {item.description}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Grid>
           </Grid>
         </Container>
       </Box>
 
-      {/* 핵심 역량 */}
+      {/* 현재 집중하는 것 */}
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 7, md: 10 } }}
+        sx={{ py: { xs: 6, md: 8 } }}
       >
-        <Grid container spacing={{ xs: 4, md: 8 }}>
+        <Grid container spacing={{ xs: 3, md: 5 }}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h3" fontWeight={900}>
-              핵심 역량
+            <Typography variant="h3" fontWeight={700}>
+              현재 집중하는 것
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              실무 프로젝트에서 쌓은 웹 구현 경험과 Notion에 정리한 학습 기록을
-              바탕으로 프론트엔드 역량을 확장하고 있습니다.
+              지금의 학습 방향과 실무에서 더 깊게 다듬고 있는 기준입니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
@@ -200,7 +175,7 @@ const HomePage = () => {
                       borderRadius: 2,
                     }}
                   >
-                    <Typography fontWeight={800}>{item.title}</Typography>
+                    <Typography fontWeight={700}>{item.title}</Typography>
                     <Typography
                       variant="body2"
                       sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.75 }}
@@ -211,8 +186,30 @@ const HomePage = () => {
                 </Grid>
               ))}
             </Grid>
+          </Grid>
+        </Grid>
+      </Container>
 
-            <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 3 }}>
+      <Divider sx={{ borderColor: "#e8e3d8" }} />
+
+      {/* 핵심 역량 */}
+      <Container
+        maxWidth="lg"
+        component="section"
+        sx={{ py: { xs: 7, md: 10 } }}
+      >
+        <Grid container spacing={{ xs: 4, md: 8 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h3" fontWeight={700}>
+              핵심 역량
+            </Typography>
+            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              실무 프로젝트에서 쌓은 웹 구현 경험과 Notion에 정리한 학습 기록을
+              바탕으로 프론트엔드 역량을 확장하고 있습니다.
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Stack direction="row" gap={1} flexWrap="wrap">
               {mainSkills.map((skill) => (
                 <Chip
                   key={skill.name}
@@ -234,6 +231,7 @@ const HomePage = () => {
 
       {/* 대표 프로젝트 */}
       <Container
+        id="home-projects"
         maxWidth="lg"
         component="section"
         sx={{ py: { xs: 7, md: 10 } }}
@@ -249,7 +247,7 @@ const HomePage = () => {
           }}
         >
           <Box>
-            <Typography variant="h3" fontWeight={900}>
+            <Typography variant="h3" fontWeight={700}>
               프로젝트
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
@@ -259,7 +257,7 @@ const HomePage = () => {
           <Button
             endIcon={<ArrowForwardIcon />}
             onClick={() => navigate(ROUTES.PORTFOLIO)}
-            sx={{ color: "#171717", fontWeight: 800 }}
+            sx={{ color: "#171717", fontWeight: 700 }}
           >
             전체 보기
           </Button>
@@ -282,7 +280,7 @@ const HomePage = () => {
                   </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 5 }}>
-                  <Typography variant="h5" fontWeight={900}>
+                  <Typography variant="h5" fontWeight={700}>
                     {project.title}
                   </Typography>
                   <Typography sx={{ mt: 1, color: "#625d54", lineHeight: 1.7 }}>
@@ -321,7 +319,7 @@ const HomePage = () => {
           }}
         >
           <Box>
-            <Typography variant="h3" fontWeight={900}>
+            <Typography variant="h3" fontWeight={700}>
               Tech Blog
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
@@ -331,7 +329,7 @@ const HomePage = () => {
           <Button
             endIcon={<OpenInNewIcon />}
             onClick={() => navigate(ROUTES.BLOG)}
-            sx={{ color: "#171717", fontWeight: 800 }}
+            sx={{ color: "#171717", fontWeight: 700 }}
           >
             블로그로 이동
           </Button>
@@ -366,7 +364,7 @@ const HomePage = () => {
                   <Typography
                     className="post-title"
                     variant="h6"
-                    fontWeight={900}
+                    fontWeight={700}
                     sx={{ transition: "color 0.2s" }}
                   >
                     {post.title}
@@ -384,7 +382,7 @@ const HomePage = () => {
       {/* 연락 섹션 */}
       <Box component="section" sx={{ bgcolor: "#171717", color: "#fff" }}>
         <Container maxWidth="lg" sx={{ py: { xs: 7, md: 9 } }}>
-          <Typography variant="h3" fontWeight={900}>
+          <Typography variant="h3" fontWeight={700}>
             함께 이야기해요
           </Typography>
           <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
