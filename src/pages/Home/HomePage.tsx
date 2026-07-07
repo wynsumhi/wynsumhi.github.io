@@ -1,20 +1,21 @@
 /**
  * 홈 페이지
  *
- * 사이트에 처음 들어온 방문자에게 소개, 프로젝트, 최신 글을 보여주는 첫 화면입니다
+ * 첫 진입 화면에서 소개, 핵심 역량, 대표 작업, 최신 글을 보여주는 화면입니다
  */
 import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
+  Divider,
   Stack,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { CONFIG } from "@/constants/config";
@@ -22,109 +23,304 @@ import { usePosts } from "@/hooks/usePosts";
 import { useProjects } from "@/hooks/useProjects";
 import { formatDate } from "@/utils/date";
 
+const strengths = [
+  {
+    title: "화면 구조 설계",
+    description:
+      "사용자가 이동하는 흐름을 기준으로 페이지와 컴포넌트 구조를 정리합니다.",
+  },
+  {
+    title: "React UI 구현",
+    description:
+      "반응형 레이아웃, 상태 처리, 데이터 기반 화면을 안정적으로 구현합니다.",
+  },
+  {
+    title: "기록과 개선",
+    description:
+      "Notion 기반 Tech Blog로 학습 과정과 문제 해결 과정을 꾸준히 남깁니다.",
+  },
+];
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { getRecentPosts, loading, error } = usePosts();
   const { projects, skills } = useProjects();
 
+  // 홈 노출 데이터
   const recentPosts = getRecentPosts(3);
   const featuredProjects = projects.slice(0, 3);
-  const mainSkills = skills.flatMap((skill) => skill.items).slice(0, 8);
+  const mainSkills = skills.flatMap((skill) => skill.items).slice(0, 10);
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 9 } }}>
-      <Box sx={{ mb: 8 }}>
-        <Typography
-          variant="overline"
-          sx={{ color: "primary.main", fontWeight: 700 }}
-        >
-          Frontend Developer
-        </Typography>
-        <Typography variant="h2" fontWeight={800} gutterBottom>
-          HYUNA
-        </Typography>
-        <Typography
-          variant="h5"
-          color="text.secondary"
-          sx={{ maxWidth: 720, lineHeight: 1.6, mb: 3 }}
-        >
-          사용자가 이해하기 쉬운 화면과 오래 관리할 수 있는 프론트엔드
-          구조를 고민합니다.
-        </Typography>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-          <Button variant="contained" onClick={() => navigate(ROUTES.PORTFOLIO)}>
-            포트폴리오 보기
-          </Button>
-          <Button variant="outlined" onClick={() => navigate(ROUTES.BLOG)}>
-            블로그 보기
-          </Button>
-          <Button variant="text" href={`mailto:${CONFIG.EMAIL}`}>
-            이메일 보내기
-          </Button>
-        </Stack>
+    <Box sx={{ bgcolor: "#fbfbf8", color: "#171717" }}>
+      {/* 첫 화면 소개 */}
+      <Box
+        component="section"
+        sx={{
+          minHeight: { xs: "calc(100vh - 64px)", md: "calc(100vh - 72px)" },
+          display: "flex",
+          alignItems: "center",
+          borderBottom: "1px solid #e8e3d8",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  color: "#5f6f52",
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                }}
+              >
+                Frontend Developer
+              </Typography>
+              <Typography
+                component="h1"
+                sx={{
+                  mt: 1.5,
+                  fontSize: { xs: "2.9rem", md: "5.8rem" },
+                  fontWeight: 900,
+                  lineHeight: 1.02,
+                  letterSpacing: 0,
+                }}
+              >
+                안녕하세요,
+                <br />
+                프론트엔드 개발자
+                <br />
+                김현아입니다.
+              </Typography>
+              <Typography
+                sx={{
+                  mt: 3,
+                  maxWidth: 680,
+                  color: "#55524b",
+                  fontSize: { xs: "1.05rem", md: "1.25rem" },
+                  lineHeight: 1.8,
+                }}
+              >
+                사용자가 마주하는 화면을 만들고, 오래 관리할 수 있는 구조를
+                고민합니다. React와 TypeScript 기반의 UI 구현, 기록, 개선에
+                집중하고 있습니다.
+              </Typography>
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.5}
+                sx={{ mt: 4 }}
+              >
+                <Button
+                  variant="contained"
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => navigate(ROUTES.PORTFOLIO)}
+                  sx={{
+                    bgcolor: "#171717",
+                    "&:hover": { bgcolor: "#313131" },
+                  }}
+                >
+                  포트폴리오 보기
+                </Button>
+                <Button
+                  variant="outlined"
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => navigate(ROUTES.BLOG)}
+                  sx={{
+                    color: "#171717",
+                    borderColor: "#171717",
+                    "&:hover": {
+                      borderColor: "#171717",
+                      bgcolor: "rgba(23,23,23,0.04)",
+                    },
+                  }}
+                >
+                  Tech Blog 보기
+                </Button>
+              </Stack>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Box
+                sx={{
+                  borderLeft: { xs: "none", md: "1px solid #d8d1c4" },
+                  pl: { xs: 0, md: 4 },
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ color: "#777167", fontWeight: 700 }}
+                >
+                  현재 집중하는 것
+                </Typography>
+                <Stack spacing={2.5} sx={{ mt: 2 }}>
+                  {strengths.map((item) => (
+                    <Box key={item.title}>
+                      <Typography fontWeight={800}>{item.title}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ mt: 0.6, color: "#625d54", lineHeight: 1.7 }}
+                      >
+                        {item.description}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
 
-      <Box sx={{ mb: 8 }}>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          Skills
-        </Typography>
-        <Stack direction="row" gap={1} flexWrap="wrap">
-          {mainSkills.map((skill) => (
-            <Chip key={skill.name} label={skill.name} variant="outlined" />
-          ))}
-        </Stack>
-      </Box>
+      {/* 핵심 역량 */}
+      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
+        <Grid container spacing={{ xs: 4, md: 8 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h3" fontWeight={900}>
+              핵심 역량
+            </Typography>
+            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              화면을 만드는 기술과 기록하는 습관을 함께 쌓아가고 있습니다.
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Grid container spacing={2}>
+              {strengths.map((item) => (
+                <Grid size={{ xs: 12, md: 4 }} key={item.title}>
+                  <Box
+                    sx={{
+                      height: "100%",
+                      p: 3,
+                      bgcolor: "#ffffff",
+                      border: "1px solid #ebe6dc",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography fontWeight={800}>{item.title}</Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.75 }}
+                    >
+                      {item.description}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
 
-      <Box sx={{ mb: 8 }}>
+            <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 3 }}>
+              {mainSkills.map((skill) => (
+                <Chip
+                  key={skill.name}
+                  label={skill.name}
+                  variant="outlined"
+                  sx={{
+                    bgcolor: "#fff",
+                    borderColor: "#d8d1c4",
+                    color: "#393631",
+                  }}
+                />
+              ))}
+            </Stack>
+          </Grid>
+        </Grid>
+      </Container>
+
+      <Divider sx={{ borderColor: "#e8e3d8" }} />
+
+      {/* 대표 프로젝트 */}
+      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
             justifyContent: "space-between",
-            mb: 2,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            mb: 4,
           }}
         >
-          <Typography variant="h4" fontWeight={700}>
-            Featured Projects
-          </Typography>
-          <Button onClick={() => navigate(ROUTES.PORTFOLIO)}>전체 보기</Button>
+          <Box>
+            <Typography variant="h3" fontWeight={900}>
+              프로젝트
+            </Typography>
+            <Typography sx={{ mt: 1, color: "#625d54" }}>
+              프론트엔드 구현 경험을 프로젝트 단위로 정리합니다.
+            </Typography>
+          </Box>
+          <Button
+            endIcon={<ArrowForwardIcon />}
+            onClick={() => navigate(ROUTES.PORTFOLIO)}
+            sx={{ color: "#171717", fontWeight: 800 }}
+          >
+            전체 보기
+          </Button>
         </Box>
-        <Grid container spacing={3}>
+
+        <Stack spacing={0}>
           {featuredProjects.map((project) => (
-            <Grid size={{ xs: 12, md: 4 }} key={project.id}>
-              <Card sx={{ height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>
+            <Box
+              key={project.id}
+              sx={{
+                py: 3,
+                borderTop: "1px solid #e8e3d8",
+                "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
+              }}
+            >
+              <Grid container spacing={3} alignItems="center">
+                <Grid size={{ xs: 12, md: 3 }}>
+                  <Typography color="#777167">{project.period.start}</Typography>
+                </Grid>
+                <Grid size={{ xs: 12, md: 5 }}>
+                  <Typography variant="h5" fontWeight={900}>
                     {project.title}
                   </Typography>
-                  <Typography color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography sx={{ mt: 1, color: "#625d54", lineHeight: 1.7 }}>
                     {project.description}
                   </Typography>
-                  <Stack direction="row" gap={0.5} flexWrap="wrap">
-                    {project.tech.slice(0, 4).map((tech) => (
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <Stack direction="row" gap={0.75} flexWrap="wrap">
+                    {project.tech.slice(0, 5).map((tech) => (
                       <Chip key={tech} label={tech} size="small" />
                     ))}
                   </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+                </Grid>
+              </Grid>
+            </Box>
           ))}
-        </Grid>
-      </Box>
+        </Stack>
+      </Container>
 
-      <Box>
+      <Divider sx={{ borderColor: "#e8e3d8" }} />
+
+      {/* 최신 블로그 글 */}
+      <Container maxWidth="lg" component="section" sx={{ py: { xs: 7, md: 10 } }}>
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
             justifyContent: "space-between",
-            mb: 2,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            mb: 4,
           }}
         >
-          <Typography variant="h4" fontWeight={700}>
-            Recent Posts
-          </Typography>
-          <Button onClick={() => navigate(ROUTES.BLOG)}>전체 보기</Button>
+          <Box>
+            <Typography variant="h3" fontWeight={900}>
+              Tech Blog
+            </Typography>
+            <Typography sx={{ mt: 1, color: "#625d54" }}>
+              Notion에 기록한 학습과 문제 해결 과정을 모아둡니다.
+            </Typography>
+          </Box>
+          <Button
+            endIcon={<OpenInNewIcon />}
+            onClick={() => navigate(ROUTES.BLOG)}
+            sx={{ color: "#171717", fontWeight: 800 }}
+          >
+            블로그로 이동
+          </Button>
         </Box>
 
         {loading && <Typography>로딩 중...</Typography>}
@@ -132,26 +328,67 @@ const HomePage = () => {
         {!loading && !error && recentPosts.length === 0 && (
           <Alert severity="info">아직 작성된 글이 없습니다.</Alert>
         )}
-        <Stack spacing={1.5}>
+
+        <Stack spacing={0}>
           {recentPosts.map((post) => (
-            <Card
+            <Box
               key={post.id}
               onClick={() => navigate(`/blog/${post.id}`)}
-              sx={{ cursor: "pointer" }}
+              sx={{
+                py: 2.5,
+                borderTop: "1px solid #e8e3d8",
+                cursor: "pointer",
+                "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
+                "&:hover .post-title": { color: "#5f6f52" },
+              }}
             >
-              <CardContent>
-                <Typography variant="h6" fontWeight={700}>
-                  {post.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatDate(post.date)} · {post.category}
-                </Typography>
-              </CardContent>
-            </Card>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, md: 3 }}>
+                  <Typography color="#777167">{formatDate(post.date)}</Typography>
+                </Grid>
+                <Grid size={{ xs: 12, md: 7 }}>
+                  <Typography
+                    className="post-title"
+                    variant="h6"
+                    fontWeight={900}
+                    sx={{ transition: "color 0.2s" }}
+                  >
+                    {post.title}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 12, md: 2 }}>
+                  <Typography color="#777167">{post.category}</Typography>
+                </Grid>
+              </Grid>
+            </Box>
           ))}
         </Stack>
+      </Container>
+
+      {/* 연락 섹션 */}
+      <Box component="section" sx={{ bgcolor: "#171717", color: "#fff" }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 7, md: 9 } }}>
+          <Typography variant="h3" fontWeight={900}>
+            함께 이야기해요
+          </Typography>
+          <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
+            프로젝트, 채용, 협업 이야기는 편하게 메일로 남겨주세요.
+          </Typography>
+          <Button
+            href={`mailto:${CONFIG.EMAIL}`}
+            variant="contained"
+            sx={{
+              mt: 3,
+              bgcolor: "#fff",
+              color: "#171717",
+              "&:hover": { bgcolor: "#f2f0ea" },
+            }}
+          >
+            이메일 보내기
+          </Button>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
