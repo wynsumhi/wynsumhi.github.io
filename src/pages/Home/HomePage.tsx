@@ -16,7 +16,7 @@ import {
 import Grid from "@mui/material/Grid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { createElement } from "react";
+import { createElement, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { CONFIG } from "@/constants/config";
@@ -78,6 +78,7 @@ const highlightTextSx = {
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const splineWrapperRef = useRef<HTMLDivElement | null>(null);
   const { getRecentPosts, loading, error } = usePosts();
   const { projects, skills } = useProjects();
 
@@ -90,6 +91,28 @@ const HomePage = () => {
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const splineWrapper = splineWrapperRef.current;
+
+    if (!splineWrapper) return;
+
+    // Spline 휠 입력 차단
+    const stopSplineWheel = (event: WheelEvent) => {
+      event.stopPropagation();
+    };
+
+    splineWrapper.addEventListener("wheel", stopSplineWheel, {
+      capture: true,
+      passive: true,
+    });
+
+    return () => {
+      splineWrapper.removeEventListener("wheel", stopSplineWheel, {
+        capture: true,
+      });
+    };
+  }, []);
 
   return (
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717" }}>
@@ -107,7 +130,7 @@ const HomePage = () => {
         }}
       >
         {/* Spline 배경 */}
-        <Box sx={{ position: "absolute", inset: 0 }}>
+        <Box ref={splineWrapperRef} sx={{ position: "absolute", inset: 0 }}>
           {createElement("spline-viewer", {
             url: splineSceneUrl,
             style: {
