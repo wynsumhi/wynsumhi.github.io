@@ -41,6 +41,14 @@ const strengths = [
   },
 ];
 
+// 형광펜 강조 스타일
+const highlightTextSx = {
+  display: "inline",
+  color: "#050505",
+  background: "linear-gradient(transparent 52%, #ffd6d6 52%)",
+  px: 0.35,
+};
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { getRecentPosts, loading, error } = usePosts();
@@ -72,19 +80,8 @@ const HomePage = () => {
           <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
             <Grid size={{ xs: 12, md: 10 }}>
               <Typography
-                variant="overline"
-                sx={{
-                  color: "#5f6f52",
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                }}
-              >
-                Frontend Developer
-              </Typography>
-              <Typography
                 component="h1"
                 sx={{
-                  mt: 1.5,
                   fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
                   fontWeight: 700,
                   lineHeight: 1.08,
@@ -93,9 +90,22 @@ const HomePage = () => {
               >
                 안녕하세요,
                 <br />
-                사용자 경험을 기술로 구현하는
+                <Box
+                  component="span"
+                  sx={highlightTextSx}
+                >
+                  사용자 경험
+                </Box>
+                을 기술로 구현하는
                 <br />
-                개발자 김현아입니다.
+                개발자{" "}
+                <Box
+                  component="span"
+                  sx={highlightTextSx}
+                >
+                  김현아
+                </Box>
+                입니다.
               </Typography>
               <Typography
                 sx={{
