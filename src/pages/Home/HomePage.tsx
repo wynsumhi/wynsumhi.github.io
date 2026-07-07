@@ -16,6 +16,7 @@ import {
 import Grid from "@mui/material/Grid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { createElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { CONFIG } from "@/constants/config";
@@ -41,6 +42,9 @@ const strengths = [
   },
 ];
 
+const splineSceneUrl =
+  "https://prod.spline.design/WhFeS8gDdkksYQKA/scene.splinecode";
+
 // 형광펜 강조 스타일
 const highlightTextSx = {
   position: "relative",
@@ -55,7 +59,7 @@ const highlightTextSx = {
     right: "-0.04em",
     bottom: "0.02em",
     height: "0.58em",
-    bgcolor: "rgba(255, 205, 205, 0.82)",
+    bgcolor: "rgba(255, 190, 124, 0.48)",
     zIndex: -1,
   },
   "&::after": {
@@ -65,7 +69,7 @@ const highlightTextSx = {
     bottom: "0.03em",
     width: "0.28em",
     height: "0.56em",
-    bgcolor: "rgba(255, 205, 205, 0.72)",
+    bgcolor: "rgba(255, 170, 98, 0.36)",
     borderRadius: "45% 30% 35% 45%",
     transform: "rotate(-2deg)",
     zIndex: -1,
@@ -93,50 +97,89 @@ const HomePage = () => {
       <Box
         component="section"
         sx={{
+          position: "relative",
           minHeight: { xs: "calc(100vh - 64px)", md: "calc(100vh - 72px)" },
           display: "flex",
           alignItems: "center",
+          overflow: "hidden",
           borderBottom: "1px solid #e8e3d8",
+          bgcolor: "#f6f3ee",
         }}
       >
-        <Container maxWidth="lg">
+        {/* Spline 배경 */}
+        <Box sx={{ position: "absolute", inset: 0 }}>
+          {createElement("spline-viewer", {
+            url: splineSceneUrl,
+            style: {
+              width: "100%",
+              height: "100%",
+              display: "block",
+            },
+          } as Record<string, unknown>)}
+        </Box>
+
+        {/* 배경 가독성 레이어 */}
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(90deg, rgba(246,243,238,0.72) 0%, rgba(246,243,238,0.38) 38%, rgba(246,243,238,0) 72%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
           <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
-            <Grid size={{ xs: 12, md: 10 }}>
+            <Grid size={{ xs: 12, md: 8 }}>
               <Typography
                 component="h1"
                 sx={{
-                  fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
+                  fontSize: { xs: "1.55rem", sm: "2.4rem", md: "3.35rem", lg: "3.8rem" },
                   fontWeight: 800,
-                  lineHeight: 1.24,
+                  lineHeight: 1.28,
                   letterSpacing: 0,
-                  color: "#999999",
+                  color: "rgba(20,20,20,0.68)",
                 }}
               >
-                안녕하세요,
-                <br />
                 <Box
                   component="span"
-                  sx={highlightTextSx}
+                  sx={{ display: "block", whiteSpace: "nowrap" }}
                 >
-                  사용자 경험
+                  안녕하세요,
                 </Box>
-                을 기술로 구현하는
-                <br />
-                개발자{" "}
                 <Box
                   component="span"
-                  sx={highlightTextSx}
+                  sx={{ display: "block", whiteSpace: "nowrap" }}
                 >
-                  김현아
+                  <Box
+                    component="span"
+                    sx={highlightTextSx}
+                  >
+                    사용자 경험
+                  </Box>
+                  을 기술로 구현하는
                 </Box>
-                입니다.
+                <Box
+                  component="span"
+                  sx={{ display: "block", whiteSpace: "nowrap" }}
+                >
+                  개발자{" "}
+                  <Box
+                    component="span"
+                    sx={highlightTextSx}
+                  >
+                    김현아
+                  </Box>
+                  입니다.
+                </Box>
               </Typography>
               <Typography
                 sx={{
                   mt: 3,
                   maxWidth: 680,
-                  color: "#55524b",
-                  fontSize: { xs: "1.05rem", md: "1.25rem" },
+                  color: "rgba(20,20,20,0.68)",
+                  fontSize: { xs: "1rem", md: "1.12rem" },
                   lineHeight: 1.8,
                 }}
               >
@@ -154,6 +197,7 @@ const HomePage = () => {
                   endIcon={<ArrowForwardIcon />}
                   onClick={() => scrollToSection("home-projects")}
                   sx={{
+                    color: "#ffffff",
                     bgcolor: "#171717",
                     "&:hover": { bgcolor: "#313131" },
                   }}
@@ -166,10 +210,10 @@ const HomePage = () => {
                   onClick={() => navigate(ROUTES.BLOG)}
                   sx={{
                     color: "#171717",
-                    borderColor: "#171717",
+                    borderColor: "rgba(23,23,23,0.72)",
                     "&:hover": {
                       borderColor: "#171717",
-                      bgcolor: "rgba(23,23,23,0.04)",
+                      bgcolor: "rgba(23,23,23,0.06)",
                     },
                   }}
                 >
