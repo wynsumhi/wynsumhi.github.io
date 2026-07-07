@@ -84,7 +84,7 @@ const HomePage = () => {
                 sx={{
                   fontSize: { xs: "1.8rem", md: "3.6rem", lg: "4rem" },
                   fontWeight: 800,
-                  lineHeight: 1.08,
+                  lineHeight: 1.16,
                   letterSpacing: 0,
                 }}
               >
