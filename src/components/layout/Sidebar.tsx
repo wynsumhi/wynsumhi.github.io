@@ -105,22 +105,21 @@ const Sidebar = () => {
         />
 
         {/* 홈 이동 로고 */}
-        <Typography
-          variant="h6"
-          fontWeight={800}
+        <Box
+          component="img"
+          src="/assets/hi.svg"
+          alt="HYUNA"
           onClick={() => navigate(ROUTES.HOME)}
           sx={{
-            color: "#1e293b",
-            fontSize: "1rem",
-            letterSpacing: "0.08em",
-            lineHeight: 1.4,
+            width: 34,
+            height: "auto",
+            mx: "auto",
+            display: "block",
             cursor: "pointer",
-            transition: "color 0.2s",
-            "&:hover": { color: "#2563eb" },
+            transition: "transform 0.2s",
+            "&:hover": { transform: "translateY(-1px)" },
           }}
-        >
-          HYUNA
-        </Typography>
+        />
 
         {/* 한 줄 소개 */}
         <Typography

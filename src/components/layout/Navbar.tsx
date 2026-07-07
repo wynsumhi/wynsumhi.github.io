@@ -57,18 +57,18 @@ const Navbar = () => {
           }}
         >
           {/* 홈 이동 로고 */}
-          <Typography
-            fontWeight={800}
+          <Box
+            component="img"
+            src="/assets/hi.svg"
+            alt="HYUNA"
             onClick={() => navigate(ROUTES.HOME)}
             sx={{
               cursor: "pointer",
-              letterSpacing: "0.08em",
-              fontSize: { xs: "0.95rem", md: "1rem" },
-              whiteSpace: "nowrap",
+              width: { xs: 26, md: 30 },
+              height: "auto",
+              display: "block",
             }}
-          >
-            HYUNA
-          </Typography>
+          />
 
           {/* 주요 메뉴 */}
           <Stack
