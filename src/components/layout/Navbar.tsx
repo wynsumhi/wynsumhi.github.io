@@ -27,11 +27,23 @@ const Navbar = () => {
   // useLocation: 현재 URL 경로 정보를 가져옴
   const location = useLocation();
 
-  // 네비게이션 메뉴 항목 정의 (label: 표시 텍스트, path: 이동 경로)
+  // 상단 메뉴 목록
   const navItems = [
-    { label: "블로그", path: ROUTES.HOME },
+    { label: "홈", path: ROUTES.HOME },
+    { label: "블로그", path: ROUTES.BLOG },
+    { label: "아카이브", path: ROUTES.ARCHIVES },
     { label: "포트폴리오", path: ROUTES.PORTFOLIO },
+    { label: "이력서", path: ROUTES.RESUME },
   ];
+
+  // 현재 메뉴 활성 상태 확인
+  const isActivePath = (path: string) => {
+    // 블로그 상세 페이지 포함
+    if (path === ROUTES.BLOG) return location.pathname.startsWith(ROUTES.BLOG);
+
+    // 현재 경로 일치 확인
+    return location.pathname === path;
+  };
 
   return (
     <AppBar
@@ -45,7 +57,7 @@ const Navbar = () => {
           disableGutters // 기본 좌우 패딩 제거
           sx={{ justifyContent: "space-between" }}
         >
-          {/* 사이트 제목 - 클릭하면 홈(블로그)으로 이동 */}
+          {/* 사이트 제목 */}
           <Typography
             variant="h6"
             fontWeight={700}
@@ -54,20 +66,18 @@ const Navbar = () => {
           >
             {CONFIG.SITE_TITLE}
           </Typography>
-
-          {/* 네비게이션 링크들 */}
+          {/* 상단 메뉴 버튼 목록 */}
           <Box sx={{ display: "flex", gap: 1 }}>
             {navItems.map((item) => (
               <Button
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 sx={{
-                  // 현재 경로와 일치하면 강조 표시
-                  fontWeight: location.pathname === item.path ? 700 : 400,
-                  color:
-                    location.pathname === item.path
-                      ? "primary.main"
-                      : "text.secondary",
+                  // 선택된 메뉴 강조
+                  fontWeight: isActivePath(item.path) ? 700 : 400,
+                  color: isActivePath(item.path)
+                    ? "primary.main"
+                    : "text.secondary",
                 }}
               >
                 {item.label}
