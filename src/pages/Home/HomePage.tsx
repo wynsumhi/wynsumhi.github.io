@@ -43,11 +43,33 @@ const strengths = [
 
 // 형광펜 강조 스타일
 const highlightTextSx = {
-  display: "inline",
+  position: "relative",
+  display: "inline-block",
   color: "#050505",
-  background:
-    "linear-gradient(transparent 38%, rgba(255, 205, 205, 0.78) 38%)",
-  px: 0.12,
+  px: 0.16,
+  zIndex: 0,
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    left: "-0.04em",
+    right: "-0.04em",
+    bottom: "0.02em",
+    height: "0.58em",
+    bgcolor: "rgba(255, 205, 205, 0.82)",
+    zIndex: -1,
+  },
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    right: "-0.12em",
+    bottom: "0.03em",
+    width: "0.28em",
+    height: "0.56em",
+    bgcolor: "rgba(255, 205, 205, 0.72)",
+    borderRadius: "45% 30% 35% 45%",
+    transform: "rotate(-2deg)",
+    zIndex: -1,
+  },
 };
 
 const HomePage = () => {
