@@ -151,11 +151,11 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 6, md: 8 } }}
+        sx={{ py: { xs: 7, md: 10 } }}
       >
         <Grid container spacing={{ xs: 3, md: 5 }}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h3" fontWeight={700}>
+            <Typography variant="h3" fontWeight={800}>
               현재 집중하는 것
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
@@ -196,11 +196,11 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 7, md: 10 } }}
+        sx={{ py: { xs: 8, md: 12 } }}
       >
         <Grid container spacing={{ xs: 4, md: 8 }}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h3" fontWeight={700}>
+            <Typography variant="h3" fontWeight={800}>
               핵심 역량
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
@@ -234,7 +234,7 @@ const HomePage = () => {
         id="home-projects"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 7, md: 10 } }}
+        sx={{ py: { xs: 8, md: 12 } }}
       >
         <Box
           sx={{
@@ -247,7 +247,7 @@ const HomePage = () => {
           }}
         >
           <Box>
-            <Typography variant="h3" fontWeight={700}>
+            <Typography variant="h3" fontWeight={800}>
               프로젝트
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
@@ -306,7 +306,7 @@ const HomePage = () => {
       <Container
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 7, md: 10 } }}
+        sx={{ py: { xs: 8, md: 12 } }}
       >
         <Box
           sx={{
@@ -319,7 +319,7 @@ const HomePage = () => {
           }}
         >
           <Box>
-            <Typography variant="h3" fontWeight={700}>
+            <Typography variant="h3" fontWeight={800}>
               Tech Blog
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
@@ -381,8 +381,8 @@ const HomePage = () => {
 
       {/* 연락 섹션 */}
       <Box component="section" sx={{ bgcolor: "#171717", color: "#fff" }}>
-        <Container maxWidth="lg" sx={{ py: { xs: 7, md: 9 } }}>
-          <Typography variant="h3" fontWeight={700}>
+        <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
+          <Typography variant="h3" fontWeight={800}>
             함께 이야기해요
           </Typography>
           <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
