@@ -45,8 +45,9 @@ const strengths = [
 const highlightTextSx = {
   display: "inline",
   color: "#050505",
-  background: "linear-gradient(transparent 42%, #ffd6d6 42%, #ffd6d6 88%, transparent 88%)",
-  px: 0.25,
+  background:
+    "linear-gradient(transparent 38%, rgba(255, 205, 205, 0.78) 38%)",
+  px: 0.12,
 };
 
 const HomePage = () => {
@@ -86,6 +87,7 @@ const HomePage = () => {
                   fontWeight: 800,
                   lineHeight: 1.24,
                   letterSpacing: 0,
+                  color: "#999999",
                 }}
               >
                 안녕하세요,
