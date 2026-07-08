@@ -8,17 +8,18 @@
  * 4. Navbar: 일반 페이지에 표시되는 상단 네비게이션 바
  *
  * 라우트 구조:
- *   /           → HomePage (포트폴리오 홈)
+ *   /           → /portfolio 이동
  *   /blog       → BlogHome (블로그 홈)
  *   /blog/:id   → BlogPost (블로그 포스트 상세)
  *   /archives   → ArchivePage (블로그 아카이브)
- *   /portfolio  → HomePage (포트폴리오 홈)
+ *   /portfolio  → HomePage (포트폴리오)
  *   /*          → 404 페이지
  */
 import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
   useLocation,
 } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
@@ -60,10 +61,10 @@ const MainRoutes = () => (
     <Navbar />
 
     <Routes>
-      {/* 포트폴리오 홈 */}
-      <Route path="/" element={<HomePage />} />
+      {/* 포트폴리오 기본 경로 */}
+      <Route path="/" element={<Navigate to={ROUTES.PORTFOLIO} replace />} />
 
-      {/* 포트폴리오 홈 별칭 */}
+      {/* 포트폴리오 홈 */}
       <Route path="/portfolio" element={<HomePage />} />
 
       {/* 위 경로에 매칭되지 않는 모든 URL → 404 */}

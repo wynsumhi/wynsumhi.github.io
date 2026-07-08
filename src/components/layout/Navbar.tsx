@@ -16,8 +16,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   // 포트폴리오 화면 네비게이션 배경
-  const isPortfolioPage =
-    location.pathname === ROUTES.HOME || location.pathname === ROUTES.PORTFOLIO;
+  const isPortfolioPage = location.pathname === ROUTES.PORTFOLIO;
 
   // 헤더 아이콘 hover 색상
   const portfolioHoverColor = "#6b7280";
@@ -76,12 +75,12 @@ const Navbar = () => {
               height: 32,
             }}
           >
-            {/* 홈 이동 로고 */}
+            {/* 포트폴리오 이동 로고 */}
             <Box
               component="button"
               type="button"
-              aria-label="홈으로 이동"
-              onClick={() => navigate(ROUTES.HOME)}
+              aria-label="포트폴리오로 이동"
+              onClick={() => navigate(ROUTES.PORTFOLIO)}
               sx={{
                 p: 0,
                 border: 0,
