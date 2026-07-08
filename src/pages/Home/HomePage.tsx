@@ -19,6 +19,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { createElement, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
@@ -103,6 +104,7 @@ const HomePage = () => {
   const [activeSectionId, setActiveSectionId] = useState(sectionNavItems[0].sectionId);
   const [isBlogPassed, setIsBlogPassed] = useState(false);
   const [isSectionNavPinned, setIsSectionNavPinned] = useState(false);
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
   const { getRecentPosts, loading, error } = usePosts();
   const { projects, skills } = useProjects();
 
@@ -119,6 +121,11 @@ const HomePage = () => {
   // 블로그 새 탭 열기
   const openBlogRoute = (path: string) => {
     window.open(path, "_blank", "noopener,noreferrer");
+  };
+
+  // 블로그 미리보기 열림 상태
+  const togglePostPreview = (postId: string) => {
+    setExpandedPostId((currentId) => (currentId === postId ? null : postId));
   };
 
   useEffect(() => {
@@ -305,19 +312,20 @@ const HomePage = () => {
               >
                 <Button
                   variant="contained"
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => scrollToSection("home-focus")}
+                  startIcon={<DownloadIcon />}
+                  href="/portfolio_kimhyuna.pdf"
+                  download
                   sx={{
                     color: "#ffffff",
                     bgcolor: "#171717",
                     "&:hover": { bgcolor: "#313131" },
                   }}
                 >
-                  더 알아보기
+                  포트폴리오 PDF
                 </Button>
                 <Button
                   variant="outlined"
-                  endIcon={<DownloadIcon />}
+                  startIcon={<PersonOutlineIcon />}
                   href="/resume_kimhyuna.pdf"
                   download
                   sx={{
@@ -329,12 +337,73 @@ const HomePage = () => {
                     },
                   }}
                 >
-                  이력서 다운로드
+                  이력서 PDF
                 </Button>
               </Stack>
             </Grid>
           </Grid>
         </Container>
+
+        {/* 다음 섹션 이동 힌트 */}
+        <Button
+          aria-label="다음 섹션으로 이동"
+          onClick={() => scrollToSection("home-focus")}
+          sx={{
+            position: "absolute",
+            left: "50%",
+            bottom: { xs: 24, md: 34 },
+            transform: "translateX(-50%)",
+            zIndex: 4,
+            minWidth: "auto",
+            width: 88,
+            height: 108,
+            p: 0,
+            color: "rgba(23, 23, 23, 0.56)",
+            bgcolor: "transparent",
+            textTransform: "none",
+            flexDirection: "column",
+            gap: 0,
+            "&:hover": {
+              bgcolor: "transparent",
+              color: "#171717",
+            },
+            "@keyframes heroScrollCue": {
+              "0%, 100%": {
+                transform: "translateY(0)",
+              },
+              "50%": {
+                transform: "translateY(4px)",
+              },
+            },
+          }}
+        >
+          <Box
+            component="img"
+            src="/assets/scroll-mouse.png"
+            alt=""
+            aria-hidden
+            sx={{
+              width: 52,
+              height: 52,
+              objectFit: "contain",
+              opacity: 0.74,
+              animation: "heroScrollCue 1.7s ease-in-out infinite",
+            }}
+          />
+          <Typography
+            component="span"
+            sx={{
+              mt: 2.1,
+              fontSize: "0.68rem",
+              fontWeight: 500,
+              lineHeight: 1,
+              letterSpacing: "0.12em",
+              color: "rgba(23, 23, 23, 0.42)",
+            }}
+          >
+            scroll down
+          </Typography>
+        </Button>
 
         {/* 섹션 목차 배경 도형 */}
         <Box
@@ -557,7 +626,7 @@ const HomePage = () => {
           </Box>
           <Button
             endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate(ROUTES.PORTFOLIO)}
+            onClick={() => navigate(ROUTES.PROJECTS)}
             sx={{ color: "#171717", fontWeight: 700 }}
           >
             전체 보기
@@ -644,7 +713,10 @@ const HomePage = () => {
         id="home-blog"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 12, md: 20 } }}
+        sx={{
+          py: { xs: 12, md: 20 },
+          minHeight: { xs: 760, md: 720 },
+        }}
       >
         <Box
           sx={{
@@ -680,40 +752,106 @@ const HomePage = () => {
         )}
 
         <Stack spacing={0}>
-          {recentPosts.map((post) => (
-            <Box
-              key={post.id}
-              onClick={() => openBlogRoute(`/blog/${post.id}`)}
-              sx={{
-                py: 2.5,
-                borderTop: "1px solid #e8e3d8",
-                cursor: "pointer",
-                "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
-                "&:hover .post-title": { color: "#5f6f52" },
-              }}
-            >
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography color="#777167">
-                    {formatDate(post.date)}
-                  </Typography>
+          {recentPosts.map((post) => {
+            const isExpanded = expandedPostId === post.id;
+
+            return (
+              <Box
+                key={post.id}
+                onClick={() => togglePostPreview(post.id)}
+                sx={{
+                  py: 2.5,
+                  borderTop: "1px solid #e8e3d8",
+                  cursor: "pointer",
+                  "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
+                  "&:hover .post-title": { color: "#5f6f52" },
+                }}
+              >
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, md: 3 }}>
+                    <Typography color="#777167">
+                      {formatDate(post.date)}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 7 }}>
+                    <Typography
+                      className="post-title"
+                      variant="h6"
+                      fontWeight={700}
+                      sx={{ transition: "color 0.2s" }}
+                    >
+                      {post.title}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 2 }}>
+                    <Typography color="#777167">{post.category}</Typography>
+                  </Grid>
                 </Grid>
-                <Grid size={{ xs: 12, md: 7 }}>
-                  <Typography
-                    className="post-title"
-                    variant="h6"
-                    fontWeight={700}
-                    sx={{ transition: "color 0.2s" }}
+
+                {isExpanded && (
+                  <Box
+                    sx={{
+                      mt: 2.4,
+                      ml: { xs: 0, md: "25%" },
+                      pr: { xs: 0, md: 4 },
+                      color: "#625d54",
+                    }}
                   >
-                    {post.title}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 2 }}>
-                  <Typography color="#777167">{post.category}</Typography>
-                </Grid>
-              </Grid>
-            </Box>
-          ))}
+                    <Typography sx={{ lineHeight: 1.75 }}>
+                      {post.excerpt}
+                    </Typography>
+                    {post.tags.length > 0 && (
+                      <Stack direction="row" gap={0.75} flexWrap="wrap" sx={{ mt: 1.6 }}>
+                        {post.tags.slice(0, 4).map((tag) => (
+                          <Chip
+                            key={tag}
+                            label={tag}
+                            size="small"
+                            sx={{
+                              bgcolor: "#f4f4f5",
+                              color: "#52525b",
+                              border: "1px solid #e4e4e7",
+                              borderRadius: "5px",
+                              fontWeight: 700,
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                    )}
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      spacing={1.2}
+                      alignItems={{ xs: "flex-start", sm: "center" }}
+                      sx={{ mt: 2 }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "#8a8175", lineHeight: 1.6 }}
+                      >
+                        ※ 자세한 내용은 블로그에서 확인할 수 있습니다
+                      </Typography>
+                      <Button
+                        size="small"
+                        endIcon={<OpenInNewIcon />}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openBlogRoute(`/blog/${post.id}`);
+                        }}
+                        sx={{
+                          minWidth: "auto",
+                          p: 0,
+                          color: "#171717",
+                          fontWeight: 800,
+                        }}
+                      >
+                        자세히 보기
+                      </Button>
+                    </Stack>
+                  </Box>
+                )}
+              </Box>
+            );
+          })}
         </Stack>
       </Container>
 
@@ -721,23 +859,40 @@ const HomePage = () => {
       <Box
         id="home-contact"
         component="section"
-        sx={{ bgcolor: "#171717", color: "#fff" }}
+        sx={{
+          bgcolor: "#171717",
+          color: "#fff",
+          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
       >
-        <Container maxWidth="lg" sx={{ py: { xs: 11, md: 16 } }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 10, md: 14 } }}>
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
+              alignItems: { xs: "center", md: "flex-end" },
               justifyContent: "space-between",
               flexDirection: "row",
               gap: { xs: 2, md: 6 },
             }}
           >
-            <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography
+                component="p"
+                sx={{
+                  mb: 1.2,
+                  color: "#f7d88b",
+                  fontSize: "0.78rem",
+                  fontWeight: 900,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Contact
+              </Typography>
               <Typography
                 variant="h3"
                 fontWeight={800}
-                sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "3rem" } }}
+                sx={{ fontSize: { xs: "1.45rem", sm: "2rem", md: "3rem" } }}
               >
                 함께 이야기해요
               </Typography>
@@ -745,7 +900,7 @@ const HomePage = () => {
                 sx={{
                   mt: 1.5,
                   color: "#c9c3b8",
-                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                  fontSize: { xs: "0.84rem", sm: "1rem" },
                   lineHeight: 1.6,
                 }}
               >
@@ -754,15 +909,18 @@ const HomePage = () => {
             </Box>
 
             <Stack
-              direction="row"
-              spacing={1.25}
+              direction={{ xs: "row", md: "column" }}
+              spacing={{ xs: 1.25, md: 1.2 }}
+              useFlexGap
               sx={{
                 width: { xs: "auto", md: "auto" },
                 flexShrink: 0,
-                ml: "auto",
+                flexWrap: "nowrap",
+                justifyContent: { xs: "flex-end", md: "flex-end" },
+                ml: { xs: "auto", md: 0 },
               }}
             >
-              {/* 모바일 전화 아이콘 */}
+              {/* 연락처 링크 */}
               <Button
                 href={
                   CONFIG.PHONE
@@ -771,7 +929,64 @@ const HomePage = () => {
                         "전화 연락 요청",
                       )}`
                 }
-                variant="outlined"
+                startIcon={<LocalPhoneOutlinedIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  justifyContent: "flex-start",
+                  minWidth: 268,
+                  px: 2,
+                  py: 1.25,
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: 2,
+                  color: "#fff",
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "rgba(247, 216, 139, 0.7)",
+                    bgcolor: "rgba(255, 255, 255, 0.06)",
+                    color: "#f7d88b",
+                  },
+                }}
+              >
+                {CONFIG.PHONE}
+              </Button>
+
+              <Button
+                href={`mailto:${CONFIG.EMAIL}`}
+                startIcon={<EmailOutlinedIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  justifyContent: "flex-start",
+                  minWidth: 268,
+                  px: 2,
+                  py: 1.25,
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: 2,
+                  color: "#fff",
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "rgba(247, 216, 139, 0.7)",
+                    bgcolor: "rgba(255, 255, 255, 0.06)",
+                    color: "#f7d88b",
+                  },
+                }}
+              >
+                {CONFIG.EMAIL}
+              </Button>
+
+              {/* 태블릿 이하 전화 아이콘 */}
+              <Button
+                href={
+                  CONFIG.PHONE
+                    ? `tel:${CONFIG.PHONE.replaceAll("-", "")}`
+                    : `mailto:${CONFIG.EMAIL}?subject=${encodeURIComponent(
+                        "전화 연락 요청",
+                      )}`
+                }
+                aria-label="전화 연결"
                 sx={{
                   display: { xs: "inline-flex", md: "none" },
                   height: 48,
@@ -779,7 +994,7 @@ const HomePage = () => {
                   width: 48,
                   p: 0,
                   borderRadius: "50%",
-                  borderColor: "rgba(255, 255, 255, 0.34)",
+                  border: "1px solid rgba(255, 255, 255, 0.34)",
                   color: "#fff",
                   "&:hover": {
                     borderColor: "#fff",
@@ -790,10 +1005,10 @@ const HomePage = () => {
                 <LocalPhoneOutlinedIcon sx={{ fontSize: 21 }} />
               </Button>
 
-              {/* 모바일 메일 아이콘 */}
+              {/* 태블릿 이하 메일 아이콘 */}
               <Button
                 href={`mailto:${CONFIG.EMAIL}`}
-                variant="outlined"
+                aria-label="메일 보내기"
                 sx={{
                   display: { xs: "inline-flex", md: "none" },
                   height: 48,
@@ -801,7 +1016,7 @@ const HomePage = () => {
                   width: 48,
                   p: 0,
                   borderRadius: "50%",
-                  borderColor: "rgba(255, 255, 255, 0.34)",
+                  border: "1px solid rgba(255, 255, 255, 0.34)",
                   color: "#fff",
                   "&:hover": {
                     borderColor: "#fff",
@@ -811,67 +1026,42 @@ const HomePage = () => {
               >
                 <EmailOutlinedIcon sx={{ fontSize: 21 }} />
               </Button>
-
-              {/* 데스크톱 전화 연결 */}
-              <Button
-                href={
-                  CONFIG.PHONE
-                    ? `tel:${CONFIG.PHONE.replaceAll("-", "")}`
-                    : `mailto:${CONFIG.EMAIL}?subject=${encodeURIComponent(
-                        "전화 연락 요청",
-                      )}`
-                }
-                startIcon={<LocalPhoneOutlinedIcon sx={{ fontSize: 20 }} />}
-                sx={{
-                  display: { xs: "none", md: "inline-flex" },
-                  height: 48,
-                  px: 2.4,
-                  borderRadius: 999,
-                  border: "1px solid rgba(255, 255, 255, 0.28)",
-                  color: "#fff",
-                  bgcolor: "rgba(255, 255, 255, 0.06)",
-                  fontWeight: 800,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: 0.2,
-                  whiteSpace: "nowrap",
-                  transition: "border-color 0.2s ease, background-color 0.2s ease",
-                  "&:hover": {
-                    borderColor: "#fff",
-                    bgcolor: "rgba(255, 255, 255, 0.12)",
-                  },
-                }}
-              >
-                {CONFIG.PHONE}
-              </Button>
-
-              <Button
-                href={`mailto:${CONFIG.EMAIL}`}
-                startIcon={<EmailOutlinedIcon />}
-                sx={{
-                  display: { xs: "none", md: "inline-flex" },
-                  height: 48,
-                  px: 2.4,
-                  borderRadius: 999,
-                  border: "1px solid rgba(255, 255, 255, 0.28)",
-                  bgcolor: "rgba(255, 255, 255, 0.06)",
-                  color: "#fff",
-                  fontWeight: 800,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: 0.2,
-                  whiteSpace: "nowrap",
-                  transition: "border-color 0.2s ease, background-color 0.2s ease",
-                  "&:hover": {
-                    borderColor: "#fff",
-                    bgcolor: "rgba(255, 255, 255, 0.12)",
-                  },
-                }}
-              >
-                {CONFIG.EMAIL}
-              </Button>
             </Stack>
           </Box>
+        </Container>
+      </Box>
+
+      {/* 저작권 푸터 */}
+      <Box
+        component="footer"
+        sx={{
+          bgcolor: "#2f2f2f",
+          color: "rgba(255, 255, 255, 0.54)",
+          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            minHeight: 52,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Typography sx={{ fontSize: "0.78rem", fontWeight: 700 }}>
+            © 2026 김현아 포트폴리오
+          </Typography>
+          <Typography
+            sx={{
+              display: { xs: "none", sm: "block" },
+              fontSize: "0.78rem",
+              fontWeight: 700,
+            }}
+          >
+            Frontend Developer
+          </Typography>
         </Container>
       </Box>
     </Box>

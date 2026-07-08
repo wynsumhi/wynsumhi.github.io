@@ -4,7 +4,9 @@
  * 일반 페이지 상단에서 주요 경로와 외부 링크를 제공하는 네비게이션입니다
  */
 import { AppBar, Toolbar, Button, Container, Box, Stack, IconButton } from "@mui/material";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/constants/routes";
@@ -20,8 +22,6 @@ const Navbar = () => {
 
   // 헤더 아이콘 hover 색상
   const portfolioHoverColor = "#6b7280";
-  const portfolioHoverFilter =
-    "brightness(0) saturate(100%) invert(44%) sepia(8%) saturate(641%) hue-rotate(176deg) brightness(94%) contrast(89%)";
   const isTransparentNav = isPortfolioPage && !isScrolled;
 
   useEffect(() => {
@@ -167,10 +167,10 @@ const Navbar = () => {
               />
             </IconButton>
             <IconButton
-              href="https://wynsumhi.notion.site/Frontend-Developer-HYUNA-131bdef722b680578ea1c1fb0781226e?pvs=74"
+              href={CONFIG.LINKEDIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Notion 이력서 열기"
+              aria-label="LinkedIn 열기"
               sx={{
                 width: 32,
                 height: 32,
@@ -183,32 +183,18 @@ const Navbar = () => {
                   bgcolor: "transparent",
                   color: isPortfolioPage ? portfolioHoverColor : "#171717",
                 },
-                "&:hover .notion-icon": {
-                  filter: isPortfolioPage ? portfolioHoverFilter : "none",
-                },
               }}
             >
-              <Box
-                className="notion-icon"
-                component="img"
-                src="/assets/notion-trimmed.png"
-                alt=""
-                aria-hidden
+              <LinkedInIcon
                 sx={{
-                  width: 24,
-                  height: 24,
-                  aspectRatio: "1 / 1",
+                  fontSize: { xs: 23, md: 24 },
                   display: "block",
-                  objectFit: "contain",
-                  transition: "filter 0.2s ease",
                 }}
               />
             </IconButton>
             <IconButton
-              href={ROUTES.BLOG}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Blog 새 탭으로 열기"
+              href={`mailto:${CONFIG.EMAIL}`}
+              aria-label="메일 보내기"
               sx={{
                 width: 32,
                 height: 32,
@@ -216,27 +202,17 @@ const Navbar = () => {
                 color: "#171717",
                 borderRadius: "50%",
                 alignItems: "center",
+                transition: "color 0.2s ease",
                 "&:hover": {
                   bgcolor: "transparent",
-                },
-                "&:hover .blog-icon": {
-                  filter: isPortfolioPage ? portfolioHoverFilter : "none",
+                  color: isPortfolioPage ? portfolioHoverColor : "#171717",
                 },
               }}
             >
-              <Box
-                className="blog-icon"
-                component="img"
-                src="/assets/blog.png"
-                alt=""
-                aria-hidden
+              <EmailOutlinedIcon
                 sx={{
-                  width: 23,
-                  height: 23,
+                  fontSize: { xs: 23, md: 24 },
                   display: "block",
-                  objectFit: "contain",
-                  transform: "translateX(0.75px)",
-                  transition: "filter 0.2s ease",
                 }}
               />
             </IconButton>
