@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DownloadIcon from "@mui/icons-material/Download";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
@@ -54,6 +55,9 @@ const sectionNavItems = [
   { label: "Project", sectionId: "home-projects" },
   { label: "Blog", sectionId: "home-blog" },
 ];
+
+// 핵심 역량 아이콘 색상
+const skillIconColors = ["#f59e0b", "#fb923c", "#eab308", "#d97706"];
 
 // 프로젝트 기간 표시
 const formatProjectPeriod = (start: string, end?: string) => {
@@ -110,6 +114,11 @@ const HomePage = () => {
   // 섹션 스크롤 이동
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 블로그 새 탭 열기
+  const openBlogRoute = (path: string) => {
+    window.open(path, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {
@@ -479,21 +488,42 @@ const HomePage = () => {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
-            <Stack direction="row" gap={1} flexWrap="wrap">
-              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill) => (
-                <Chip
+            <Stack direction="row" gap={1.2} flexWrap="wrap">
+              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill, index) => (
+                <Box
                   key={skill.name}
-                  label={skill.name}
                   sx={{
-                    bgcolor: "#fff7ed",
-                    border: "1px solid rgba(245, 158, 11, 0.28)",
-                    color: "#7c2d12",
-                    fontWeight: 700,
-                    "& .MuiChip-label": {
-                      px: 1.4,
-                    },
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                    minHeight: 44,
+                    px: 1.6,
+                    py: 0.75,
+                    bgcolor: "#fffaf0",
+                    border: "1px solid rgba(245, 158, 11, 0.24)",
+                    borderRadius: 999,
+                    boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
+                    color: "#3f3425",
+                    fontWeight: 800,
+                    fontSize: "0.95rem",
                   }}
-                />
+                >
+                  <Box
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 26,
+                      height: 26,
+                      borderRadius: "50%",
+                      bgcolor: `${skillIconColors[index % skillIconColors.length]}1f`,
+                      color: skillIconColors[index % skillIconColors.length],
+                    }}
+                  >
+                    <AutoAwesomeIcon sx={{ fontSize: 15 }} />
+                  </Box>
+                  {skill.name}
+                </Box>
               ))}
             </Stack>
           </Grid>
@@ -587,11 +617,11 @@ const HomePage = () => {
                               label={tech}
                               size="small"
                               sx={{
-                                bgcolor: "#f5e8c7",
-                                color: "#6f4f12",
-                                border: 0,
+                                bgcolor: "#f4f4f5",
+                                color: "#52525b",
+                                border: "1px solid #e4e4e7",
                                 borderRadius: "5px",
-                                fontWeight: 800,
+                                fontWeight: 700,
                                 "& .MuiChip-label": {
                                   px: 1,
                                 },
@@ -636,7 +666,7 @@ const HomePage = () => {
           </Box>
           <Button
             endIcon={<OpenInNewIcon />}
-            onClick={() => navigate(ROUTES.BLOG)}
+            onClick={() => openBlogRoute(ROUTES.BLOG)}
             sx={{ color: "#171717", fontWeight: 700 }}
           >
             블로그로 이동
@@ -653,7 +683,7 @@ const HomePage = () => {
           {recentPosts.map((post) => (
             <Box
               key={post.id}
-              onClick={() => navigate(`/blog/${post.id}`)}
+              onClick={() => openBlogRoute(`/blog/${post.id}`)}
               sx={{
                 py: 2.5,
                 borderTop: "1px solid #e8e3d8",
