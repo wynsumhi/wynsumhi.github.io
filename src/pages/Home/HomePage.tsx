@@ -55,6 +55,13 @@ const sectionNavItems = [
   { label: "Blog", sectionId: "home-blog" },
 ];
 
+// 프로젝트 기간 표시
+const formatProjectPeriod = (start: string, end?: string) => {
+  const formatMonth = (value: string) => value.replace("-", ".");
+
+  return `${formatMonth(start)} - ${end ? formatMonth(end) : "진행 중"}`;
+};
+
 // 형광펜 강조 스타일
 const highlightTextSx = {
   position: "relative",
@@ -97,8 +104,8 @@ const HomePage = () => {
 
   // 홈 노출 데이터
   const recentPosts = getRecentPosts(3);
-  const featuredProjects = projects.slice(0, 3);
-  const mainSkills = skills.flatMap((skill) => skill.items).slice(0, 10);
+  const workProjects = projects.filter((project) => project.kind === "work").slice(0, 2);
+  const sideProjects = projects.filter((project) => project.kind === "side").slice(0, 1);
 
   // 섹션 스크롤 이동
   const scrollToSection = (sectionId: string) => {
@@ -473,15 +480,18 @@ const HomePage = () => {
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
             <Stack direction="row" gap={1} flexWrap="wrap">
-              {mainSkills.map((skill) => (
+              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill) => (
                 <Chip
                   key={skill.name}
                   label={skill.name}
-                  variant="outlined"
                   sx={{
-                    bgcolor: "#fff",
-                    borderColor: "#d8d1c4",
-                    color: "#393631",
+                    bgcolor: "#fff7ed",
+                    border: "1px solid rgba(245, 158, 11, 0.28)",
+                    color: "#7c2d12",
+                    fontWeight: 700,
+                    "& .MuiChip-label": {
+                      px: 1.4,
+                    },
                   }}
                 />
               ))}
@@ -512,7 +522,7 @@ const HomePage = () => {
               프로젝트
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
-              프론트엔드 구현 경험을 프로젝트 단위로 정리합니다.
+              약 20여 개의 프로젝트를 구현하며 쌓은 프론트엔드 경험을 정리합니다.
             </Typography>
           </Box>
           <Button
@@ -524,38 +534,76 @@ const HomePage = () => {
           </Button>
         </Box>
 
-        <Stack spacing={0}>
-          {featuredProjects.map((project) => (
-            <Box
-              key={project.id}
-              sx={{
-                py: 3,
-                borderTop: "1px solid #e8e3d8",
-                "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
-              }}
-            >
-              <Grid container spacing={3} alignItems="center">
-                <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography color="#777167">
-                    {project.period.start}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 5 }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {project.title}
-                  </Typography>
-                  <Typography sx={{ mt: 1, color: "#625d54", lineHeight: 1.7 }}>
-                    {project.description}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Stack direction="row" gap={0.75} flexWrap="wrap">
-                    {project.tech.slice(0, 5).map((tech) => (
-                      <Chip key={tech} label={tech} size="small" />
-                    ))}
-                  </Stack>
-                </Grid>
-              </Grid>
+        <Stack spacing={{ xs: 5, md: 7 }}>
+          {[
+            { title: "✦ 업무 프로젝트", items: workProjects },
+            { title: "✦ 사이드 프로젝트", items: sideProjects },
+          ].map((group) => (
+            <Box key={group.title}>
+              {/* 프로젝트 그룹 제목 */}
+              <Typography
+                component="h4"
+                sx={{
+                  mb: 1.5,
+                  color: "#d97706",
+                  fontSize: "0.95rem",
+                  fontWeight: 800,
+                }}
+              >
+                {group.title}
+              </Typography>
+
+              <Stack spacing={0}>
+                {group.items.map((project) => (
+                  <Box
+                    key={project.id}
+                    sx={{
+                      py: 3,
+                      borderTop: "1px solid rgba(217, 119, 6, 0.18)",
+                      "&:last-of-type": {
+                        borderBottom: "1px solid rgba(217, 119, 6, 0.18)",
+                      },
+                    }}
+                  >
+                    <Grid container spacing={3} alignItems="center">
+                      <Grid size={{ xs: 12, md: 3 }}>
+                        <Typography color="#777167">
+                          {formatProjectPeriod(project.period.start, project.period.end)}
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 5 }}>
+                        <Typography variant="h5" fontWeight={700}>
+                          {project.title}
+                        </Typography>
+                        <Typography sx={{ mt: 1, color: "#625d54", lineHeight: 1.7 }}>
+                          {project.description}
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 4 }}>
+                        <Stack direction="row" gap={0.75} flexWrap="wrap">
+                          {project.tech.slice(0, 5).map((tech) => (
+                            <Chip
+                              key={tech}
+                              label={tech}
+                              size="small"
+                              sx={{
+                                bgcolor: "#f5e8c7",
+                                color: "#6f4f12",
+                                border: 0,
+                                borderRadius: "5px",
+                                fontWeight: 800,
+                                "& .MuiChip-label": {
+                                  px: 1,
+                                },
+                              }}
+                            />
+                          ))}
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ))}
+              </Stack>
             </Box>
           ))}
         </Stack>
@@ -583,7 +631,7 @@ const HomePage = () => {
               Tech Blog
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
-              Notion에 기록한 학습과 문제 해결 과정을 모아둡니다.
+              IT 지식을 습득하고 기록하며 문제 해결 과정을 정리합니다.
             </Typography>
           </Box>
           <Button
@@ -649,26 +697,42 @@ const HomePage = () => {
           <Box
             sx={{
               display: "flex",
-              alignItems: { xs: "flex-start", md: "center" },
+              alignItems: "center",
               justifyContent: "space-between",
-              flexDirection: { xs: "column", md: "row" },
-              gap: { xs: 4, md: 6 },
+              flexDirection: "row",
+              gap: { xs: 2, md: 6 },
             }}
           >
-            <Box>
-              <Typography variant="h3" fontWeight={800}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="h3"
+                fontWeight={800}
+                sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "3rem" } }}
+              >
                 함께 이야기해요
               </Typography>
-              <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
+              <Typography
+                sx={{
+                  mt: 1.5,
+                  color: "#c9c3b8",
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                  lineHeight: 1.6,
+                }}
+              >
                 프로젝트, 채용, 협업 이야기는 편하게 남겨주세요.
               </Typography>
             </Box>
 
             <Stack
-              direction={{ xs: "column", sm: "row" }}
+              direction="row"
               spacing={1.25}
-              sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
+              sx={{
+                width: { xs: "auto", md: "auto" },
+                flexShrink: 0,
+                ml: "auto",
+              }}
             >
+              {/* 모바일 전화 아이콘 */}
               <Button
                 href={
                   CONFIG.PHONE
@@ -678,40 +742,103 @@ const HomePage = () => {
                       )}`
                 }
                 variant="outlined"
-                startIcon={<LocalPhoneOutlinedIcon />}
                 sx={{
+                  display: { xs: "inline-flex", md: "none" },
                   height: 48,
-                  px: 2.4,
-                  borderRadius: 999,
+                  minWidth: 48,
+                  width: 48,
+                  p: 0,
+                  borderRadius: "50%",
                   borderColor: "rgba(255, 255, 255, 0.34)",
                   color: "#fff",
-                  fontWeight: 800,
-                  textTransform: "none",
                   "&:hover": {
                     borderColor: "#fff",
                     bgcolor: "rgba(255, 255, 255, 0.1)",
                   },
                 }}
               >
-                Phone
+                <LocalPhoneOutlinedIcon sx={{ fontSize: 21 }} />
               </Button>
+
+              {/* 모바일 메일 아이콘 */}
               <Button
                 href={`mailto:${CONFIG.EMAIL}`}
-                variant="contained"
-                startIcon={<EmailOutlinedIcon />}
+                variant="outlined"
                 sx={{
+                  display: { xs: "inline-flex", md: "none" },
+                  height: 48,
+                  minWidth: 48,
+                  width: 48,
+                  p: 0,
+                  borderRadius: "50%",
+                  borderColor: "rgba(255, 255, 255, 0.34)",
+                  color: "#fff",
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+              >
+                <EmailOutlinedIcon sx={{ fontSize: 21 }} />
+              </Button>
+
+              {/* 데스크톱 전화 연결 */}
+              <Button
+                href={
+                  CONFIG.PHONE
+                    ? `tel:${CONFIG.PHONE.replaceAll("-", "")}`
+                    : `mailto:${CONFIG.EMAIL}?subject=${encodeURIComponent(
+                        "전화 연락 요청",
+                      )}`
+                }
+                startIcon={<LocalPhoneOutlinedIcon sx={{ fontSize: 20 }} />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
                   height: 48,
                   px: 2.4,
                   borderRadius: 999,
-                  bgcolor: "#fff",
-                  color: "#171717",
+                  border: "1px solid rgba(255, 255, 255, 0.28)",
+                  color: "#fff",
+                  bgcolor: "rgba(255, 255, 255, 0.06)",
                   fontWeight: 800,
+                  fontSize: "0.95rem",
                   textTransform: "none",
-                  boxShadow: "0 18px 40px rgba(255, 255, 255, 0.14)",
-                  "&:hover": { bgcolor: "#f2f0ea" },
+                  letterSpacing: 0.2,
+                  whiteSpace: "nowrap",
+                  transition: "border-color 0.2s ease, background-color 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255, 255, 255, 0.12)",
+                  },
                 }}
               >
-                Mail
+                {CONFIG.PHONE}
+              </Button>
+
+              <Button
+                href={`mailto:${CONFIG.EMAIL}`}
+                startIcon={<EmailOutlinedIcon />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  height: 48,
+                  px: 2.4,
+                  borderRadius: 999,
+                  border: "1px solid rgba(255, 255, 255, 0.28)",
+                  bgcolor: "rgba(255, 255, 255, 0.06)",
+                  color: "#fff",
+                  fontWeight: 800,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: 0.2,
+                  whiteSpace: "nowrap",
+                  transition: "border-color 0.2s ease, background-color 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255, 255, 255, 0.12)",
+                  },
+                }}
+              >
+                {CONFIG.EMAIL}
               </Button>
             </Stack>
           </Box>
