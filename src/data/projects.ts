@@ -8,6 +8,7 @@ import type { Project } from "@/types/portfolio";
 export const projects: Project[] = [
   {
     id: "gseps-homepage",
+    kind: "work",
     title: "GSEPS 홈페이지 구축",
     description:
       "패럴랙스 스크롤링을 이용한 반응형 웹 프로젝트입니다. 전체 페이지 퍼블리싱과 동적 UI 구현을 담당했고, GSAP, Google Charts, Slick Slider를 활용해 소개형 웹사이트의 인터랙션과 시각 요소를 구현했습니다.",
@@ -31,6 +32,7 @@ export const projects: Project[] = [
   },
   {
     id: "okcc-homepage",
+    kind: "work",
     title: "재외동포협력센터 OKCC",
     description:
       "기존 이미지 중심 구조와 불필요한 코드를 개선하고, 웹 표준과 접근성을 고려한 구조로 페이지를 정리했습니다. 반응형 화면과 유지보수 가능한 마크업 구조를 중심으로 퍼블리싱을 지원했습니다.",
@@ -46,6 +48,7 @@ export const projects: Project[] = [
   },
   {
     id: "internal-pool",
+    kind: "work",
     title: "사내 인력풀 홈페이지 구축",
     description:
       "사내 인력 관리와 업체 관리를 효율화하기 위한 웹페이지입니다. 파일 업로드, 조건별 스타일 처리, 경력/급여 계산, 카카오 API 기반 주소 검색 등 업무 흐름에 필요한 기능을 구현했습니다.",
@@ -67,6 +70,7 @@ export const projects: Project[] = [
   },
   {
     id: "buildtalk-translation",
+    kind: "work",
     title: "빌드톡 번역앱 구축",
     description:
       "ChatGPT를 이용한 AI 통번역 앱 서비스입니다. 사용자 흐름 정리, UI 기획, Figma 프로토타입 제작에 참여했고 Flutter/Dart 기반 모바일 화면 구조를 이해하며 협업했습니다.",
@@ -82,6 +86,7 @@ export const projects: Project[] = [
   },
   {
     id: "sosoco-mall",
+    kind: "work",
     title: "SOSOCO 쇼핑몰 홈페이지 제작",
     description:
       "고도몰 기반 쇼핑몰 홈페이지 제작 프로젝트입니다. 2인 프로젝트로 HTML, CSS, JavaScript, PHP를 활용해 쇼핑몰 화면 구성과 퍼블리싱 작업을 진행했습니다.",
@@ -95,6 +100,7 @@ export const projects: Project[] = [
   },
   {
     id: "portfolio-blog",
+    kind: "side",
     title: "개인 포트폴리오 블로그",
     description:
       "React와 TypeScript로 만든 개인 포트폴리오입니다. Notion API로 Tech Blog 글을 가져오고 GitHub Actions를 통해 GitHub Pages에 배포합니다.",

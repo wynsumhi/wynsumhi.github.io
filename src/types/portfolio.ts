@@ -8,6 +8,7 @@
 /** 프로젝트 데이터 타입 */
 export interface Project {
   id: string; // 프로젝트 고유 ID
+  kind: "work" | "side"; // 프로젝트 구분
   title: string; // 프로젝트 이름
   description: string; // 프로젝트 설명
   thumbnail: string; // 썸네일 이미지 URL
