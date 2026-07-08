@@ -8,12 +8,11 @@
  * 4. Navbar: 일반 페이지에 표시되는 상단 네비게이션 바
  *
  * 라우트 구조:
- *   /           → HomePage (소개 홈)
+ *   /           → HomePage (포트폴리오 홈)
  *   /blog       → BlogHome (블로그 홈)
  *   /blog/:id   → BlogPost (블로그 포스트 상세)
  *   /archives   → ArchivePage (블로그 아카이브)
- *   /portfolio  → PortfolioHome (포트폴리오)
- *   /resume     → ResumePage (이력서)
+ *   /portfolio  → HomePage (포트폴리오 홈)
  *   /*          → 404 페이지
  */
 import {
@@ -36,8 +35,6 @@ import HomePage from "@/pages/Home/HomePage";
 import BlogHome from "@/pages/Blog/BlogHome";
 import BlogPost from "@/pages/Blog/BlogPost";
 import ArchivePage from "@/pages/Blog/ArchivePage";
-import PortfolioHome from "@/pages/Portfolio/PortfolioHome";
-import ResumePage from "@/pages/Resume/ResumePage";
 
 const BlogRoutes = () => (
   <BlogLayout>
@@ -63,14 +60,11 @@ const MainRoutes = () => (
     <Navbar />
 
     <Routes>
-      {/* 소개 홈 */}
+      {/* 포트폴리오 홈 */}
       <Route path="/" element={<HomePage />} />
 
-      {/* 포트폴리오 페이지 */}
-      <Route path="/portfolio" element={<PortfolioHome />} />
-
-      {/* 이력서 페이지 */}
-      <Route path="/resume" element={<ResumePage />} />
+      {/* 포트폴리오 홈 별칭 */}
+      <Route path="/portfolio" element={<HomePage />} />
 
       {/* 위 경로에 매칭되지 않는 모든 URL → 404 */}
       <Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
@@ -81,7 +75,7 @@ const MainRoutes = () => (
 const AppRoutes = () => {
   const location = useLocation();
 
-  // 블로그 사이드바 적용 경로
+  // 블로그 레이아웃 적용 경로
   const isBlogLayout =
     location.pathname.startsWith(ROUTES.BLOG) ||
     location.pathname === ROUTES.ARCHIVES;

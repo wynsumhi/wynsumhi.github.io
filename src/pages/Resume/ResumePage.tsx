@@ -27,7 +27,7 @@ const ResumePage = () => {
             최신 이력서를 파일로 확인하고, 추가 문의는 이메일로 연락해주세요.
           </Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-            <Button variant="contained" href="/resume.pdf" download>
+            <Button variant="contained" href="/resume_kimhyuna.pdf" download>
               PDF 다운로드
             </Button>
             <Button variant="outlined" href={`mailto:${CONFIG.EMAIL}`}>
