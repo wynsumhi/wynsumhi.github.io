@@ -3,4 +3,5 @@ export const CONFIG = {
   SITE_DESCRIPTION: " portfolio website.",
   GITHUB_URL: "https://github.com/wynsumhi",
   EMAIL: "gusdk7244@naver.com",
+  PHONE: "010-7498-7244",
 };

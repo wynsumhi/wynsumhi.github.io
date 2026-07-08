@@ -9,14 +9,16 @@ import {
   Button,
   Chip,
   Container,
-  Divider,
   Stack,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DownloadIcon from "@mui/icons-material/Download";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { createElement, useEffect, useRef } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { CONFIG } from "@/constants/config";
@@ -45,6 +47,14 @@ const strengths = [
 const splineSceneUrl =
   "https://prod.spline.design/WhFeS8gDdkksYQKA/scene.splinecode";
 
+const sectionNavItems = [
+  { label: "Hero", sectionId: "home-hero" },
+  { label: "Focus", sectionId: "home-focus" },
+  { label: "Skill", sectionId: "home-skills" },
+  { label: "Project", sectionId: "home-projects" },
+  { label: "Blog", sectionId: "home-blog" },
+];
+
 // 형광펜 강조 스타일
 const highlightTextSx = {
   position: "relative",
@@ -55,22 +65,22 @@ const highlightTextSx = {
   "&::before": {
     content: '""',
     position: "absolute",
-    left: "-0.04em",
-    right: "-0.04em",
-    bottom: "0.02em",
-    height: "0.58em",
-    bgcolor: "rgba(255, 190, 124, 0.48)",
+    left: "-0.02em",
+    right: "-0.02em",
+    bottom: "0",
+    height: "0.78em",
+    bgcolor: "rgba(255, 255, 255, 0.54)",
     zIndex: -1,
   },
   "&::after": {
     content: '""',
     position: "absolute",
-    right: "-0.12em",
-    bottom: "0.03em",
-    width: "0.28em",
-    height: "0.56em",
-    bgcolor: "rgba(255, 170, 98, 0.36)",
-    borderRadius: "45% 30% 35% 45%",
+    right: "-0.06em",
+    bottom: "0.01em",
+    width: "0.24em",
+    height: "0.76em",
+    bgcolor: "rgba(255, 255, 255, 0.38)",
+    borderRadius: 0,
     transform: "rotate(-2deg)",
     zIndex: -1,
   },
@@ -79,6 +89,9 @@ const highlightTextSx = {
 const HomePage = () => {
   const navigate = useNavigate();
   const splineWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState(sectionNavItems[0].sectionId);
+  const [isBlogPassed, setIsBlogPassed] = useState(false);
+  const [isSectionNavPinned, setIsSectionNavPinned] = useState(false);
   const { getRecentPosts, loading, error } = usePosts();
   const { projects, skills } = useProjects();
 
@@ -114,14 +127,66 @@ const HomePage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const sectionElements = sectionNavItems
+      .map((item) => document.getElementById(item.sectionId))
+      .filter((element): element is HTMLElement => Boolean(element));
+
+    if (sectionElements.length === 0) return;
+
+    // 현재 섹션 감지
+    const handleScroll = () => {
+      const nextSection = sectionElements.reduce((current, section) => {
+        const sectionTop = section.getBoundingClientRect().top;
+
+        if (sectionTop <= window.innerHeight * 0.35) return section;
+        return current;
+      }, sectionElements[0]);
+
+      setActiveSectionId(nextSection.id);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const blogSection = document.getElementById("home-blog");
+
+    if (!blogSection) return;
+
+    // Blog 이후 스크롤 감지
+    const handleBlogScroll = () => {
+      const blogTop = blogSection.offsetTop;
+      const hideLine = blogTop + 24;
+
+      setIsBlogPassed(window.scrollY > hideLine);
+      setIsSectionNavPinned(window.scrollY > 0);
+    };
+
+    handleBlogScroll();
+    window.addEventListener("scroll", handleBlogScroll, { passive: true });
+    window.addEventListener("resize", handleBlogScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleBlogScroll);
+      window.removeEventListener("resize", handleBlogScroll);
+    };
+  }, []);
+
   return (
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717" }}>
       {/* 첫 화면 소개 */}
       <Box
+        id="home-hero"
         component="section"
         sx={{
           position: "relative",
-          minHeight: { xs: "calc(100vh - 64px)", md: "calc(100vh - 72px)" },
+          minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           overflow: "hidden",
@@ -152,7 +217,14 @@ const HomePage = () => {
           }}
         />
 
-        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            pointerEvents: "none",
+          }}
+        >
           <Grid container spacing={{ xs: 5, md: 8 }} alignItems="center">
             <Grid size={{ xs: 12, md: 8 }}>
               <Typography
@@ -213,24 +285,25 @@ const HomePage = () => {
               <Stack
                 direction={{ xs: "column", sm: "row" }}
                 spacing={1.5}
-                sx={{ mt: 4 }}
+                sx={{ mt: 4, pointerEvents: "auto" }}
               >
                 <Button
                   variant="contained"
                   endIcon={<ArrowForwardIcon />}
-                  onClick={() => scrollToSection("home-projects")}
+                  onClick={() => scrollToSection("home-focus")}
                   sx={{
                     color: "#ffffff",
                     bgcolor: "#171717",
                     "&:hover": { bgcolor: "#313131" },
                   }}
                 >
-                  포트폴리오 보기
+                  더 알아보기
                 </Button>
                 <Button
                   variant="outlined"
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => navigate(ROUTES.BLOG)}
+                  endIcon={<DownloadIcon />}
+                  href="/resume_kimhyuna.pdf"
+                  download
                   sx={{
                     color: "#171717",
                     borderColor: "rgba(23,23,23,0.72)",
@@ -240,19 +313,109 @@ const HomePage = () => {
                     },
                   }}
                 >
-                  Tech Blog 보기
+                  이력서 다운로드
                 </Button>
               </Stack>
             </Grid>
           </Grid>
         </Container>
+
+        {/* 섹션 목차 배경 도형 */}
+        <Box
+          sx={{
+            display: {
+              xs: "none",
+              lg: "block",
+            },
+            position: "absolute",
+            top: "54%",
+            right: { lg: 58, xl: 86 },
+            transform: "translateY(-50%)",
+            width: { lg: 560, xl: 650 },
+            aspectRatio: "673 / 455",
+            zIndex: 2,
+            pointerEvents: "none",
+          }}
+        >
+          <Box
+            component="img"
+            src="/assets/section-nav-panel.svg"
+            alt=""
+            aria-hidden
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "block",
+              opacity: 0.92,
+              filter: "drop-shadow(0 24px 70px rgba(0,0,0,0.08))",
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
+
+        {/* 섹션 목차 버튼 */}
+        <Stack
+          component="nav"
+          spacing={{ lg: 0.72, xl: 1 }}
+          sx={{
+            display: {
+              xs: "none",
+              lg: isBlogPassed ? "none" : "flex",
+            },
+            position: isSectionNavPinned ? "fixed" : "absolute",
+            top: { lg: "calc(54vh - 62px)", xl: "calc(54vh - 78px)" },
+            right: { lg: 64, xl: 88 },
+            width: { lg: 118, xl: 137 },
+            zIndex: 3,
+            pointerEvents: "auto",
+          }}
+        >
+          {sectionNavItems.map((item) => {
+            const isActive = activeSectionId === item.sectionId;
+
+            return (
+              <Button
+                key={item.sectionId}
+                onClick={() => scrollToSection(item.sectionId)}
+                sx={{
+                  minWidth: 0,
+                  justifyContent: "flex-start",
+                  gap: 1.25,
+                  px: 0,
+                  color: isActive ? "#171717" : "rgba(23,23,23,0.34)",
+                  fontSize: "0.78rem",
+                  fontWeight: isActive ? 800 : 700,
+                  lineHeight: { lg: 0.68, xl: 0.76 },
+                  "&:hover": {
+                    bgcolor: "transparent",
+                    color: "#171717",
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    width: 9,
+                    height: 9,
+                    borderRadius: "50%",
+                    border: isActive ? "none" : "2px solid rgba(23,23,23,0.24)",
+                    bgcolor: isActive ? "#f59e0b" : "transparent",
+                    flexShrink: 0,
+                  }}
+                />
+                {item.label}
+              </Button>
+            );
+          })}
+        </Stack>
       </Box>
 
       {/* 현재 집중하는 것 */}
       <Container
+        id="home-focus"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 8, md: 12 } }}
+        sx={{ py: { xs: 12, md: 20 } }}
       >
         <Grid container spacing={{ xs: 3, md: 5 }}>
           <Grid size={{ xs: 12, md: 4 }}>
@@ -291,13 +454,12 @@ const HomePage = () => {
         </Grid>
       </Container>
 
-      <Divider sx={{ borderColor: "#e8e3d8" }} />
-
       {/* 핵심 역량 */}
       <Container
+        id="home-skills"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 9, md: 14 } }}
+        sx={{ py: { xs: 12, md: 20 } }}
       >
         <Grid container spacing={{ xs: 4, md: 8 }}>
           <Grid size={{ xs: 12, md: 4 }}>
@@ -328,14 +490,12 @@ const HomePage = () => {
         </Grid>
       </Container>
 
-      <Divider sx={{ borderColor: "#e8e3d8" }} />
-
       {/* 대표 프로젝트 */}
       <Container
         id="home-projects"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 9, md: 14 } }}
+        sx={{ py: { xs: 12, md: 20 } }}
       >
         <Box
           sx={{
@@ -401,13 +561,12 @@ const HomePage = () => {
         </Stack>
       </Container>
 
-      <Divider sx={{ borderColor: "#e8e3d8" }} />
-
       {/* 최신 블로그 글 */}
       <Container
+        id="home-blog"
         maxWidth="lg"
         component="section"
-        sx={{ py: { xs: 9, md: 14 } }}
+        sx={{ py: { xs: 12, md: 20 } }}
       >
         <Box
           sx={{
@@ -481,26 +640,81 @@ const HomePage = () => {
       </Container>
 
       {/* 연락 섹션 */}
-      <Box component="section" sx={{ bgcolor: "#171717", color: "#fff" }}>
-        <Container maxWidth="lg" sx={{ py: { xs: 9, md: 12 } }}>
-          <Typography variant="h3" fontWeight={800}>
-            함께 이야기해요
-          </Typography>
-          <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
-            프로젝트, 채용, 협업 이야기는 편하게 메일로 남겨주세요.
-          </Typography>
-          <Button
-            href={`mailto:${CONFIG.EMAIL}`}
-            variant="contained"
+      <Box
+        id="home-contact"
+        component="section"
+        sx={{ bgcolor: "#171717", color: "#fff" }}
+      >
+        <Container maxWidth="lg" sx={{ py: { xs: 11, md: 16 } }}>
+          <Box
             sx={{
-              mt: 3,
-              bgcolor: "#fff",
-              color: "#171717",
-              "&:hover": { bgcolor: "#f2f0ea" },
+              display: "flex",
+              alignItems: { xs: "flex-start", md: "center" },
+              justifyContent: "space-between",
+              flexDirection: { xs: "column", md: "row" },
+              gap: { xs: 4, md: 6 },
             }}
           >
-            이메일 보내기
-          </Button>
+            <Box>
+              <Typography variant="h3" fontWeight={800}>
+                함께 이야기해요
+              </Typography>
+              <Typography sx={{ mt: 1.5, color: "#c9c3b8" }}>
+                프로젝트, 채용, 협업 이야기는 편하게 남겨주세요.
+              </Typography>
+            </Box>
+
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.25}
+              sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
+            >
+              <Button
+                href={
+                  CONFIG.PHONE
+                    ? `tel:${CONFIG.PHONE.replaceAll("-", "")}`
+                    : `mailto:${CONFIG.EMAIL}?subject=${encodeURIComponent(
+                        "전화 연락 요청",
+                      )}`
+                }
+                variant="outlined"
+                startIcon={<LocalPhoneOutlinedIcon />}
+                sx={{
+                  height: 48,
+                  px: 2.4,
+                  borderRadius: 999,
+                  borderColor: "rgba(255, 255, 255, 0.34)",
+                  color: "#fff",
+                  fontWeight: 800,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+              >
+                Phone
+              </Button>
+              <Button
+                href={`mailto:${CONFIG.EMAIL}`}
+                variant="contained"
+                startIcon={<EmailOutlinedIcon />}
+                sx={{
+                  height: 48,
+                  px: 2.4,
+                  borderRadius: 999,
+                  bgcolor: "#fff",
+                  color: "#171717",
+                  fontWeight: 800,
+                  textTransform: "none",
+                  boxShadow: "0 18px 40px rgba(255, 255, 255, 0.14)",
+                  "&:hover": { bgcolor: "#f2f0ea" },
+                }}
+              >
+                Mail
+              </Button>
+            </Stack>
+          </Box>
         </Container>
       </Box>
     </Box>
