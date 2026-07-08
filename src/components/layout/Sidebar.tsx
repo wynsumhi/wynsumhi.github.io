@@ -3,7 +3,7 @@
  *
  * 블로그 화면에서 프로필, 메뉴, 외부 링크를 보여주는 왼쪽 고정 영역입니다
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -18,14 +18,15 @@ import {
 } from "@mui/material";
 import {
   ArticleOutlined,
-  ArchiveOutlined,
-  DarkModeOutlined,
+  AutoStoriesOutlined,
+  CodeOutlined,
+  Download,
+  EditNoteOutlined,
   EmailOutlined,
   GitHub,
-  HomeOutlined,
-  LightModeOutlined,
+  LinkedIn,
+  OpenInNew,
   PersonOutline,
-  WorkOutline,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CONFIG } from "@/constants/config";
@@ -33,37 +34,82 @@ import { ROUTES } from "@/constants/routes";
 
 // 블로그 사이드 메뉴 목록
 const navItems = [
-  { label: "HOME", icon: <HomeOutlined fontSize="small" />, path: ROUTES.HOME },
-  { label: "BLOG", icon: <ArticleOutlined fontSize="small" />, path: ROUTES.BLOG },
   {
-    label: "ARCHIVES",
-    icon: <ArchiveOutlined fontSize="small" />,
-    path: ROUTES.ARCHIVES,
+    label: "ALL POST",
+    icon: <ArticleOutlined fontSize="small" />,
+    path: ROUTES.BLOG,
+    section: "all",
   },
   {
-    label: "PORTFOLIO",
-    icon: <WorkOutline fontSize="small" />,
-    path: ROUTES.PORTFOLIO,
+    label: "TECH",
+    icon: <CodeOutlined fontSize="small" />,
+    path: `${ROUTES.BLOG}?section=tech`,
+    section: "tech",
   },
   {
-    label: "RESUME",
-    icon: <PersonOutline fontSize="small" />,
-    path: ROUTES.RESUME,
+    label: "STUDY",
+    icon: <AutoStoriesOutlined fontSize="small" />,
+    path: `${ROUTES.BLOG}?section=study`,
+    section: "study",
+  },
+  {
+    label: "LOG",
+    icon: <EditNoteOutlined fontSize="small" />,
+    path: `${ROUTES.BLOG}?section=log`,
+    section: "log",
   },
 ];
+
+// 프로필 이미지 경로
+const AVATAR_IMAGES = {
+  default: "/blog-avatar.png",
+  hover: "/blog-avatar-hover.png",
+  dark: "/blog-avatar-dark.png",
+};
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [darkMode, setDarkMode] = useState(false);
+  const currentSection = new URLSearchParams(location.search).get("section") ?? "all";
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem("blogTheme") === "dark",
+  );
+  const [isAvatarHover, setIsAvatarHover] = useState(false);
+
+  // 다크모드 상태 반영
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (isDarkMode) {
+      root.dataset.blogTheme = "dark";
+      localStorage.setItem("blogTheme", "dark");
+      return;
+    }
+
+    delete root.dataset.blogTheme;
+    localStorage.setItem("blogTheme", "light");
+  }, [isDarkMode]);
+
+  // 프로필 이미지 상태
+  const avatarSrc = isDarkMode
+    ? AVATAR_IMAGES.dark
+    : isAvatarHover
+      ? AVATAR_IMAGES.hover
+      : AVATAR_IMAGES.default;
 
   // 현재 메뉴 활성 상태 확인
-  const isActivePath = (path: string) => {
-    // 블로그 상세 페이지 포함
-    if (path === ROUTES.BLOG) return location.pathname.startsWith(ROUTES.BLOG);
+  const isActivePath = (section: string) => {
+    // 전체 글 활성 상태
+    if (section === "all") {
+      return (
+        (location.pathname === ROUTES.BLOG && currentSection === "all") ||
+        (location.pathname.startsWith(`${ROUTES.BLOG}/`) &&
+          !location.pathname.startsWith(ROUTES.ARCHIVES))
+      );
+    }
 
-    // 현재 경로 일치 확인
-    return location.pathname === path;
+    // 섹션 메뉴 활성 상태
+    return location.pathname === ROUTES.BLOG && currentSection === section;
   };
 
   return (
@@ -75,73 +121,89 @@ const Sidebar = () => {
         position: "fixed",
         top: 0,
         left: 0,
-        bgcolor: "white",
-        borderRight: "1px solid #edf0f7",
+        bgcolor: "var(--blog-sidebar-bg)",
+        borderRight: "1px solid var(--blog-border)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         py: 5,
         zIndex: 100,
-        boxShadow: "2px 0 20px rgba(0,0,0,0.04)",
+        boxShadow: "2px 0 22px var(--blog-sidebar-shadow)",
       }}
     >
       {/* 프로필 영역 */}
       <Box sx={{ textAlign: "center", mb: 4, px: 3 }}>
-        <Avatar
-          src="/avatar.png"
-          alt={CONFIG.SITE_TITLE}
-          onClick={() => navigate(ROUTES.HOME)}
-          sx={{
-            width: 88,
-            height: 88,
-            mx: "auto",
-            mb: 2,
-            border: "3px solid #e8ecf7",
-            boxShadow: "0 4px 16px rgba(37,99,235,0.15)",
-            cursor: "pointer",
-            transition: "transform 0.3s ease",
-            "&:hover": { transform: "scale(1.05)" },
-          }}
-        />
+        <Tooltip title={isDarkMode ? "라이트 모드" : "다크 모드"} placement="right">
+          <Avatar
+            component="button"
+            src={avatarSrc}
+            alt="Hyuna's Tech Blog"
+            onClick={() => setIsDarkMode((current) => !current)}
+            onMouseEnter={() => setIsAvatarHover(true)}
+            onMouseLeave={() => setIsAvatarHover(false)}
+            sx={{
+              width: 96,
+              height: 96,
+              mx: "auto",
+              mb: 2,
+              p: 0,
+              appearance: "none",
+              bgcolor: "transparent",
+              border: "3px solid var(--blog-avatar-border)",
+              boxShadow: "0 8px 24px var(--blog-avatar-shadow)",
+              cursor: "pointer",
+              transition: "transform 0.3s ease, border-color 0.25s ease, box-shadow 0.25s ease",
+              "& img": {
+                objectFit: "cover",
+              },
+              "&:hover": { transform: "scale(1.05)" },
+            }}
+          />
+        </Tooltip>
 
-        {/* 홈 이동 로고 */}
-        <Box
-          component="img"
-          src="/assets/hi.svg"
-          alt="HYUNA"
-          onClick={() => navigate(ROUTES.HOME)}
+        {/* 블로그 타이틀 */}
+        <Typography
+          component="button"
+          onClick={() => navigate(ROUTES.BLOG)}
           sx={{
-            width: 34,
-            height: "auto",
-            mx: "auto",
-            display: "block",
+            p: 0,
+            border: 0,
+            bgcolor: "transparent",
+            color: "var(--blog-heading)",
+            fontSize: "1.05rem",
+            fontWeight: 900,
+            letterSpacing: 0,
             cursor: "pointer",
-            transition: "transform 0.2s",
-            "&:hover": { transform: "translateY(-1px)" },
+            lineHeight: 1.25,
+            "&:hover": {
+              color: "var(--blog-accent)",
+            },
           }}
-        />
+        >
+          Hyuna&apos;s Tech Blog
+        </Typography>
 
         {/* 한 줄 소개 */}
         <Typography
           variant="caption"
           sx={{
-            color: "#94a3b8",
+            color: "var(--blog-muted)",
             fontSize: "0.78rem",
             lineHeight: 1.5,
             display: "block",
-            mt: 0.5,
+            mt: 0.75,
           }}
         >
-          Portfolio & Tech Blog
+          개발 기록과 문제 해결 노트
         </Typography>
       </Box>
 
-      <Divider sx={{ width: "80%", mb: 3, borderColor: "#edf0f7" }} />
+      <Divider sx={{ width: "80%", mb: 3, borderColor: "var(--blog-border)" }} />
 
       {/* 사이드 메뉴 목록 */}
-      <List sx={{ width: "100%", px: 2, flex: 1 }}>
+      <List sx={{ width: "100%", px: 2 }}>
         {navItems.map((item) => {
-          const isActive = isActivePath(item.path);
+          const isActive = isActivePath(item.section);
 
           return (
             <ListItemButton
@@ -153,7 +215,7 @@ const Sidebar = () => {
                 py: 1.2,
                 px: 2,
                 position: "relative",
-                bgcolor: isActive ? "#eff4ff" : "transparent",
+                bgcolor: isActive ? "var(--blog-active-bg)" : "transparent",
                 "&::before": isActive
                   ? {
                       content: '""',
@@ -162,14 +224,14 @@ const Sidebar = () => {
                       top: "20%",
                       height: "60%",
                       width: 3,
-                      bgcolor: "#2563eb",
+                      bgcolor: "var(--blog-accent)",
                       borderRadius: "0 2px 2px 0",
                     }
                   : {},
                 "&:hover": {
-                  bgcolor: isActive ? "#eff4ff" : "#f8faff",
-                  "& .nav-label": { color: "#2563eb" },
-                  "& .nav-icon": { color: "#2563eb" },
+                  bgcolor: isActive ? "var(--blog-active-bg)" : "var(--blog-hover-bg)",
+                  "& .nav-label": { color: "var(--blog-accent)" },
+                  "& .nav-icon": { color: "var(--blog-accent)" },
                 },
                 transition: "all 0.2s ease",
               }}
@@ -179,7 +241,7 @@ const Sidebar = () => {
                 className="nav-icon"
                 sx={{
                   minWidth: 32,
-                  color: isActive ? "#2563eb" : "#94a3b8",
+                  color: isActive ? "var(--blog-accent)" : "var(--blog-muted)",
                   transition: "color 0.2s",
                 }}
               >
@@ -194,7 +256,7 @@ const Sidebar = () => {
                   fontSize: "0.78rem",
                   fontWeight: isActive ? 700 : 500,
                   letterSpacing: "0.08em",
-                  color: isActive ? "#2563eb" : "#64748b",
+                  color: isActive ? "var(--blog-accent)" : "var(--blog-subtle)",
                   sx: { transition: "color 0.2s" },
                 }}
               />
@@ -203,28 +265,137 @@ const Sidebar = () => {
         })}
       </List>
 
-      {/* 하단 링크 영역 */}
-      <Box sx={{ display: "flex", gap: 0.5, mt: 2, alignItems: "center" }}>
-        <Tooltip title={darkMode ? "라이트 모드" : "다크 모드"} placement="top">
-          <IconButton
-            size="small"
-            onClick={() => setDarkMode(!darkMode)}
+      {/* 포트폴리오 자료 영역 */}
+      <Box sx={{ width: "100%", px: 2, mt: "auto", pb: 1.25 }}>
+        {/* 메뉴 구분선 */}
+        <Box
+          sx={{
+            mx: 2,
+            mb: 1.2,
+            borderTop: "1px solid var(--blog-border)",
+          }}
+        />
+
+        {/* 포트폴리오 바로가기 */}
+        <ListItemButton
+          component="a"
+          href={ROUTES.PORTFOLIO}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            borderRadius: 2,
+            mb: 0.5,
+            py: 1,
+            px: 2,
+            color: "var(--blog-subtle)",
+            "&:hover": {
+              bgcolor: "var(--blog-active-bg)",
+              color: "var(--blog-accent)",
+              "& .resource-end-icon": { color: "var(--blog-accent)" },
+            },
+          }}
+        >
+          <ListItemText
+            primary="포트폴리오 바로가기"
+            primaryTypographyProps={{
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: 0,
+            }}
+          />
+          <ListItemIcon
+            className="resource-end-icon"
             sx={{
-              color: "#94a3b8",
-              "&:hover": { color: "#2563eb", bgcolor: "#eff4ff" },
-              transition: "all 0.2s",
+              minWidth: 0,
+              ml: 1,
+              color: "var(--blog-muted)",
+              transition: "color 0.2s",
             }}
           >
-            {darkMode ? (
-              <LightModeOutlined fontSize="small" />
-            ) : (
-              <DarkModeOutlined fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
+            <OpenInNew sx={{ fontSize: 17 }} />
+          </ListItemIcon>
+        </ListItemButton>
 
-        <Typography sx={{ color: "#cbd5e1", fontSize: "0.6rem" }}>·</Typography>
+        {/* 포트폴리오 PDF 다운로드 */}
+        <ListItemButton
+          component="a"
+          href="/portfolio_kimhyuna.pdf"
+          download="portfolio_kimhyuna.pdf"
+          sx={{
+            borderRadius: 2,
+            mb: 0.5,
+            py: 1,
+            px: 2,
+            color: "var(--blog-subtle)",
+            "&:hover": {
+              bgcolor: "var(--blog-active-bg)",
+              color: "var(--blog-accent)",
+              "& .resource-end-icon": { color: "var(--blog-accent)" },
+            },
+          }}
+        >
+          <ListItemText
+            primary="포트폴리오 PDF"
+            primaryTypographyProps={{
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: 0,
+            }}
+          />
+          <ListItemIcon
+            className="resource-end-icon"
+            sx={{
+              minWidth: 0,
+              ml: 1,
+              color: "var(--blog-muted)",
+              transition: "color 0.2s",
+            }}
+          >
+            <Download sx={{ fontSize: 18 }} />
+          </ListItemIcon>
+        </ListItemButton>
 
+        {/* 이력서 PDF 다운로드 */}
+        <ListItemButton
+          component="a"
+          href="/resume_kimhyuna.pdf"
+          download="resume_kimhyuna.pdf"
+          sx={{
+            borderRadius: 2,
+            py: 1,
+            px: 2,
+            color: "var(--blog-subtle)",
+            "&:hover": {
+              bgcolor: "var(--blog-active-bg)",
+              color: "var(--blog-accent)",
+              "& .resource-end-icon": { color: "var(--blog-accent)" },
+            },
+          }}
+        >
+          <ListItemText
+            primary="이력서 PDF"
+            primaryTypographyProps={{
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: 0,
+            }}
+          />
+          <ListItemIcon
+            className="resource-end-icon"
+            sx={{
+              minWidth: 0,
+              ml: 1,
+              color: "var(--blog-muted)",
+              transition: "color 0.2s",
+            }}
+          >
+            <PersonOutline sx={{ fontSize: 18 }} />
+          </ListItemIcon>
+        </ListItemButton>
+      </Box>
+
+      {/* 하단 링크 영역 */}
+      <Box sx={{ display: "flex", gap: 0.75, mt: 2.4, alignItems: "center" }}>
         <Tooltip title="GitHub" placement="top">
           <IconButton
             size="small"
@@ -232,13 +403,38 @@ const Sidebar = () => {
             href={CONFIG.GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="GitHub 열기"
             sx={{
-              color: "#94a3b8",
-              "&:hover": { color: "#1e293b", bgcolor: "#f1f5f9" },
-              transition: "all 0.2s",
+              width: 32,
+              height: 32,
+              p: 0,
+              color: "var(--blog-muted)",
+              "&:hover": { color: "var(--blog-accent)", bgcolor: "transparent" },
+              transition: "color 0.2s",
             }}
           >
-            <GitHub fontSize="small" />
+            <GitHub sx={{ fontSize: 22, display: "block" }} />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="LinkedIn" placement="top">
+          <IconButton
+            size="small"
+            component="a"
+            href={CONFIG.LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn 열기"
+            sx={{
+              width: 32,
+              height: 32,
+              p: 0,
+              color: "var(--blog-muted)",
+              "&:hover": { color: "var(--blog-accent)", bgcolor: "transparent" },
+              transition: "color 0.2s",
+            }}
+          >
+            <LinkedIn sx={{ fontSize: 22, display: "block" }} />
           </IconButton>
         </Tooltip>
 
@@ -247,13 +443,17 @@ const Sidebar = () => {
             size="small"
             component="a"
             href={`mailto:${CONFIG.EMAIL}`}
+            aria-label="메일 보내기"
             sx={{
-              color: "#94a3b8",
-              "&:hover": { color: "#1e293b", bgcolor: "#f1f5f9" },
-              transition: "all 0.2s",
+              width: 32,
+              height: 32,
+              p: 0,
+              color: "var(--blog-muted)",
+              "&:hover": { color: "var(--blog-accent)", bgcolor: "transparent" },
+              transition: "color 0.2s",
             }}
           >
-            <EmailOutlined fontSize="small" />
+            <EmailOutlined sx={{ fontSize: 22, display: "block" }} />
           </IconButton>
         </Tooltip>
       </Box>
