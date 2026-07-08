@@ -18,8 +18,8 @@ import {
   CardMedia,
 } from "@mui/material";
 import {
+  GridViewOutlined, // 카드 뷰 아이콘
   ViewListOutlined, // 리스트 뷰 아이콘
-  GridViewOutlined, // 카드(그리드) 뷰 아이콘
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
@@ -384,83 +384,73 @@ const BlogHome = () => {
 
   return (
     <Box>
-      {/* 헤더 영역 */}
+      {/* 목록 헤더 영역 */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between", // 양쪽 끝으로 배치 (제목 왼쪽, 버튼 오른쪽)
-          mb: 4,
+          justifyContent: "space-between",
+          pb: 3,
+          mb: 3,
+          borderBottom: "1px solid #e5e7eb",
         }}
       >
-        {/* 왼쪽: 제목 + 포스트 수 */}
-        <Box>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            sx={{
-              color: "#1e293b",
-              fontSize: "1.8rem",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Posts
-          </Typography>
-          <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-            총 {posts.length}개의 글
-          </Typography>
-        </Box>
+        {/* 왼쪽 목록 제목 */}
+        <Typography
+          component="h1"
+          sx={{
+            color: "#111111",
+            fontSize: { xs: "1.22rem", md: "1.4rem" },
+            fontWeight: 650,
+            lineHeight: 1,
+          }}
+        >
+          전체 글 ({posts.length})
+        </Typography>
 
-        {/* 오른쪽: 뷰 전환 버튼 그룹 */}
-        {/*
-          배경을 회색 박스로 묶고 안에 버튼 2개를 넣어서
-          선택된 버튼만 흰 배경 + 그림자로 강조하는 "세그먼트 컨트롤" 스타일
-        */}
+        {/* 오른쪽 보기 전환 */}
         <Box
           sx={{
             display: "flex",
-            gap: 0.5,
-            bgcolor: "#f1f5f9",
-            borderRadius: 2,
-            p: 0.5,
+            alignItems: "center",
+            gap: 1.4,
           }}
         >
           {/* 리스트 뷰 버튼 */}
           <Tooltip title="리스트 뷰" placement="top">
             <IconButton
-              size="small"
               onClick={() => handleViewChange("list")}
               sx={{
-                borderRadius: 1.5,
-                // 현재 선택된 뷰면 흰 배경 + 파란 아이콘으로 강조
-                bgcolor: viewMode === "list" ? "white" : "transparent",
-                color: viewMode === "list" ? "#2563eb" : "#94a3b8",
-                boxShadow:
-                  viewMode === "list" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-                "&:hover": { color: "#2563eb" },
-                transition: "all 0.2s ease",
+                width: 34,
+                height: 34,
+                p: 0,
+                color: viewMode === "list" ? "#111111" : "#b7b7b7",
+                "&:hover": {
+                  bgcolor: "transparent",
+                  color: "#111111",
+                },
               }}
             >
-              <ViewListOutlined fontSize="small" />
+              <ViewListOutlined sx={{ fontSize: 30 }} />
             </IconButton>
           </Tooltip>
 
           {/* 카드 뷰 버튼 */}
           <Tooltip title="카드 뷰" placement="top">
             <IconButton
-              size="small"
               onClick={() => handleViewChange("card")}
               sx={{
-                borderRadius: 1.5,
-                bgcolor: viewMode === "card" ? "white" : "transparent",
-                color: viewMode === "card" ? "#2563eb" : "#94a3b8",
-                boxShadow:
-                  viewMode === "card" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-                "&:hover": { color: "#2563eb" },
-                transition: "all 0.2s ease",
+                width: 34,
+                height: 34,
+                p: 0,
+                color: viewMode === "card" ? "#111111" : "#b7b7b7",
+                "&:hover": {
+                  bgcolor: "transparent",
+                  color: "#111111",
+                },
               }}
             >
-              <GridViewOutlined fontSize="small" />
+              <GridViewOutlined sx={{ fontSize: 28 }} />
             </IconButton>
           </Tooltip>
         </Box>
