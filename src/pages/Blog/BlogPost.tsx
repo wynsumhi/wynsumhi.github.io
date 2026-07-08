@@ -13,7 +13,6 @@
  */
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Container,
   Typography,
   Box,
   Chip,
@@ -22,6 +21,8 @@ import {
   Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MarkdownRenderer from "@/components/blog/MarkdownRenderer";
+import { ROUTES } from "@/constants/routes";
 import { usePosts } from "@/hooks/usePosts";
 import { formatDate, getRelativeTime } from "@/utils/date";
 
@@ -35,18 +36,18 @@ const BlogPost = () => {
   // 로딩 상태
   if (loading) {
     return (
-      <Container maxWidth="md" sx={{ py: 8 }}>
+      <Box sx={{ maxWidth: 900, mx: "auto", py: 8 }}>
         <Typography>로딩 중...</Typography>
-      </Container>
+      </Box>
     );
   }
 
   // 에러 상태
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ py: 8 }}>
+      <Box sx={{ maxWidth: 900, mx: "auto", py: 8 }}>
         <Alert severity="error">{error}</Alert>
-      </Container>
+      </Box>
     );
   }
 
@@ -56,85 +57,138 @@ const BlogPost = () => {
   // 포스트를 찾지 못한 경우 (잘못된 ID이거나 삭제된 포스트)
   if (!post) {
     return (
-      <Container maxWidth="md" sx={{ py: 8 }}>
+      <Box sx={{ maxWidth: 900, mx: "auto", py: 8 }}>
         <Alert severity="warning">포스트를 찾을 수 없습니다.</Alert>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/")}
+          onClick={() => navigate(ROUTES.BLOG)}
           sx={{ mt: 2 }}
         >
           블로그 홈으로 돌아가기
         </Button>
-      </Container>
+      </Box>
     );
   }
 
+  // 유효한 날짜 정보
+  const hasDate = Boolean(post.date) && !Number.isNaN(new Date(post.date).getTime());
+
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
+    <Box sx={{ maxWidth: 900, mx: "auto", py: { xs: 1.5, md: 2.5 } }}>
       {/* 뒤로가기 버튼 */}
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/")}
-        sx={{ mb: 3 }}
+        onClick={() => navigate(ROUTES.BLOG)}
+        sx={{
+          mb: { xs: 2.4, md: 3 },
+          px: 0,
+          color: "#64748b",
+          fontWeight: 800,
+          fontSize: "0.86rem",
+          "&:hover": {
+            bgcolor: "transparent",
+            color: "#2563eb",
+          },
+        }}
       >
         목록으로
       </Button>
 
-      {/* 썸네일 이미지 - 있을 때만 표시 */}
-      {post.thumbnail && (
-        <Box
-          component="img"
-          src={post.thumbnail}
-          alt={post.title}
-          sx={{
-            width: "100%",
-            maxHeight: 400,
-            objectFit: "cover", // 이미지 비율 유지하면서 영역 채우기
-            borderRadius: 2,
-            mb: 4,
-          }}
-        />
-      )}
-
-      {/* 카테고리 칩 */}
-      <Chip
-        label={post.category}
-        color="primary"
-        sx={{ mb: 2, fontWeight: 600 }}
-      />
-
-      {/* 포스트 제목 */}
-      <Typography variant="h3" fontWeight={700} gutterBottom>
-        {post.title}
-      </Typography>
-
-      {/* 날짜 정보 (절대 날짜 + 상대 시간) */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {formatDate(post.date)} · {getRelativeTime(post.date)}
-      </Typography>
-
-      {/* 태그 목록 */}
-      <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 3 }}>
-        {post.tags.map((tag) => (
-          <Chip key={tag} label={tag} size="small" variant="outlined" />
-        ))}
-      </Box>
-
-      {/* 구분선 */}
-      <Divider sx={{ mb: 4 }} />
-
-      {/* 본문 내용 - 마크다운 텍스트를 줄바꿈 유지하며 표시 */}
       <Box
+        component="article"
         sx={{
-          "& p": { mb: 2, lineHeight: 1.8 },
-          whiteSpace: "pre-wrap", // 줄바꿈(\n)을 그대로 유지
-          wordBreak: "break-word", // 긴 단어가 있을 때 줄바꿈
-          typography: "body1", // MUI의 body1 타이포그래피 스타일 적용
+          color: "#334155",
         }}
       >
-        {post.content}
+        {/* 썸네일 이미지 */}
+        {post.thumbnail && (
+          <Box
+            component="img"
+            src={post.thumbnail}
+            alt={post.title}
+            sx={{
+              width: "100%",
+              maxHeight: 430,
+              objectFit: "cover",
+              borderRadius: 3,
+              display: "block",
+              mb: { xs: 3, md: 4 },
+            }}
+          />
+        )}
+
+        <Box>
+          {/* 포스트 헤더 */}
+          <Box sx={{ mb: { xs: 3.2, md: 4 } }}>
+            <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap", mb: 2 }}>
+              {post.category && (
+                <Chip
+                  label={post.category}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: "#eff4ff",
+                    color: "#2563eb",
+                    fontSize: "0.72rem",
+                    fontWeight: 800,
+                    borderRadius: 999,
+                  }}
+                />
+              )}
+              {post.tags.slice(0, 4).map((tag) => (
+                <Chip
+                  key={tag}
+                  label={tag}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: "#f8fafc",
+                    color: "#64748b",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    borderRadius: 999,
+                  }}
+                />
+              ))}
+            </Box>
+
+            {/* 포스트 제목 */}
+            <Typography
+              component="h1"
+              sx={{
+                color: "#0f172a",
+                fontSize: { xs: "1.9rem", md: "2.55rem" },
+                fontWeight: 880,
+                lineHeight: 1.22,
+                letterSpacing: 0,
+                mb: 1.4,
+              }}
+            >
+              {post.title || "제목 없음"}
+            </Typography>
+
+            {/* 날짜 정보 */}
+            {hasDate && (
+              <Typography
+                sx={{
+                  color: "#94a3b8",
+                  fontSize: "0.86rem",
+                  fontWeight: 700,
+                }}
+              >
+                {formatDate(post.date)} · {getRelativeTime(post.date)}
+              </Typography>
+            )}
+          </Box>
+
+          {/* 구분선 */}
+          <Divider sx={{ mb: { xs: 3.2, md: 4 }, borderColor: "#e2e8f0" }} />
+
+          {/* 마크다운 본문 */}
+          <MarkdownRenderer content={post.content ?? ""} />
+        </Box>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
