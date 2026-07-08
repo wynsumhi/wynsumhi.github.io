@@ -21,6 +21,18 @@ export interface Project {
     start: string; // 시작일 (예: "2026-02")
     end?: string; // 종료일 (없으면 "진행 중")
   };
+  detail?: {
+    subtitle?: string; // 프로젝트 한 줄 소개
+    problem?: string; // 문제 정의
+    solution?: string; // 해결 방안
+    results?: string[]; // 성과 및 결과
+    challenges?: string[]; // 기술적 도전
+    info?: {
+      duration?: string; // 개발 기간
+      team?: string; // 팀 규모
+      role?: string; // 담당 역할
+    };
+  };
 }
 
 /** 기술 스택 카테고리 타입 */

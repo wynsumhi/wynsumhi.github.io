@@ -9,10 +9,11 @@
  *
  * 라우트 구조:
  *   /           → /portfolio 이동
- *   /blog       → BlogHome (블로그 홈)
- *   /blog/:id   → BlogPost (블로그 포스트 상세)
- *   /archives   → ArchivePage (블로그 아카이브)
  *   /portfolio  → HomePage (포트폴리오)
+ *   /projects   → ProjectsPage (프로젝트 전체)
+ *   /blog       → BlogHome (블로그 홈)
+ *   /blog/:id   → BlogPost (블로그 글 상세)
+ *   /blog/archives → ArchivePage (블로그 아카이브)
  *   /*          → 404 페이지
  */
 import {
@@ -33,6 +34,7 @@ import BlogLayout from "@/components/layout/BlogLayout";
 
 // 페이지 컴포넌트
 import HomePage from "@/pages/Home/HomePage";
+import ProjectsPage from "@/pages/Projects/ProjectsPage";
 import BlogHome from "@/pages/Blog/BlogHome";
 import BlogPost from "@/pages/Blog/BlogPost";
 import ArchivePage from "@/pages/Blog/ArchivePage";
@@ -40,14 +42,14 @@ import ArchivePage from "@/pages/Blog/ArchivePage";
 const BlogRoutes = () => (
   <BlogLayout>
     <Routes>
+      {/* 블로그 아카이브 */}
+      <Route path="/blog/archives" element={<ArchivePage />} />
+
       {/* 블로그 홈 */}
       <Route path="/blog" element={<BlogHome />} />
 
       {/* 블로그 포스트 상세 */}
       <Route path="/blog/:id" element={<BlogPost />} />
-
-      {/* 블로그 아카이브 */}
-      <Route path="/archives" element={<ArchivePage />} />
 
       {/* 블로그 경로 404 */}
       <Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
@@ -67,6 +69,9 @@ const MainRoutes = () => (
       {/* 포트폴리오 홈 */}
       <Route path="/portfolio" element={<HomePage />} />
 
+      {/* 프로젝트 전체 */}
+      <Route path="/projects" element={<ProjectsPage />} />
+
       {/* 위 경로에 매칭되지 않는 모든 URL → 404 */}
       <Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
     </Routes>
@@ -76,7 +81,7 @@ const MainRoutes = () => (
 const AppRoutes = () => {
   const location = useLocation();
 
-  // 블로그 레이아웃 적용 경로
+  // 블로그 영역 레이아웃
   const isBlogLayout =
     location.pathname.startsWith(ROUTES.BLOG) ||
     location.pathname === ROUTES.ARCHIVES;
