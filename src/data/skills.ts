@@ -10,7 +10,7 @@ export const skills: Skill[] = [
     category: "Frontend",
     items: [
       { name: "HTML5", level: 4 },
-      { name: "CSS3/SCSS", level: 4 },
+      { name: "CSS3·SCSS", level: 4 },
       { name: "JavaScript(ES6+)", level: 4 },
       { name: "TypeScript", level: 3 },
       { name: "React", level: 3 },
