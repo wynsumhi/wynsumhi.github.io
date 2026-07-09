@@ -17,14 +17,133 @@ import {
   Box,
   Chip,
   Button,
+  Breadcrumbs,
   Divider,
   Alert,
+  Link as MuiLink,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import MarkdownRenderer from "@/components/blog/MarkdownRenderer";
+import GitHubComments from "@/components/blog/GitHubComments";
 import { ROUTES } from "@/constants/routes";
 import { usePosts } from "@/hooks/usePosts";
 import { formatDate, getRelativeTime } from "@/utils/date";
+import type { BlogSection, Post } from "@/types/blog";
+
+// 날짜 정렬 기준
+const getPostTime = (post: Post) => {
+  const time = new Date(post.date).getTime();
+  return Number.isNaN(time) ? 0 : time;
+};
+
+// 섹션 표시 이름
+const SECTION_LABELS: Record<BlogSection, string> = {
+  tech: "Tech",
+  study: "Study",
+  log: "Log",
+};
+
+// 이전 데이터 기본 섹션
+const getPostSection = (post: Post): BlogSection => post.section ?? "tech";
+
+// 이전/다음 글 카드
+const PostNavigationCard = ({
+  label,
+  post,
+  direction,
+  onClick,
+}: {
+  label: string;
+  post?: Post;
+  direction: "older" | "newer";
+  onClick: () => void;
+}) => {
+  const isOlder = direction === "older";
+
+  return (
+    <Box
+      component="button"
+      type="button"
+      disabled={!post}
+      onClick={onClick}
+      sx={{
+        width: "100%",
+        minHeight: { xs: 116, md: 132 },
+        px: { xs: 2.2, md: 3 },
+        py: { xs: 2.2, md: 2.7 },
+        border: "1px solid var(--blog-divider)",
+        borderRadius: 3,
+        bgcolor: "var(--blog-panel-bg)",
+        color: "var(--blog-text)",
+        cursor: post ? "pointer" : "default",
+        textAlign: isOlder ? "left" : "right",
+        opacity: post ? 1 : 0.42,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isOlder ? "flex-start" : "flex-end",
+        gap: 1.1,
+        position: "relative",
+        zIndex: 0,
+        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+        "&:hover": post
+          ? {
+              borderColor: "var(--blog-border)",
+              boxShadow: "0 18px 46px var(--blog-card-shadow)",
+              zIndex: 1,
+            }
+          : undefined,
+        "&:hover .post-nav-title": post
+          ? {
+              color: "var(--blog-accent)",
+            }
+          : undefined,
+      }}
+    >
+      <Typography
+        sx={{
+          color: "var(--blog-muted)",
+          fontSize: "0.7rem",
+          fontWeight: 820,
+          letterSpacing: "0.08em",
+          lineHeight: 1,
+        }}
+      >
+        {label}
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.7,
+          flexDirection: isOlder ? "row" : "row-reverse",
+        }}
+      >
+        {isOlder ? (
+          <KeyboardArrowLeftRoundedIcon sx={{ fontSize: 24, color: "var(--blog-muted)" }} />
+        ) : (
+          <KeyboardArrowRightRoundedIcon sx={{ fontSize: 24, color: "var(--blog-muted)" }} />
+        )}
+        <Typography
+          className="post-nav-title"
+          sx={{
+            color: "var(--blog-heading)",
+            fontSize: { xs: "0.98rem", md: "1.08rem" },
+            fontWeight: 780,
+            lineHeight: 1.45,
+            wordBreak: "keep-all",
+          }}
+        >
+          {post?.title ?? "이동할 글이 없습니다"}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 const BlogPost = () => {
   // useParams: URL의 동적 파라미터를 객체로 추출 (예: /blog/abc → { id: "abc" })
@@ -72,32 +191,93 @@ const BlogPost = () => {
 
   // 유효한 날짜 정보
   const hasDate = Boolean(post.date) && !Number.isNaN(new Date(post.date).getTime());
+  // 최신순 기준 이전/다음 글
+  const sortedPosts = [...posts].sort((a, b) => getPostTime(b) - getPostTime(a));
+  const currentPostIndex = sortedPosts.findIndex((sortedPost) => sortedPost.id === post.id);
+  const newerPost = currentPostIndex > 0 ? sortedPosts[currentPostIndex - 1] : undefined;
+  const olderPost =
+    currentPostIndex >= 0 && currentPostIndex < sortedPosts.length - 1
+      ? sortedPosts[currentPostIndex + 1]
+      : undefined;
+  const postSection = getPostSection(post);
 
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", py: { xs: 1.5, md: 2.5 } }}>
-      {/* 뒤로가기 버튼 */}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(ROUTES.BLOG)}
+      {/* 상세 위치 네비게이션 */}
+      <Box
         sx={{
-          mb: { xs: 2.4, md: 3 },
-          px: 0,
-          color: "#64748b",
-          fontWeight: 800,
-          fontSize: "0.86rem",
-          "&:hover": {
-            bgcolor: "transparent",
-            color: "#2563eb",
-          },
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: { xs: 2.8, md: 3.4 },
         }}
       >
-        목록으로
-      </Button>
+        <Breadcrumbs
+          separator="›"
+          sx={{
+            color: "var(--blog-muted)",
+            "& .MuiBreadcrumbs-separator": {
+              mx: 0.8,
+              color: "var(--blog-muted)",
+              fontWeight: 800,
+            },
+          }}
+        >
+          <MuiLink
+            component="button"
+            type="button"
+            aria-label="블로그 홈으로 이동"
+            underline="hover"
+            onClick={() => navigate(ROUTES.BLOG)}
+            sx={{
+              width: 28,
+              height: 28,
+              p: 0,
+              border: 0,
+              bgcolor: "transparent",
+              color: "var(--blog-muted)",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+              "&:hover": {
+                color: "var(--blog-accent)",
+              },
+            }}
+          >
+            {/* 홈 이동 아이콘 */}
+            <HomeRoundedIcon sx={{ fontSize: 22 }} />
+          </MuiLink>
+          <Typography
+            sx={{
+              color: "var(--blog-subtle)",
+              fontSize: "0.94rem",
+              fontWeight: 700,
+              lineHeight: 1.35,
+            }}
+          >
+            {SECTION_LABELS[postSection]}
+          </Typography>
+          {post.category && (
+            <Typography
+              sx={{
+                color: "var(--blog-muted)",
+                fontSize: "0.94rem",
+                fontWeight: 700,
+                lineHeight: 1.35,
+              }}
+            >
+              {post.category}
+            </Typography>
+          )}
+        </Breadcrumbs>
+      </Box>
 
       <Box
         component="article"
         sx={{
-          color: "#334155",
+          color: "var(--blog-text)",
         }}
       >
         {/* 썸네일 이미지 */}
@@ -120,48 +300,16 @@ const BlogPost = () => {
         <Box>
           {/* 포스트 헤더 */}
           <Box sx={{ mb: { xs: 3.2, md: 4 } }}>
-            <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap", mb: 2 }}>
-              {post.category && (
-                <Chip
-                  label={post.category}
-                  size="small"
-                  sx={{
-                    height: 24,
-                    bgcolor: "#eff4ff",
-                    color: "#2563eb",
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    borderRadius: 999,
-                  }}
-                />
-              )}
-              {post.tags.slice(0, 4).map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  size="small"
-                  sx={{
-                    height: 24,
-                    bgcolor: "#f8fafc",
-                    color: "#64748b",
-                    fontSize: "0.72rem",
-                    fontWeight: 700,
-                    borderRadius: 999,
-                  }}
-                />
-              ))}
-            </Box>
-
             {/* 포스트 제목 */}
             <Typography
               component="h1"
               sx={{
-                color: "#0f172a",
+                color: "var(--blog-heading)",
                 fontSize: { xs: "1.9rem", md: "2.55rem" },
                 fontWeight: 880,
                 lineHeight: 1.22,
                 letterSpacing: 0,
-                mb: 1.4,
+                mb: 1.5,
               }}
             >
               {post.title || "제목 없음"}
@@ -171,21 +319,101 @@ const BlogPost = () => {
             {hasDate && (
               <Typography
                 sx={{
-                  color: "#94a3b8",
+                  color: "var(--blog-muted)",
                   fontSize: "0.86rem",
                   fontWeight: 700,
-                }}
-              >
-                {formatDate(post.date)} · {getRelativeTime(post.date)}
-              </Typography>
+                  mb: 2.1,
+              }}
+            >
+              {formatDate(post.date)} · {getRelativeTime(post.date)}
+            </Typography>
             )}
           </Box>
 
           {/* 구분선 */}
-          <Divider sx={{ mb: { xs: 3.2, md: 4 }, borderColor: "#e2e8f0" }} />
+          <Divider sx={{ mb: { xs: 3.2, md: 4 }, borderColor: "var(--blog-divider)" }} />
 
           {/* 마크다운 본문 */}
           <MarkdownRenderer content={post.content ?? ""} />
+
+          {/* 하단 태그 목록 */}
+          {post.tags.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1.2,
+                mt: { xs: 5.5, md: 7 },
+                pt: { xs: 2.5, md: 3 },
+                borderTop: "1px solid var(--blog-divider)",
+              }}
+            >
+              <LocalOfferOutlinedIcon
+                sx={{
+                  mt: 0.25,
+                  fontSize: 22,
+                  color: "var(--blog-muted)",
+                }}
+              />
+              <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap" }}>
+                {post.tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    sx={{
+                      height: 26,
+                      bgcolor: "var(--blog-card-soft-bg)",
+                      color: "var(--blog-subtle)",
+                      border: "1px solid var(--blog-divider)",
+                      fontSize: "0.72rem",
+                      fontWeight: 720,
+                      borderRadius: 999,
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* 이전/다음 글 이동 */}
+          <Box
+            component="nav"
+            aria-label="이전 다음 글"
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: { xs: 1.4, md: 0 },
+              mt: { xs: 6.5, md: 8 },
+              borderRadius: 3,
+              overflow: "hidden",
+              "& > button:first-of-type": {
+                borderTopRightRadius: { md: 0 },
+                borderBottomRightRadius: { md: 0 },
+              },
+              "& > button:last-of-type": {
+                borderTopLeftRadius: { md: 0 },
+                borderBottomLeftRadius: { md: 0 },
+                ml: { md: "-1px" },
+              },
+            }}
+          >
+            <PostNavigationCard
+              label="OLDER"
+              post={olderPost}
+              direction="older"
+              onClick={() => olderPost && navigate(`/blog/${olderPost.id}`)}
+            />
+            <PostNavigationCard
+              label="NEWER"
+              post={newerPost}
+              direction="newer"
+              onClick={() => newerPost && navigate(`/blog/${newerPost.id}`)}
+            />
+          </Box>
+
+          {/* GitHub 댓글 */}
+          <GitHubComments />
         </Box>
       </Box>
     </Box>
