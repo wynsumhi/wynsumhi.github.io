@@ -12,6 +12,7 @@ export interface Post {
   title: string; // 포스트 제목
   content: string; // 마크다운 형식의 본문 내용
   date: string; // 작성일 (YYYY-MM-DD 형식)
+  section?: BlogSection; // 블로그 상위 섹션
   category: PostCategory; // 카테고리 분류
   tags: string[]; // 태그 목록 (예: ["React", "TypeScript"])
   excerpt?: string; // 본문 요약 (선택적 필드)
@@ -23,12 +24,13 @@ export interface Post {
  * 포스트 카테고리 타입
  * Notion 데이터베이스의 카테고리 select 필드와 매칭
  */
-export type PostCategory =
-  | "Frontend"
-  | "Backend"
-  | "DevOps"
-  | "Design"
-  | "etc";
+export type PostCategory = string;
+
+/**
+ * 블로그 상위 섹션 타입
+ * Notion 데이터베이스 단위와 매칭
+ */
+export type BlogSection = "tech" | "study" | "log";
 
 /**
  * 포스트 미리보기 타입
