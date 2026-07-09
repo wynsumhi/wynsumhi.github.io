@@ -37,10 +37,10 @@ const renderInline = (text: string): ReactNode[] => {
           sx={{
             px: 0.55,
             py: 0.18,
-            bgcolor: "#eff6ff",
-            border: "1px solid #dbeafe",
+            bgcolor: "var(--blog-code-inline-bg)",
+            border: "1px solid var(--blog-code-inline-border)",
             borderRadius: "5px",
-            color: "#1d4ed8",
+            color: "var(--blog-code-inline-text)",
             fontFamily:
               "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
             fontSize: "0.88em",
@@ -51,7 +51,7 @@ const renderInline = (text: string): ReactNode[] => {
       );
     } else if (value.startsWith("**")) {
       nodes.push(
-        <Box component="strong" key={`${value}-${match.index}`} sx={{ color: "#0f172a" }}>
+        <Box component="strong" key={`${value}-${match.index}`} sx={{ color: "var(--blog-strong)" }}>
           {value.slice(2, -2)}
         </Box>,
       );
@@ -87,7 +87,7 @@ const renderInline = (text: string): ReactNode[] => {
             target="_blank"
             rel="noopener noreferrer"
             underline="hover"
-            sx={{ color: "#2563eb", fontWeight: 700 }}
+            sx={{ color: "var(--blog-link)", fontWeight: 700 }}
           >
             {linkMatch[1]}
           </Link>,
@@ -166,15 +166,15 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
             my: 3,
             p: { xs: 2, md: 2.4 },
             overflowX: "auto",
-            bgcolor: "#0f172a",
+            bgcolor: "var(--blog-code-block-bg)",
             borderRadius: 2,
-            color: "#e2e8f0",
+            color: "var(--blog-code-block-text)",
             fontSize: "0.9rem",
             lineHeight: 1.75,
           }}
         >
           {language && (
-            <Box component="span" sx={{ display: "block", mb: 1, color: "#93c5fd" }}>
+            <Box component="span" sx={{ display: "block", mb: 1, color: "var(--blog-code-block-label)" }}>
               {language}
             </Box>
           )}
@@ -201,9 +201,9 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
                     key={header}
                     sx={{
                       p: 1.4,
-                      bgcolor: "#eff6ff",
-                      border: "1px solid #dbeafe",
-                      color: "#1e3a8a",
+                      bgcolor: "var(--blog-table-header-bg)",
+                      border: "1px solid var(--blog-table-border)",
+                      color: "var(--blog-heading)",
                       textAlign: "left",
                       fontWeight: 800,
                     }}
@@ -222,8 +222,8 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
                       key={`${cell}-${cellIndex}`}
                       sx={{
                         p: 1.4,
-                        border: "1px solid #e2e8f0",
-                        color: "#475569",
+                        border: "1px solid var(--blog-table-border)",
+                        color: "var(--blog-subtle)",
                         lineHeight: 1.65,
                       }}
                     >
@@ -281,7 +281,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
           sx={{
             mt: level <= 2 ? 4.4 : 3.2,
             mb: 1.4,
-            color: "#0f172a",
+            color: "var(--blog-heading)",
             fontSize,
             fontWeight: 860,
             lineHeight: 1.35,
@@ -311,9 +311,9 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
             my: 3,
             pl: 2.2,
             py: 1,
-            borderLeft: "3px solid #93c5fd",
-            color: "#475569",
-            bgcolor: "#f8fbff",
+            borderLeft: "3px solid var(--blog-quote-border)",
+            color: "var(--blog-quote-text)",
+            bgcolor: "var(--blog-quote-bg)",
             borderRadius: "0 10px 10px 0",
             lineHeight: 1.8,
           }}
@@ -348,7 +348,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
           sx={{
             my: 2,
             pl: 3,
-            color: "#334155",
+            color: "var(--blog-text)",
             "& li": {
               mb: 0.8,
               lineHeight: 1.8,
@@ -370,7 +370,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
       blocks.push(
         <Box
           key={`divider-${index}`}
-          sx={{ my: 4, borderTop: "1px solid #e2e8f0" }}
+          sx={{ my: 4, borderTop: "1px solid var(--blog-divider)" }}
         />,
       );
       index += 1;
@@ -399,7 +399,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
         key={`paragraph-${index}`}
         sx={{
           mb: 2,
-          color: "#334155",
+          color: "var(--blog-text)",
           fontSize: "0.98rem",
           lineHeight: 1.9,
           wordBreak: "break-word",

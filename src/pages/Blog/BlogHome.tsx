@@ -22,13 +22,14 @@ import {
 } from "@mui/material";
 import {
   CloseRounded,
+  SearchOffRounded,
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { getRelativeTime } from "@/utils/date";
 import { extractExcerpt } from "@/utils/markdown";
-import type { Post } from "@/types/blog";
+import type { BlogSection as PostSection, Post } from "@/types/blog";
 
 // 날짜 표시에 사용하는 월 이름 약자 배열
 // 인덱스 0 = 1월(Jan), 11 = 12월(Dec)
@@ -57,13 +58,16 @@ const TIMELINE_COLUMNS = {
 // 타임라인 컬럼 간격
 const TIMELINE_GAP = { xs: 1.05, md: 1.35 };
 
+// 타임라인 첫 줄 정렬 높이
+const TIMELINE_HEADER_HEIGHT = { xs: 32, md: 36 };
+
 // 연도와 타임라인 영역 분리 폭
 const YEAR_GROUP_COLUMNS = {
   xs: "42px minmax(0, 1fr)",
   md: "58px minmax(0, 1fr)",
 };
 
-type BlogSection = "all" | "tech" | "study" | "log";
+type BlogSection = "all" | PostSection;
 
 // 섹션 이름
 const SECTION_LABELS: Record<BlogSection, string> = {
@@ -73,28 +77,6 @@ const SECTION_LABELS: Record<BlogSection, string> = {
   log: "Log",
 };
 
-// 학습 기록 판별 키워드
-const STUDY_KEYWORDS = [
-  "daily content",
-  "coach session",
-  "study",
-  "learning",
-  "수업",
-  "학습",
-];
-
-// 기록 글 판별 키워드
-const LOG_KEYWORDS = [
-  "log",
-  "retrospect",
-  "retrospective",
-  "essay",
-  "회고",
-  "작업 방식",
-  "작업방식",
-  "생각 정리",
-];
-
 // URL 섹션 값 변환
 const getBlogSection = (section: string | null): BlogSection => {
   if (section === "tech" || section === "study" || section === "log") return section;
@@ -102,14 +84,7 @@ const getBlogSection = (section: string | null): BlogSection => {
 };
 
 // 글 섹션 분류
-const getPostSection = (post: Post): BlogSection => {
-  const searchableText = `${post.category} ${post.tags.join(" ")} ${post.title}`.toLowerCase();
-  const isLogPost = LOG_KEYWORDS.some((keyword) => searchableText.includes(keyword));
-  const isStudyPost = STUDY_KEYWORDS.some((keyword) => searchableText.includes(keyword));
-
-  if (isLogPost) return "log";
-  return isStudyPost ? "study" : "tech";
-};
+const getPostSection = (post: Post): PostSection => post.section ?? "tech";
 
 // 카드 보기 아이콘
 const GridViewIcon = ({ active }: { active: boolean }) => (
@@ -131,7 +106,7 @@ const GridViewIcon = ({ active }: { active: boolean }) => (
         sx={{
           width: 6,
           height: 6,
-          bgcolor: active ? "#2563eb" : "#b7b7b7",
+          bgcolor: active ? "var(--blog-accent)" : "var(--blog-icon-muted)",
         }}
       />
     ))}
@@ -156,7 +131,7 @@ const ListViewIcon = ({ active }: { active: boolean }) => (
         sx={{
           width: 22,
           height: 3,
-          bgcolor: active ? "#2563eb" : "#b7b7b7",
+          bgcolor: active ? "var(--blog-accent)" : "var(--blog-icon-muted)",
         }}
       />
     ))}
@@ -194,14 +169,17 @@ const ListView = ({ posts }: { posts: Post[] }) => {
               position: "sticky",
               top: { xs: 16, md: 24 },
               zIndex: 2,
-              pt: 0.95,
+              height: TIMELINE_HEADER_HEIGHT,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
               pointerEvents: "none",
             }}
           >
             <Typography
               sx={{
                 textAlign: "right",
-                color: "#475569",
+                color: "var(--blog-subtle)",
                 fontSize: { xs: "0.82rem", md: "0.92rem" },
                 fontWeight: 760,
                 lineHeight: 1,
@@ -230,22 +208,30 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                     gap: TIMELINE_GAP,
                     minHeight: { xs: 136, md: 148 },
                     cursor: "pointer",
-                    "&:hover .post-title": { color: "#2563eb" },
+                    "&:hover .post-title": { color: "var(--blog-accent)" },
                     "&:hover .post-content": {
-                      bgcolor: "#ffffff",
-                      boxShadow: "0 18px 46px rgba(37, 99, 235, 0.08)",
-                      borderColor: "#dbeafe",
+                      bgcolor: "var(--blog-card-bg)",
+                      boxShadow: "0 18px 46px var(--blog-card-shadow)",
+                      borderColor: "var(--blog-border)",
                     },
                   }}
                 >
                   {/* 날짜 */}
-                  <Box sx={{ pt: 0.7, textAlign: "right" }}>
+                  <Box
+                    sx={{
+                      height: TIMELINE_HEADER_HEIGHT,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      textAlign: "right",
+                    }}
+                  >
                     <Typography
                       sx={{
-                        color: "#64748b",
+                        color: "var(--blog-subtle)",
                         fontSize: { xs: "0.88rem", md: "1.02rem" },
                         fontWeight: 700,
-                        lineHeight: 1.45,
+                        lineHeight: 1,
                         fontVariantNumeric: "tabular-nums",
                       }}
                     >
@@ -259,26 +245,30 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                     position: "relative",
                     display: "flex",
                     justifyContent: "center",
-                    pt: 1.35,
                     "&::before": {
                       content: '""',
                       position: "absolute",
-                      top: idx === 0 ? 11 : 0,
+                      left: "50%",
+                      top: idx === 0 ? { xs: "16px", md: "18px" } : 0,
                       bottom: idx === yearPosts.length - 1 ? 34 : 0,
                       width: 2,
-                      bgcolor: "#e2e8f0",
+                      bgcolor: "var(--blog-timeline-line)",
+                      transform: "translateX(-50%)",
                     },
                   }}
                 >
                   <Box
                     sx={{
-                      position: "relative",
+                      position: "absolute",
+                      top: { xs: "10.5px", md: "12.5px" },
+                      left: "50%",
+                      transform: "translateX(-50%)",
                       zIndex: 1,
                       width: 11,
                       height: 11,
                       borderRadius: "50%",
-                      bgcolor: "#cbd5e1",
-                      border: "2px solid #e2e8f0",
+                      bgcolor: "var(--blog-timeline-dot)",
+                      border: "2px solid var(--blog-timeline-line)",
                     }}
                   />
                 </Box>
@@ -287,9 +277,12 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                 <Box
                   className="post-content"
                   sx={{
+                    mt: { xs: -0.9, md: -1.05 },
+                    mx: { xs: -0.6, md: -0.8 },
                     mb: 2.4,
-                    px: { xs: 1.8, md: 2.8 },
-                    py: { xs: 1.35, md: 1.7 },
+                    px: { xs: 2.4, md: 3.6 },
+                    pt: { xs: 0.9, md: 1.05 },
+                    pb: { xs: 1.65, md: 2.05 },
                     border: "1px solid transparent",
                     borderRadius: 2.4,
                     transition: "background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
@@ -299,8 +292,9 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                   <Box
                     sx={{
                       display: "flex",
-                      alignItems: "baseline",
+                      alignItems: "center",
                       gap: 1.5,
+                      minHeight: TIMELINE_HEADER_HEIGHT,
                       mb: 1.2,
                       minWidth: 0,
                     }}
@@ -308,10 +302,10 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                     <Typography
                       className="post-title"
                       sx={{
-                        color: "#0f172a",
+                        color: "var(--blog-heading)",
                         fontSize: { xs: "1.08rem", md: "1.3rem" },
                         fontWeight: 850,
-                        lineHeight: 1.35,
+                        lineHeight: 1.08,
                         transition: "color 0.2s",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -322,9 +316,10 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                     <Typography
                       sx={{
                         flexShrink: 0,
-                        color: "#94a3b8",
+                        color: "var(--blog-muted)",
                         fontSize: "0.82rem",
                         fontWeight: 800,
+                        lineHeight: 1,
                       }}
                     >
                       {getRelativeTime(post.date)}
@@ -334,7 +329,7 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                   <Typography
                     sx={{
                       maxWidth: 860,
-                      color: "#64748b",
+                      color: "var(--blog-subtle)",
                       fontSize: "0.92rem",
                       lineHeight: 1.75,
                       mb: 1.3,
@@ -353,8 +348,8 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                       size="small"
                       sx={{
                         height: 22,
-                        bgcolor: "#eff4ff",
-                        color: "#2563eb",
+                        bgcolor: "var(--blog-chip-bg)",
+                        color: "var(--blog-chip-text)",
                         fontSize: "0.7rem",
                         fontWeight: 800,
                       }}
@@ -367,8 +362,8 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                         variant="outlined"
                         sx={{
                           height: 22,
-                          color: "#64748b",
-                          borderColor: "#dbeafe",
+                          color: "var(--blog-subtle)",
+                          borderColor: "var(--blog-border)",
                           fontSize: "0.68rem",
                           fontWeight: 700,
                         }}
@@ -404,14 +399,14 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               flexDirection: "column",
               cursor: "pointer",
               p: { xs: 2.1, md: 2.4 },
-              bgcolor: "#ffffff",
-              boxShadow: "0 18px 50px rgba(15, 23, 42, 0.06)",
+              bgcolor: "var(--blog-card-bg)",
+              boxShadow: "0 18px 50px var(--blog-card-shadow)",
               borderRadius: 3.5,
               transition: "transform 0.25s ease, box-shadow 0.25s ease",
               "&:hover": {
                 transform: "translateY(-5px)",
-                boxShadow: "0 24px 64px rgba(37, 99, 235, 0.13)",
-                "& .card-title": { color: "#2563eb" },
+                boxShadow: "0 24px 64px var(--blog-card-hover-shadow)",
+                "& .card-title": { color: "var(--blog-accent)" },
                 "& .card-thumbnail": {
                   transform: "scale(1.03)",
                 },
@@ -426,7 +421,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   overflow: "hidden",
                   borderRadius: 2.4,
                   aspectRatio: "16 / 9",
-                  bgcolor: "#f1f5f9",
+                  bgcolor: "var(--blog-card-soft-bg)",
                 }}
               >
                 <CardMedia
@@ -468,15 +463,15 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     height: 23,
                     fontSize: "0.7rem",
                     fontWeight: 800,
-                    bgcolor: "#eff4ff",
-                    color: "#2563eb",
+                    bgcolor: "var(--blog-chip-bg)",
+                    color: "var(--blog-chip-text)",
                     borderRadius: 999,
                   }}
                 />
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "#94a3b8",
+                    color: "var(--blog-muted)",
                     fontSize: "0.74rem",
                     fontWeight: 800,
                     ml: "auto",
@@ -492,7 +487,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                 sx={{
                   fontSize: { xs: "1.05rem", md: "1.12rem" },
                   fontWeight: 850,
-                  color: "#0f172a",
+                  color: "var(--blog-heading)",
                   lineHeight: 1.45,
                   mb: 1.2,
                   transition: "color 0.2s",
@@ -510,7 +505,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                 variant="body2"
                 sx={{
                   fontSize: "0.86rem",
-                  color: "#64748b",
+                  color: "var(--blog-subtle)",
                   lineHeight: 1.72,
                   flexGrow: 1,
                   overflow: "hidden",
@@ -533,8 +528,8 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     sx={{
                       height: 22,
                       fontSize: "0.7rem",
-                      bgcolor: "#f8fafc",
-                      color: "#64748b",
+                      bgcolor: "var(--blog-card-soft-bg)",
+                      color: "var(--blog-subtle)",
                       fontWeight: 700,
                       borderRadius: 999,
                     }}
@@ -547,8 +542,8 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     sx={{
                       height: 22,
                       fontSize: "0.7rem",
-                      bgcolor: "#f1f5f9",
-                      color: "#94a3b8",
+                      bgcolor: "var(--blog-card-soft-bg)",
+                      color: "var(--blog-muted)",
                       fontWeight: 800,
                       borderRadius: 999,
                     }}
@@ -587,31 +582,36 @@ const BlogHome = () => {
     setIsSearchOpen(false);
   }, [activeSection]);
 
+  // 현재 섹션 글 목록
+  const sectionPosts = useMemo(() => {
+    if (activeSection === "all") return posts;
+    return posts.filter((post) => getPostSection(post) === activeSection);
+  }, [posts, activeSection]);
+
   // 카테고리 필터 목록
   const categories = useMemo(() => {
     return [
       "All",
-      ...Array.from(new Set(posts.map((post) => post.category).filter(Boolean))),
+      ...Array.from(new Set(sectionPosts.map((post) => post.category).filter(Boolean))),
     ];
-  }, [posts]);
+  }, [sectionPosts]);
 
   // 태그 필터 목록
   const tags = useMemo(() => {
-    return ["All", ...Array.from(new Set(posts.flatMap((post) => post.tags))).sort()];
-  }, [posts]);
+    return ["All", ...Array.from(new Set(sectionPosts.flatMap((post) => post.tags))).sort()];
+  }, [sectionPosts]);
 
   // 화면 표시 포스트
   const filteredPosts = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
 
-    return [...posts]
+    return [...sectionPosts]
       .filter((post) => {
-        const matchesSection =
-          activeSection === "all" || getPostSection(post) === activeSection;
         const matchesCategory =
           selectedCategory === "All" || post.category === selectedCategory;
         const matchesTag = selectedTag === "All" || post.tags.includes(selectedTag);
         const searchableText = [
+          SECTION_LABELS[getPostSection(post)],
           post.title,
           post.excerpt,
           post.content,
@@ -623,10 +623,10 @@ const BlogHome = () => {
           .toLowerCase();
         const matchesKeyword = keyword.length === 0 || searchableText.includes(keyword);
 
-        return matchesSection && matchesCategory && matchesTag && matchesKeyword;
+        return matchesCategory && matchesTag && matchesKeyword;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [posts, activeSection, searchKeyword, selectedCategory, selectedTag]);
+  }, [sectionPosts, searchKeyword, selectedCategory, selectedTag]);
 
   // 보기 방식 저장
   const handleViewChange = (mode: "list" | "card") => {
@@ -691,7 +691,7 @@ const BlogHome = () => {
         sx={{
           pb: 2.2,
           mb: 4,
-          borderBottom: "1px solid #e2e8f0",
+          borderBottom: "1px solid var(--blog-divider)",
         }}
       >
         <Box
@@ -718,11 +718,11 @@ const BlogHome = () => {
                   width: 30,
                   height: 30,
                   p: 0,
-                  color: isSearchOpen || hasActiveCondition ? "#2563eb" : "#94a3b8",
-                  bgcolor: isSearchOpen || hasActiveCondition ? "#eff4ff" : "transparent",
+                  color: isSearchOpen || hasActiveCondition ? "var(--blog-accent)" : "var(--blog-muted)",
+                  bgcolor: isSearchOpen || hasActiveCondition ? "var(--blog-chip-bg)" : "transparent",
                   "&:hover": {
-                    bgcolor: "#eff4ff",
-                    color: "#2563eb",
+                    bgcolor: "var(--blog-chip-bg)",
+                    color: "var(--blog-accent)",
                   },
                 }}
               >
@@ -733,7 +733,7 @@ const BlogHome = () => {
             <Typography
               component="p"
               sx={{
-                color: "#334155",
+                color: "var(--blog-text)",
                 fontSize: { xs: "0.98rem", md: "1.08rem" },
                 fontWeight: 760,
                 lineHeight: 1.25,
@@ -762,10 +762,10 @@ const BlogHome = () => {
                   width: 30,
                   height: 30,
                   p: 0,
-                  color: viewMode === "list" ? "#2563eb" : "#b7b7b7",
+                  color: viewMode === "list" ? "var(--blog-accent)" : "var(--blog-icon-muted)",
                   "&:hover": {
                     bgcolor: "transparent",
-                    color: "#2563eb",
+                    color: "var(--blog-accent)",
                   },
                 }}
               >
@@ -780,10 +780,10 @@ const BlogHome = () => {
                   width: 30,
                   height: 30,
                   p: 0,
-                  color: viewMode === "card" ? "#2563eb" : "#b7b7b7",
+                  color: viewMode === "card" ? "var(--blog-accent)" : "var(--blog-icon-muted)",
                   "&:hover": {
                     bgcolor: "transparent",
-                    color: "#2563eb",
+                    color: "var(--blog-accent)",
                   },
                 }}
               >
@@ -799,10 +799,10 @@ const BlogHome = () => {
             sx={{
               mt: 1.8,
               p: { xs: 1.8, md: 2.2 },
-              bgcolor: "rgba(255, 255, 255, 0.82)",
-              border: "1px solid #dbeafe",
+              bgcolor: "var(--blog-search-bg)",
+              border: "1px solid var(--blog-border)",
               borderRadius: 2.5,
-              boxShadow: "0 18px 48px rgba(37, 99, 235, 0.07)",
+              boxShadow: "0 18px 48px var(--blog-card-shadow)",
             }}
           >
             <Box
@@ -824,7 +824,7 @@ const BlogHome = () => {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchOutlined sx={{ color: "#94a3b8", fontSize: 19 }} />
+                        <SearchOutlined sx={{ color: "var(--blog-muted)", fontSize: 19 }} />
                       </InputAdornment>
                     ),
                     endAdornment: hasActiveSearch ? (
@@ -834,7 +834,7 @@ const BlogHome = () => {
                           onClick={() => setSearchKeyword("")}
                           edge="end"
                           size="small"
-                          sx={{ color: "#94a3b8" }}
+                          sx={{ color: "var(--blog-muted)" }}
                         >
                           <CloseRounded fontSize="small" />
                         </IconButton>
@@ -845,18 +845,18 @@ const BlogHome = () => {
                 sx={{
                   maxWidth: { md: 380 },
                   "& .MuiOutlinedInput-root": {
-                    bgcolor: "#fff",
+                    bgcolor: "var(--blog-card-bg)",
                     borderRadius: 999,
                     fontWeight: 700,
                     pr: hasActiveSearch ? 0.6 : 1.6,
                     "& fieldset": {
-                      borderColor: "#dbeafe",
+                      borderColor: "var(--blog-border)",
                     },
                     "&:hover fieldset": {
-                      borderColor: "#93c5fd",
+                      borderColor: "var(--blog-accent)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#2563eb",
+                      borderColor: "var(--blog-accent)",
                       borderWidth: 1,
                     },
                   },
@@ -870,9 +870,9 @@ const BlogHome = () => {
                   onClick={resetFilters}
                   size="small"
                   sx={{
-                    bgcolor: "#f8fafc",
-                    color: "#64748b",
-                    border: "1px solid #e2e8f0",
+                    bgcolor: "var(--blog-card-soft-bg)",
+                    color: "var(--blog-subtle)",
+                    border: "1px solid var(--blog-divider)",
                     fontWeight: 800,
                   }}
                 />
@@ -881,7 +881,7 @@ const BlogHome = () => {
 
             {/* 카테고리 필터 */}
             <Box sx={{ mb: 2 }}>
-              <Typography sx={{ mb: 1, color: "#94a3b8", fontSize: "0.72rem", fontWeight: 900 }}>
+              <Typography sx={{ mb: 1, color: "var(--blog-muted)", fontSize: "0.72rem", fontWeight: 900 }}>
                 CATEGORY
               </Typography>
               <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap" }}>
@@ -892,12 +892,12 @@ const BlogHome = () => {
                     clickable
                     onClick={() => setSelectedCategory(category)}
                     sx={{
-                      bgcolor: selectedCategory === category ? "#2563eb" : "#fff",
-                      color: selectedCategory === category ? "#fff" : "#64748b",
-                      border: "1px solid #dbeafe",
+                      bgcolor: selectedCategory === category ? "var(--blog-filter-active-bg)" : "var(--blog-card-bg)",
+                      color: selectedCategory === category ? "var(--blog-filter-active-text)" : "var(--blog-subtle)",
+                      border: "1px solid var(--blog-border)",
                       fontWeight: 800,
                       "&:hover": {
-                        bgcolor: selectedCategory === category ? "#1d4ed8" : "#eff6ff",
+                        bgcolor: selectedCategory === category ? "var(--blog-filter-hover-active-bg)" : "var(--blog-filter-hover-bg)",
                       },
                     }}
                   />
@@ -907,7 +907,7 @@ const BlogHome = () => {
 
             {/* 태그 필터 */}
             <Box>
-              <Typography sx={{ mb: 1, color: "#94a3b8", fontSize: "0.72rem", fontWeight: 900 }}>
+              <Typography sx={{ mb: 1, color: "var(--blog-muted)", fontSize: "0.72rem", fontWeight: 900 }}>
                 TAG
               </Typography>
               <Box sx={{ display: "flex", gap: 0.7, flexWrap: "wrap" }}>
@@ -920,14 +920,14 @@ const BlogHome = () => {
                     onClick={() => setSelectedTag(tag)}
                     sx={{
                       height: 26,
-                      bgcolor: selectedTag === tag ? "#eff4ff" : "transparent",
-                      color: selectedTag === tag ? "#2563eb" : "#64748b",
-                      borderColor: selectedTag === tag ? "#93c5fd" : "#dbeafe",
+                      bgcolor: selectedTag === tag ? "var(--blog-chip-bg)" : "transparent",
+                      color: selectedTag === tag ? "var(--blog-chip-text)" : "var(--blog-subtle)",
+                      borderColor: selectedTag === tag ? "var(--blog-accent)" : "var(--blog-border)",
                       fontSize: "0.72rem",
                       fontWeight: 700,
                       "&:hover": {
-                        borderColor: "#93c5fd",
-                        bgcolor: "#eff4ff",
+                        borderColor: "var(--blog-accent)",
+                        bgcolor: "var(--blog-chip-bg)",
                       },
                     }}
                   />
@@ -940,7 +940,79 @@ const BlogHome = () => {
 
       {/* 포스트 목록 */}
       {filteredPosts.length === 0 ? (
-        <Alert severity="info">조건에 맞는 글이 없습니다.</Alert>
+        <Box
+          sx={{
+            mt: { xs: 3, md: 4 },
+            px: { xs: 2.4, md: 3 },
+            py: { xs: 3.2, md: 4 },
+            borderRadius: 3,
+            bgcolor: "var(--blog-card-bg)",
+            border: "1px solid var(--blog-border)",
+            boxShadow: "0 18px 46px var(--blog-card-shadow)",
+            display: "flex",
+            alignItems: { xs: "flex-start", sm: "center" },
+            gap: 1.6,
+          }}
+        >
+          {/* 빈 결과 아이콘 */}
+          <Box
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              bgcolor: "var(--blog-chip-bg)",
+              color: "var(--blog-accent)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <SearchOffRounded sx={{ fontSize: 21 }} />
+          </Box>
+
+          {/* 빈 결과 안내 */}
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              sx={{
+                color: "var(--blog-heading)",
+                fontSize: { xs: "0.98rem", md: "1.06rem" },
+                fontWeight: 820,
+                lineHeight: 1.35,
+                mb: 0.45,
+              }}
+            >
+              조건에 맞는 글이 없어요
+            </Typography>
+            <Typography
+              sx={{
+                color: "var(--blog-subtle)",
+                fontSize: "0.86rem",
+                lineHeight: 1.65,
+              }}
+            >
+              검색어를 줄이거나 카테고리와 태그 조건을 다시 조정해보세요
+            </Typography>
+          </Box>
+
+          {hasActiveCondition && (
+            <Chip
+              clickable
+              label="조건 초기화"
+              onClick={resetFilters}
+              sx={{
+                display: { xs: "none", sm: "inline-flex" },
+                bgcolor: "var(--blog-chip-bg)",
+                color: "var(--blog-chip-text)",
+                border: "1px solid var(--blog-border)",
+                fontWeight: 800,
+                "&:hover": {
+                  bgcolor: "var(--blog-filter-hover-bg)",
+                },
+              }}
+            />
+          )}
+        </Box>
       ) : viewMode === "list" ? (
         <ListView posts={filteredPosts} />
       ) : (

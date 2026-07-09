@@ -3,7 +3,7 @@
  *
  * 블로그 화면에서 프로필, 메뉴, 외부 링크를 보여주는 왼쪽 고정 영역입니다
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -17,26 +17,30 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  ArticleOutlined,
-  AutoStoriesOutlined,
   CodeOutlined,
   Download,
-  EditNoteOutlined,
   EmailOutlined,
   GitHub,
+  HistoryRounded,
+  HomeRounded,
   LinkedIn,
+  MenuBookRounded,
   OpenInNew,
   PersonOutline,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CONFIG } from "@/constants/config";
 import { ROUTES } from "@/constants/routes";
+import { usePosts } from "@/hooks/usePosts";
+import type { BlogSection } from "@/types/blog";
+
+type SidebarSection = "all" | BlogSection;
 
 // 블로그 사이드 메뉴 목록
 const navItems = [
   {
     label: "ALL POST",
-    icon: <ArticleOutlined fontSize="small" />,
+    icon: <HomeRounded fontSize="small" />,
     path: ROUTES.BLOG,
     section: "all",
   },
@@ -48,13 +52,13 @@ const navItems = [
   },
   {
     label: "STUDY",
-    icon: <AutoStoriesOutlined fontSize="small" />,
+    icon: <MenuBookRounded fontSize="small" />,
     path: `${ROUTES.BLOG}?section=study`,
     section: "study",
   },
   {
     label: "LOG",
-    icon: <EditNoteOutlined fontSize="small" />,
+    icon: <HistoryRounded fontSize="small" />,
     path: `${ROUTES.BLOG}?section=log`,
     section: "log",
   },
@@ -70,11 +74,35 @@ const AVATAR_IMAGES = {
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentSection = new URLSearchParams(location.search).get("section") ?? "all";
+  const { posts } = usePosts();
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("blogTheme") === "dark",
   );
-  const [isAvatarHover, setIsAvatarHover] = useState(false);
+
+  // 목록 URL 섹션 값
+  const currentSection: SidebarSection = (() => {
+    const section = new URLSearchParams(location.search).get("section");
+    if (section === "tech" || section === "study" || section === "log") return section;
+    return "all";
+  })();
+
+  // 상세 페이지 여부
+  const isBlogDetailPath =
+    location.pathname.startsWith(`${ROUTES.BLOG}/`) &&
+    location.pathname !== ROUTES.ARCHIVES;
+
+  // 상세 페이지 글 ID
+  const currentPostId = isBlogDetailPath
+    ? decodeURIComponent(location.pathname.replace(`${ROUTES.BLOG}/`, ""))
+    : null;
+
+  // 상세 페이지 활성 섹션
+  const currentPostSection = useMemo<BlogSection | null>(() => {
+    if (!currentPostId) return null;
+
+    const currentPost = posts.find((post) => post.id === currentPostId);
+    return currentPost ? currentPost.section ?? "tech" : null;
+  }, [posts, currentPostId]);
 
   // 다크모드 상태 반영
   useEffect(() => {
@@ -91,25 +119,91 @@ const Sidebar = () => {
   }, [isDarkMode]);
 
   // 프로필 이미지 상태
-  const avatarSrc = isDarkMode
-    ? AVATAR_IMAGES.dark
-    : isAvatarHover
-      ? AVATAR_IMAGES.hover
-      : AVATAR_IMAGES.default;
+  const avatarSrc = isDarkMode ? AVATAR_IMAGES.dark : AVATAR_IMAGES.default;
 
   // 현재 메뉴 활성 상태 확인
   const isActivePath = (section: string) => {
+    // 상세 글의 섹션 활성 상태
+    if (isBlogDetailPath) {
+      return currentPostSection === section;
+    }
+
     // 전체 글 활성 상태
     if (section === "all") {
-      return (
-        (location.pathname === ROUTES.BLOG && currentSection === "all") ||
-        (location.pathname.startsWith(`${ROUTES.BLOG}/`) &&
-          !location.pathname.startsWith(ROUTES.ARCHIVES))
-      );
+      return location.pathname === ROUTES.BLOG && currentSection === "all";
     }
 
     // 섹션 메뉴 활성 상태
     return location.pathname === ROUTES.BLOG && currentSection === section;
+  };
+
+  // 사이드 메뉴 버튼
+  const renderNavButton = (
+    item: (typeof navItems)[number],
+    variant: "parent" | "child" = "parent",
+  ) => {
+    const isActive = isActivePath(item.section);
+    const isChild = variant === "child";
+
+    return (
+      <ListItemButton
+        key={item.label}
+        onClick={() => navigate(item.path)}
+        sx={{
+          borderRadius: isChild ? 1.7 : 2,
+          mb: isChild ? 0.35 : 0.5,
+          py: isChild ? 0.95 : 1.2,
+          px: isChild ? 1.35 : 2,
+          minHeight: isChild ? 40 : 44,
+          position: "relative",
+          bgcolor: isActive ? "var(--blog-active-bg)" : "transparent",
+          "&::before": isActive
+            ? {
+                content: '""',
+                position: "absolute",
+                left: isChild ? -13 : 0,
+                top: isChild ? "50%" : "20%",
+                width: isChild ? 7 : 3,
+                height: isChild ? 7 : "60%",
+                bgcolor: "var(--blog-accent)",
+                borderRadius: isChild ? "50%" : "0 2px 2px 0",
+                transform: isChild ? "translate(-50%, -50%)" : "none",
+              }
+            : {},
+          "&:hover": {
+            bgcolor: isActive ? "var(--blog-active-bg)" : "var(--blog-hover-bg)",
+            "& .nav-label": { color: "var(--blog-accent)" },
+            "& .nav-icon": { color: "var(--blog-accent)" },
+          },
+          transition: "all 0.2s ease",
+        }}
+      >
+        {/* 메뉴 아이콘 */}
+        <ListItemIcon
+          className="nav-icon"
+          sx={{
+            minWidth: isChild ? 28 : 32,
+            color: isActive ? "var(--blog-accent)" : "var(--blog-muted)",
+            transition: "color 0.2s",
+          }}
+        >
+          {item.icon}
+        </ListItemIcon>
+
+        {/* 메뉴 이름 */}
+        <ListItemText
+          primary={item.label}
+          className="nav-label"
+          primaryTypographyProps={{
+            fontSize: isChild ? "0.74rem" : "0.78rem",
+            fontWeight: isActive ? 760 : 560,
+            letterSpacing: isChild ? "0.07em" : "0.08em",
+            color: isActive ? "var(--blog-accent)" : "var(--blog-subtle)",
+            sx: { transition: "color 0.2s" },
+          }}
+        />
+      </ListItemButton>
+    );
   };
 
   return (
@@ -136,11 +230,8 @@ const Sidebar = () => {
         <Tooltip title={isDarkMode ? "라이트 모드" : "다크 모드"} placement="right">
           <Avatar
             component="button"
-            src={avatarSrc}
-            alt="Hyuna's Tech Blog"
+            aria-label="블로그 테마 전환"
             onClick={() => setIsDarkMode((current) => !current)}
-            onMouseEnter={() => setIsAvatarHover(true)}
-            onMouseLeave={() => setIsAvatarHover(false)}
             sx={{
               width: 96,
               height: 96,
@@ -152,13 +243,43 @@ const Sidebar = () => {
               border: "3px solid var(--blog-avatar-border)",
               boxShadow: "0 8px 24px var(--blog-avatar-shadow)",
               cursor: "pointer",
+              overflow: "hidden",
+              position: "relative",
               transition: "transform 0.3s ease, border-color 0.25s ease, box-shadow 0.25s ease",
-              "& img": {
+              "& .avatar-image": {
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
                 objectFit: "cover",
               },
-              "&:hover": { transform: "scale(1.05)" },
+              "& .avatar-hover-image": {
+                opacity: 0,
+                transition: "opacity 0.22s ease",
+              },
+              "&:hover, &:focus-visible": { transform: "scale(1.05)" },
+              "&:hover .avatar-hover-image, &:focus-visible .avatar-hover-image": {
+                opacity: 1,
+              },
             }}
-          />
+          >
+            {/* 현재 모드 프로필 이미지 */}
+            <Box
+              component="img"
+              className="avatar-image"
+              src={avatarSrc}
+              alt="Hyuna's Tech Blog"
+            />
+
+            {/* 프로필 hover 이미지 */}
+            <Box
+              component="img"
+              className="avatar-image avatar-hover-image"
+              src={AVATAR_IMAGES.hover}
+              alt=""
+              aria-hidden="true"
+            />
+          </Avatar>
         </Tooltip>
 
         {/* 블로그 타이틀 */}
@@ -202,67 +323,33 @@ const Sidebar = () => {
 
       {/* 사이드 메뉴 목록 */}
       <List sx={{ width: "100%", px: 2 }}>
-        {navItems.map((item) => {
-          const isActive = isActivePath(item.section);
+        {navItems.slice(0, 1).map((item) => renderNavButton(item))}
 
-          return (
-            <ListItemButton
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              sx={{
-                borderRadius: 2,
-                mb: 0.5,
-                py: 1.2,
-                px: 2,
-                position: "relative",
-                bgcolor: isActive ? "var(--blog-active-bg)" : "transparent",
-                "&::before": isActive
-                  ? {
-                      content: '""',
-                      position: "absolute",
-                      left: 0,
-                      top: "20%",
-                      height: "60%",
-                      width: 3,
-                      bgcolor: "var(--blog-accent)",
-                      borderRadius: "0 2px 2px 0",
-                    }
-                  : {},
-                "&:hover": {
-                  bgcolor: isActive ? "var(--blog-active-bg)" : "var(--blog-hover-bg)",
-                  "& .nav-label": { color: "var(--blog-accent)" },
-                  "& .nav-icon": { color: "var(--blog-accent)" },
-                },
-                transition: "all 0.2s ease",
-              }}
-            >
-              {/* 메뉴 아이콘 */}
-              <ListItemIcon
-                className="nav-icon"
-                sx={{
-                  minWidth: 32,
-                  color: isActive ? "var(--blog-accent)" : "var(--blog-muted)",
-                  transition: "color 0.2s",
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
+        {/* 섹션 하위 메뉴 */}
+        <Box
+          sx={{
+            mt: 0.85,
+            ml: 2.15,
+            pl: 1.5,
+            borderLeft: "1px solid var(--blog-border)",
+          }}
+        >
+          <Typography
+            sx={{
+              mb: 0.55,
+              pl: 1.35,
+              color: "var(--blog-muted)",
+              fontSize: "0.62rem",
+              fontWeight: 860,
+              letterSpacing: "0.12em",
+              lineHeight: 1,
+            }}
+          >
+            SECTIONS
+          </Typography>
 
-              {/* 메뉴 이름 */}
-              <ListItemText
-                primary={item.label}
-                className="nav-label"
-                primaryTypographyProps={{
-                  fontSize: "0.78rem",
-                  fontWeight: isActive ? 700 : 500,
-                  letterSpacing: "0.08em",
-                  color: isActive ? "var(--blog-accent)" : "var(--blog-subtle)",
-                  sx: { transition: "color 0.2s" },
-                }}
-              />
-            </ListItemButton>
-          );
-        })}
+          {navItems.slice(1).map((item) => renderNavButton(item, "child"))}
+        </Box>
       </List>
 
       {/* 포트폴리오 자료 영역 */}
