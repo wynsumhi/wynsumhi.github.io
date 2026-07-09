@@ -28,7 +28,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { getRelativeTime } from "@/utils/date";
-import { extractExcerpt } from "@/utils/markdown";
+import { extractExcerpt, removeFullTextDetails } from "@/utils/markdown";
 import type { BlogSection as PostSection, Post } from "@/types/blog";
 
 // 날짜 표시에 사용하는 월 이름 약자 배열
@@ -381,6 +381,22 @@ const ListView = ({ posts }: { posts: Post[] }) => {
   );
 };
 
+// 카드 날짜 표시
+const formatCardDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (Number.isNaN(date.getTime())) return "";
+  if (diffDays <= 30) return getRelativeTime(dateString);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}.${month}.${day}`;
+};
+
 // 미리보기 카드 뷰
 const CardView = ({ posts }: { posts: Post[] }) => {
   const navigate = useNavigate();
@@ -477,7 +493,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     ml: "auto",
                   }}
                 >
-                  {getRelativeTime(post.date)}
+                  {formatCardDate(post.date)}
                 </Typography>
               </Box>
 
@@ -607,6 +623,7 @@ const BlogHome = () => {
 
     return [...sectionPosts]
       .filter((post) => {
+        const visibleContent = removeFullTextDetails(post.content);
         const matchesCategory =
           selectedCategory === "All" || post.category === selectedCategory;
         const matchesTag = selectedTag === "All" || post.tags.includes(selectedTag);
@@ -614,7 +631,7 @@ const BlogHome = () => {
           SECTION_LABELS[getPostSection(post)],
           post.title,
           post.excerpt,
-          post.content,
+          visibleContent,
           post.category,
           ...post.tags,
         ]

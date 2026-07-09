@@ -5,6 +5,7 @@
  */
 import type { ReactNode } from "react";
 import { Box, Link, Typography } from "@mui/material";
+import { removeFullTextDetails } from "@/utils/markdown";
 
 interface MarkdownRendererProps {
   content: string;
@@ -13,6 +14,7 @@ interface MarkdownRendererProps {
 interface TableBlock {
   headers: string[];
   rows: string[][];
+  lineCount: number;
 }
 
 // 인라인 마크다운 변환
@@ -105,12 +107,31 @@ const renderInline = (text: string): ReactNode[] => {
   return nodes;
 };
 
+// 가로 구분선 여부
+const isHorizontalRule = (line: string) => /^-{3,}$/.test(line.trim());
+
+// 표 구분선 여부
+const isTableSeparator = (line: string) => {
+  const cells = line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+
+  return cells.length > 1 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+};
+
+// 표 셀 개수 보정
+const normalizeCells = (cells: string[], columnCount: number) =>
+  Array.from({ length: columnCount }, (_, index) => cells[index] ?? "");
+
 // 표 구문 확인
 const parseTableBlock = (lines: string[], startIndex: number): TableBlock | null => {
   const headerLine = lines[startIndex];
   const separatorLine = lines[startIndex + 1];
 
-  if (!headerLine?.includes("|") || !/^\s*\|?\s*:?-{3,}:?\s*\|/.test(separatorLine ?? "")) {
+  if (!headerLine?.includes("|") || !isTableSeparator(separatorLine ?? "")) {
     return null;
   }
 
@@ -122,19 +143,23 @@ const parseTableBlock = (lines: string[], startIndex: number): TableBlock | null
       .split("|")
       .map((cell) => cell.trim());
 
-  const headers = toCells(headerLine);
-  const rows: string[][] = [];
+  const headerCells = toCells(headerLine);
+  const rowCells: string[][] = [];
 
   for (let index = startIndex + 2; index < lines.length; index += 1) {
     if (!lines[index].includes("|") || lines[index].trim() === "") break;
-    rows.push(toCells(lines[index]));
+    rowCells.push(toCells(lines[index]));
   }
 
-  return { headers, rows };
+  const columnCount = Math.max(headerCells.length, ...rowCells.map((row) => row.length));
+  const headers = normalizeCells(headerCells, columnCount);
+  const rows = rowCells.map((row) => normalizeCells(row, columnCount));
+
+  return { headers, rows, lineCount: rows.length + 2 };
 };
 
 const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
-  const lines = content.split(/\r?\n/);
+  const lines = removeFullTextDetails(content).split(/\r?\n/);
   const blocks: ReactNode[] = [];
   let index = 0;
 
@@ -191,21 +216,47 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
 
     if (tableBlock) {
       blocks.push(
-        <Box key={`table-${index}`} sx={{ my: 3, overflowX: "auto" }}>
-          <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
+        <Box
+          key={`table-${index}`}
+          sx={{
+            my: 3.4,
+            overflowX: "auto",
+            border: "1px solid var(--blog-table-border)",
+            borderRadius: 2,
+            bgcolor: "var(--blog-card-bg)",
+            boxShadow: "0 16px 44px var(--blog-card-shadow)",
+          }}
+        >
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              minWidth: 680,
+              borderCollapse: "separate",
+              borderSpacing: 0,
+            }}
+          >
             <Box component="thead">
               <Box component="tr">
-                {tableBlock.headers.map((header) => (
+                {tableBlock.headers.map((header, headerIndex) => (
                   <Box
                     component="th"
-                    key={header}
+                    key={`${header}-${headerIndex}`}
                     sx={{
-                      p: 1.4,
+                      px: 1.8,
+                      py: 1.55,
                       bgcolor: "var(--blog-table-header-bg)",
-                      border: "1px solid var(--blog-table-border)",
+                      borderRight: "1px solid var(--blog-table-border)",
+                      borderBottom: "1px solid var(--blog-table-border)",
                       color: "var(--blog-heading)",
                       textAlign: "left",
                       fontWeight: 800,
+                      lineHeight: 1.55,
+                      verticalAlign: "top",
+                      wordBreak: "keep-all",
+                      "&:last-of-type": {
+                        borderRight: 0,
+                      },
                     }}
                   >
                     {renderInline(header)}
@@ -215,19 +266,39 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
             </Box>
             <Box component="tbody">
               {tableBlock.rows.map((row, rowIndex) => (
-                <Box component="tr" key={`${row.join("-")}-${rowIndex}`}>
+                <Box
+                  component="tr"
+                  key={`${row.join("-")}-${rowIndex}`}
+                  sx={{
+                    bgcolor: rowIndex % 2 === 0 ? "transparent" : "rgba(96, 165, 250, 0.035)",
+                  }}
+                >
                   {row.map((cell, cellIndex) => (
                     <Box
                       component="td"
                       key={`${cell}-${cellIndex}`}
                       sx={{
-                        p: 1.4,
-                        border: "1px solid var(--blog-table-border)",
+                        px: 1.8,
+                        py: 1.65,
+                        borderRight: "1px solid var(--blog-table-border)",
+                        borderBottom:
+                          rowIndex === tableBlock.rows.length - 1 ? 0 : "1px solid var(--blog-table-border)",
                         color: "var(--blog-subtle)",
-                        lineHeight: 1.65,
+                        lineHeight: 1.75,
+                        verticalAlign: "top",
+                        wordBreak: "break-word",
+                        "&:last-of-type": {
+                          borderRight: 0,
+                        },
                       }}
                     >
-                      {renderInline(cell)}
+                      {cell ? (
+                        renderInline(cell)
+                      ) : (
+                        <Box component="span" sx={{ color: "var(--blog-muted)", opacity: 0.42 }}>
+                          -
+                        </Box>
+                      )}
                     </Box>
                   ))}
                 </Box>
@@ -237,7 +308,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
         </Box>,
       );
 
-      index += tableBlock.rows.length + 2;
+      index += tableBlock.lineCount;
       continue;
     }
 
@@ -366,11 +437,19 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
     }
 
     // 구분선
-    if (/^---+$/.test(trimmedLine)) {
+    if (isHorizontalRule(trimmedLine)) {
       blocks.push(
         <Box
+          component="hr"
           key={`divider-${index}`}
-          sx={{ my: 4, borderTop: "1px solid var(--blog-divider)" }}
+          sx={{
+            my: 4.2,
+            height: "1px",
+            border: 0,
+            bgcolor: "transparent",
+            background:
+              "linear-gradient(90deg, transparent 0%, var(--blog-divider) 16%, var(--blog-divider) 84%, transparent 100%)",
+          }}
         />,
       );
       index += 1;
@@ -388,7 +467,9 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
       !lines[index].trim().startsWith("```") &&
       !lines[index].trim().startsWith(">") &&
       !/^[-*]\s+/.test(lines[index].trim()) &&
-      !/^\d+\.\s+/.test(lines[index].trim())
+      !/^\d+\.\s+/.test(lines[index].trim()) &&
+      !isHorizontalRule(lines[index].trim()) &&
+      !parseTableBlock(lines, index)
     ) {
       paragraphLines.push(lines[index].trim());
       index += 1;
