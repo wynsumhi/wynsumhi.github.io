@@ -3,6 +3,7 @@ export const CONFIG = {
   SITE_DESCRIPTION: " portfolio website.",
   GITHUB_URL: "https://github.com/wynsumhi",
   COMMENTS_REPO: "wynsumhi/wynsumhi.github.io",
+  REAL_BLOG_URL: "https://ausekd.tistory.com/",
   LINKEDIN_URL: "https://www.linkedin.com/in/dev-chipmunk/",
   EMAIL: "gusdk7244@naver.com",
   PHONE: "010-7498-7244",

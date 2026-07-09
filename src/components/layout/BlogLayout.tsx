@@ -3,7 +3,11 @@
  *
  * 블로그 화면에 왼쪽 사이드바와 본문 영역을 배치하는 구조입니다
  */
-import { Box, GlobalStyles } from "@mui/material";
+import { useState } from "react";
+import { Box, GlobalStyles, IconButton, Link, Popover, Typography } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import { CONFIG } from "@/constants/config";
 import Sidebar from "./Sidebar";
 
 interface BlogLayoutProps {
@@ -106,6 +110,9 @@ const blogDarkThemeVariables = {
 } as const;
 
 const BlogLayout = ({ children }: BlogLayoutProps) => {
+  const [infoAnchorEl, setInfoAnchorEl] = useState<HTMLElement | null>(null);
+  const isInfoOpen = Boolean(infoAnchorEl);
+
   return (
     <>
       <GlobalStyles
@@ -203,9 +210,110 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
           }}
         >
           {/* 본문 최대 너비 */}
-          <Box sx={{ maxWidth: 1040, mx: "auto" }}>{children}</Box>
+          <Box sx={{ maxWidth: 1040, mx: "auto" }}>
+            {children}
+
+            {/* 블로그 하단 정보 */}
+            <Box
+              component="footer"
+              sx={{
+                mt: { xs: 7, md: 9 },
+                pt: { xs: 2.4, md: 3 },
+                borderTop: "1px solid var(--blog-divider)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+                flexWrap: "wrap",
+                color: "var(--blog-muted)",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    color: "var(--blog-muted)",
+                    fontSize: "0.78rem",
+                    fontWeight: 650,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  © 2026 김현아 블로그
+                </Typography>
+
+                <IconButton
+                  size="small"
+                  aria-label="블로그 운영 이유 보기"
+                  onClick={(event) => setInfoAnchorEl(event.currentTarget)}
+                  sx={{
+                    width: 26,
+                    height: 26,
+                    color: "var(--blog-muted)",
+                    "&:hover": {
+                      color: "var(--blog-accent)",
+                      bgcolor: "var(--blog-chip-bg)",
+                    },
+                  }}
+                >
+                  <InfoOutlinedIcon sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Box>
+
+              <Link
+                href={CONFIG.REAL_BLOG_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="none"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  color: "var(--blog-subtle)",
+                  fontSize: "0.78rem",
+                  fontWeight: 760,
+                  "&:hover": {
+                    color: "var(--blog-accent)",
+                  },
+                }}
+              >
+                진짜 블로그도 있어요!
+                <OpenInNewRoundedIcon sx={{ fontSize: 15 }} />
+              </Link>
+            </Box>
+          </Box>
         </Box>
       </Box>
+
+      <Popover
+        open={isInfoOpen}
+        anchorEl={infoAnchorEl}
+        onClose={() => setInfoAnchorEl(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+        slotProps={{
+          paper: {
+            sx: {
+              maxWidth: 360,
+              p: 1.6,
+              borderRadius: 2,
+              border: "1px solid var(--blog-border)",
+              bgcolor: "var(--blog-panel-bg)",
+              boxShadow: "0 18px 48px var(--blog-card-shadow)",
+            },
+          },
+        }}
+      >
+        <Typography
+          sx={{
+            color: "var(--blog-text)",
+            fontSize: "0.82rem",
+            fontWeight: 620,
+            lineHeight: 1.7,
+            wordBreak: "keep-all",
+          }}
+        >
+          어디서든 Notion에 유연하게 남긴 기록을 API로 연결하여, 웹에 가볍게 게시하기 위한 저만의 공간입니다
+        </Typography>
+      </Popover>
     </>
   );
 };
