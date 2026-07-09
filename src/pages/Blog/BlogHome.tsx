@@ -72,9 +72,9 @@ type BlogSection = "all" | PostSection;
 // 섹션 이름
 const SECTION_LABELS: Record<BlogSection, string> = {
   all: "전체 글",
-  tech: "Tech",
-  study: "Study",
-  log: "Log",
+  tech: "기술 기록",
+  study: "학습 노트",
+  log: "회고",
 };
 
 // URL 섹션 값 변환

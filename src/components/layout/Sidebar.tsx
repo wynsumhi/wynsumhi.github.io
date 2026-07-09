@@ -334,20 +334,6 @@ const Sidebar = () => {
             borderLeft: "1px solid var(--blog-border)",
           }}
         >
-          <Typography
-            sx={{
-              mb: 0.55,
-              pl: 1.35,
-              color: "var(--blog-muted)",
-              fontSize: "0.62rem",
-              fontWeight: 860,
-              letterSpacing: "0.12em",
-              lineHeight: 1,
-            }}
-          >
-            SECTIONS
-          </Typography>
-
           {navItems.slice(1).map((item) => renderNavButton(item, "child"))}
         </Box>
       </List>
