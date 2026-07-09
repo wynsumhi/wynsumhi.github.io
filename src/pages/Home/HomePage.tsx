@@ -60,6 +60,18 @@ const sectionNavItems = [
 // 핵심 역량 아이콘 색상
 const skillIconColors = ["#f59e0b", "#fb923c", "#eab308", "#d97706"];
 
+// 핵심 역량 로고 경로
+const skillLogoMap: Record<string, string> = {
+  HTML5: "/assets/skills/html5-original.svg",
+  "CSS3·SCSS": "/assets/skills/css3-original.svg",
+  "JavaScript(ES6+)": "/assets/skills/javascript-original.svg",
+  TypeScript: "/assets/skills/typescript-original.svg",
+  React: "/assets/skills/react-original.svg",
+  "Next.js": "/assets/skills/nextjs-original.svg",
+  "Vue.js": "/assets/skills/vuejs-original.svg",
+  "Tailwind CSS": "/assets/skills/tailwindcss-plain.svg",
+};
+
 // 프로젝트 기간 표시
 const formatProjectPeriod = (start: string, end?: string) => {
   const formatMonth = (value: string) => value.replace("-", ".");
@@ -558,42 +570,65 @@ const HomePage = () => {
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
             <Stack direction="row" gap={1.2} flexWrap="wrap">
-              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill, index) => (
-                <Box
-                  key={skill.name}
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 1,
-                    minHeight: 44,
-                    px: 1.6,
-                    py: 0.75,
-                    bgcolor: "#fffaf0",
-                    border: "1px solid rgba(245, 158, 11, 0.24)",
-                    borderRadius: 999,
-                    boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
-                    color: "#3f3425",
-                    fontWeight: 800,
-                    fontSize: "0.95rem",
-                  }}
-                >
+              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill, index) => {
+                const logoSrc = skillLogoMap[skill.name];
+                const fallbackColor = skillIconColors[index % skillIconColors.length];
+
+                return (
                   <Box
+                    key={skill.name}
                     sx={{
                       display: "inline-flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      width: 26,
-                      height: 26,
-                      borderRadius: "50%",
-                      bgcolor: `${skillIconColors[index % skillIconColors.length]}1f`,
-                      color: skillIconColors[index % skillIconColors.length],
+                      gap: 1.05,
+                      minHeight: 48,
+                      px: 1.75,
+                      py: 0.8,
+                      bgcolor: "#fffaf0",
+                      border: "1px solid rgba(245, 158, 11, 0.24)",
+                      borderRadius: 999,
+                      boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
+                      color: "#3f3425",
+                      fontWeight: 800,
+                      fontSize: "0.95rem",
                     }}
                   >
-                    <AutoAwesomeIcon sx={{ fontSize: 15 }} />
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 30,
+                        height: 30,
+                        borderRadius: "10px",
+                        bgcolor: "#ffffff",
+                        border: "1px solid rgba(245, 158, 11, 0.16)",
+                        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.55)",
+                        color: fallbackColor,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {logoSrc ? (
+                        <Box
+                          component="img"
+                          src={logoSrc}
+                          alt=""
+                          aria-hidden="true"
+                          sx={{
+                            display: "block",
+                            width: 21,
+                            height: 21,
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : (
+                        <AutoAwesomeIcon sx={{ fontSize: 15 }} />
+                      )}
+                    </Box>
+                    {skill.name}
                   </Box>
-                  {skill.name}
-                </Box>
-              ))}
+                );
+              })}
             </Stack>
           </Grid>
         </Grid>
