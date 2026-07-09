@@ -20,6 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { formatDate } from "@/utils/date";
+import { removeFullTextDetails } from "@/utils/markdown";
 
 const ALL = "all";
 
@@ -65,6 +66,7 @@ const ArchivePage = () => {
 
     return publishedPosts
       .filter((post) => {
+        const visibleContent = removeFullTextDetails(post.content);
         const postYear = new Date(post.date).getFullYear().toString();
         const matchesYear = year === ALL || postYear === year;
         const matchesCategory = category === ALL || post.category === category;
@@ -72,7 +74,7 @@ const ArchivePage = () => {
         const matchesKeyword =
           lowerKeyword.length === 0 ||
           post.title.toLowerCase().includes(lowerKeyword) ||
-          post.content.toLowerCase().includes(lowerKeyword);
+          visibleContent.toLowerCase().includes(lowerKeyword);
 
         return matchesYear && matchesCategory && matchesTag && matchesKeyword;
       })

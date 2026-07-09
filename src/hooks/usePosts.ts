@@ -12,6 +12,7 @@
  */
 import { useState, useEffect } from "react";
 import type { Post, PostCategory } from "@/types/blog";
+import { removeFullTextDetails } from "@/utils/markdown";
 
 export const usePosts = () => {
   // posts: 로드된 포스트 배열, loading: 로딩 상태, error: 에러 메시지
@@ -65,7 +66,7 @@ export const usePosts = () => {
     return posts.filter(
       (post) =>
         post.title.toLowerCase().includes(lowerKeyword) ||
-        post.content.toLowerCase().includes(lowerKeyword),
+        removeFullTextDetails(post.content).toLowerCase().includes(lowerKeyword),
     );
   };
 

@@ -1,3 +1,12 @@
+const FULLTEXT_DETAILS_PATTERN =
+  /<details>\s*<summary>\s*full\s*text\s*<\/summary>[\s\S]*?<\/details>/gi;
+
+// fulltext 원문 블록 제거
+export const removeFullTextDetails = (markdown: string): string => {
+  if (!markdown) return "";
+  return markdown.replace(FULLTEXT_DETAILS_PATTERN, "").trim();
+};
+
 export const extractExcerpt = (
   markdown: string,
   length: number = 150,
@@ -5,7 +14,7 @@ export const extractExcerpt = (
   if (!markdown) return "";
 
   // Markdown 제거하고 본문만 추출
-  const plain = markdown
+  const plain = removeFullTextDetails(markdown)
     .replace(/#{1,6}\s/g, "") // 헤더 제거
     .replace(/\*\*(.+?)\*\*/g, "$1") // bold 제거
     .replace(/\[(.+?)\]\(.+?\)/g, "$1") // 링크 제거

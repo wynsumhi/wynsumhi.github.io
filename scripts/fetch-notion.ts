@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
 import fs from "fs";
 import path from "path";
+import { removeFullTextDetails } from "../src/utils/markdown";
 
 // Notion 클라이언트 초기화 (notion-to-md에서 사용)
 const notion = new Client({
@@ -161,7 +162,7 @@ async function toPost(page: NotionPage, section: BlogSection): Promise<Post | nu
 
   // 본문 내용을 Markdown으로 변환
   const mdBlocks = await n2m.pageToMarkdown(page.id);
-  const content = n2m.toMarkdownString(mdBlocks).parent;
+  const content = removeFullTextDetails(n2m.toMarkdownString(mdBlocks).parent);
 
   return {
     id: page.id,
