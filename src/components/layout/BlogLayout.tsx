@@ -207,11 +207,23 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             maxWidth: "calc(100vw - 260px)",
             minHeight: "100dvh",
             bgcolor: "var(--blog-content-bg)",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           {/* 본문 최대 너비 */}
-          <Box sx={{ maxWidth: 1040, mx: "auto" }}>
-            {children}
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: 1040,
+              mx: "auto",
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* 본문 높이 보정 */}
+            <Box sx={{ flex: 1 }}>{children}</Box>
 
             {/* 블로그 하단 정보 */}
             <Box
