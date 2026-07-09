@@ -50,6 +50,9 @@ const SECTION_LABELS: Record<BlogSection, string> = {
 // 이전 데이터 기본 섹션
 const getPostSection = (post: Post): BlogSection => post.section ?? "tech";
 
+// 섹션 목록 경로
+const getSectionPath = (section: BlogSection) => `${ROUTES.BLOG}?section=${section}`;
+
 // 이전/다음 글 카드
 const PostNavigationCard = ({
   label,
@@ -249,16 +252,27 @@ const BlogPost = () => {
             {/* 홈 이동 아이콘 */}
             <HomeRoundedIcon sx={{ fontSize: 22 }} />
           </MuiLink>
-          <Typography
+          <MuiLink
+            component="button"
+            type="button"
+            underline="hover"
+            onClick={() => navigate(getSectionPath(postSection))}
             sx={{
               color: "var(--blog-subtle)",
               fontSize: "0.94rem",
               fontWeight: 700,
               lineHeight: 1.35,
+              p: 0,
+              border: 0,
+              bgcolor: "transparent",
+              cursor: "pointer",
+              "&:hover": {
+                color: "var(--blog-accent)",
+              },
             }}
           >
             {SECTION_LABELS[postSection]}
-          </Typography>
+          </MuiLink>
           {post.category && (
             <Typography
               sx={{
