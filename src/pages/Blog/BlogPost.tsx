@@ -174,7 +174,8 @@ const BlogPost = () => {
   }
 
   // ID로 포스트 찾기 - posts 배열에서 id가 일치하는 포스트를 검색
-  const post = posts.find((p) => p.id === id);
+  const publishedPosts = posts.filter((p) => p.published);
+  const post = publishedPosts.find((p) => p.id === id);
 
   // 포스트를 찾지 못한 경우 (잘못된 ID이거나 삭제된 포스트)
   if (!post) {
@@ -195,7 +196,7 @@ const BlogPost = () => {
   // 유효한 날짜 정보
   const hasDate = Boolean(post.date) && !Number.isNaN(new Date(post.date).getTime());
   // 최신순 기준 이전/다음 글
-  const sortedPosts = [...posts].sort((a, b) => getPostTime(b) - getPostTime(a));
+  const sortedPosts = [...publishedPosts].sort((a, b) => getPostTime(b) - getPostTime(a));
   const currentPostIndex = sortedPosts.findIndex((sortedPost) => sortedPost.id === post.id);
   const newerPost = currentPostIndex > 0 ? sortedPosts[currentPostIndex - 1] : undefined;
   const olderPost =

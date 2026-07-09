@@ -49,34 +49,85 @@ interface Post {
 interface NotionPage {
   id: string;
   object: string;
-  properties: {
-    title?: {
+  properties: Record<string, NotionProperty>;
+}
+
+type NotionProperty =
+  | {
       type: "title";
       title: Array<{ plain_text: string }>;
-    };
-    category?: {
+    }
+  | {
       type: "select";
       select?: { name: string };
-    };
-    tags?: {
+    }
+  | {
       type: "multi_select";
       multi_select: Array<{ name: string }>;
-    };
-    date?: {
+    }
+  | {
       type: "date";
       date?: { start: string };
-    };
-    published?: {
-      type: "status" | "checkbox";
+    }
+  | {
+      type: "status";
       status?: { name: string };
+    }
+  | {
+      type: "checkbox";
       checkbox?: boolean;
-    };
-    thumbnail?: {
+    }
+  | {
       type: "url";
       url?: string;
+    }
+  | {
+      type: string;
+      [key: string]: unknown;
     };
-  };
-}
+
+// 속성 이름 조회
+const getProperty = (properties: NotionPage["properties"], names: string[]) => {
+  const normalizedNames = names.map((name) => name.toLowerCase());
+
+  return Object.entries(properties).find(([name]) =>
+    normalizedNames.includes(name.toLowerCase()),
+  )?.[1];
+};
+
+// 공개 여부 추출
+const getPublished = (properties: NotionPage["properties"]) => {
+  const property = getProperty(properties, ["published", "Published", "발행", "공개"]);
+  const unpublishedNames = [
+    "false",
+    "no",
+    "off",
+    "비공개",
+    "비활성",
+    "비게시",
+    "미발행",
+    "숨김",
+    "draft",
+    "private",
+    "unpublished",
+    "hidden",
+  ];
+
+  if (!property) return true;
+  if (property.type === "checkbox") return property.checkbox === true;
+
+  if (property.type === "status") {
+    const statusName = property.status?.name.toLowerCase() ?? "";
+    return !unpublishedNames.includes(statusName);
+  }
+
+  if (property.type === "select") {
+    const selectName = property.select?.name.toLowerCase() ?? "";
+    return !unpublishedNames.includes(selectName);
+  }
+
+  return true;
+};
 
 // Notion DB 페이지 목록 조회
 async function fetchDatabasePages(databaseId: string) {
@@ -125,39 +176,43 @@ async function toPost(page: NotionPage, section: BlogSection): Promise<Post | nu
   const properties = page.properties;
 
   // 제목 추출
+  const titleProperty = getProperty(properties, ["title", "Title", "제목"]);
   const title =
-    properties.title?.type === "title"
-      ? properties.title.title[0]?.plain_text || ""
+    titleProperty?.type === "title"
+      ? titleProperty.title[0]?.plain_text || ""
       : "";
 
   // 카테고리 추출
+  const categoryProperty = getProperty(properties, ["category", "Category", "카테고리"]);
   const category =
-    properties.category?.type === "select"
-      ? properties.category.select?.name || ""
+    categoryProperty?.type === "select"
+      ? categoryProperty.select?.name || ""
       : "";
 
   // 태그 추출
+  const tagsProperty = getProperty(properties, ["tags", "Tags", "태그"]);
   const tags =
-    properties.tags?.type === "multi_select"
-      ? properties.tags.multi_select.map((tag) => tag.name)
+    tagsProperty?.type === "multi_select"
+      ? tagsProperty.multi_select.map((tag) => tag.name)
       : [];
 
   // 날짜 추출
+  const dateProperty = getProperty(properties, ["date", "Date", "날짜"]);
   const date =
-    properties.date?.type === "date" ? properties.date.date?.start || "" : "";
+    dateProperty?.type === "date" ? dateProperty.date?.start || "" : "";
 
   // published 상태 추출
-  const published =
-    properties.published?.type === "status"
-      ? properties.published.status?.name !== "비활성"
-      : properties.published?.type === "checkbox"
-        ? properties.published.checkbox === true
-        : true;
+  const published = getPublished(properties);
+
+  if (!published) {
+    return null;
+  }
 
   // 썸네일 추출
+  const thumbnailProperty = getProperty(properties, ["thumbnail", "Thumbnail", "썸네일"]);
   const thumbnail =
-    properties.thumbnail?.type === "url"
-      ? properties.thumbnail.url || undefined
+    thumbnailProperty?.type === "url"
+      ? thumbnailProperty.url || undefined
       : undefined;
 
   // 본문 내용을 Markdown으로 변환

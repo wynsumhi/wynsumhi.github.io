@@ -600,8 +600,10 @@ const BlogHome = () => {
 
   // 현재 섹션 글 목록
   const sectionPosts = useMemo(() => {
-    if (activeSection === "all") return posts;
-    return posts.filter((post) => getPostSection(post) === activeSection);
+    const publishedPosts = posts.filter((post) => post.published);
+
+    if (activeSection === "all") return publishedPosts;
+    return publishedPosts.filter((post) => getPostSection(post) === activeSection);
   }, [posts, activeSection]);
 
   // 카테고리 필터 목록
