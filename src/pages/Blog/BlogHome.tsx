@@ -4,11 +4,10 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardContent,
   CardMedia,
@@ -17,6 +16,7 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Pagination,
   TextField,
   Tooltip,
   Typography,
@@ -69,15 +69,9 @@ const YEAR_GROUP_COLUMNS = {
   md: "58px minmax(0, 1fr)",
 };
 
-const VISIBLE_POST_COUNT = {
-  list: 20,
-  card: 12,
-};
-
-const LOAD_MORE_COUNT = {
-  list: 20,
-  card: 12,
-};
+const LIST_INITIAL_VISIBLE_COUNT = 20;
+const LIST_LOAD_MORE_COUNT = 20;
+const CARD_PAGE_SIZE = 9;
 
 type BlogSection = "all" | PostSection;
 
@@ -593,61 +587,135 @@ type PostCollectionProps = {
   viewMode: "list" | "card";
 };
 
-// 많은 글을 한 번에 렌더링하지 않고 필요한 만큼만 보여주는 목록 래퍼
+// 보기 방식에 맞게 많은 글을 나눠 보여주는 목록 래퍼
 const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
-  const [visibleCount, setVisibleCount] = useState(VISIBLE_POST_COUNT[viewMode]);
-  const visiblePosts = posts.slice(0, visibleCount);
-  const hasMorePosts = visibleCount < posts.length;
-  const nextCount = Math.min(LOAD_MORE_COUNT[viewMode], posts.length - visibleCount);
+  const [visibleCount, setVisibleCount] = useState(LIST_INITIAL_VISIBLE_COUNT);
+  const [cardPage, setCardPage] = useState(1);
+  const collectionTopRef = useRef<HTMLDivElement | null>(null);
+  const listLoaderRef = useRef<HTMLDivElement | null>(null);
+  const isListView = viewMode === "list";
+  const visibleListPosts = posts.slice(0, visibleCount);
+  const hasMoreListPosts = visibleCount < posts.length;
+  const totalCardPages = Math.ceil(posts.length / CARD_PAGE_SIZE);
+  const cardPagePosts = posts.slice(
+    (cardPage - 1) * CARD_PAGE_SIZE,
+    cardPage * CARD_PAGE_SIZE,
+  );
 
-  const handleLoadMore = () => {
-    setVisibleCount((current) =>
-      Math.min(current + LOAD_MORE_COUNT[viewMode], posts.length),
+  useEffect(() => {
+    if (!isListView || !hasMoreListPosts) return;
+
+    const target = listLoaderRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        setVisibleCount((current) =>
+          Math.min(current + LIST_LOAD_MORE_COUNT, posts.length),
+        );
+      },
+      { rootMargin: "360px 0px" },
     );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [hasMoreListPosts, isListView, posts.length]);
+
+  const handleCardPageChange = (_: unknown, page: number) => {
+    setCardPage(page);
+    requestAnimationFrame(() => {
+      collectionTopRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   };
 
   return (
-    <>
-      {viewMode === "list" ? (
-        <ListView posts={visiblePosts} />
-      ) : (
-        <CardView posts={visiblePosts} />
-      )}
+    <Box ref={collectionTopRef}>
+      {isListView ? (
+        <>
+          <ListView posts={visibleListPosts} />
 
-      {hasMorePosts && (
-        <Box
-          sx={{
-            mt: { xs: 3.5, md: 5 },
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Button
-            onClick={handleLoadMore}
-            variant="outlined"
-            sx={{
-              minWidth: 168,
-              px: 2.6,
-              py: 1.05,
-              borderRadius: 999,
-              borderColor: "var(--blog-border)",
-              color: "var(--blog-subtle)",
-              bgcolor: "var(--blog-card-bg)",
-              fontSize: "0.82rem",
-              fontWeight: 850,
-              boxShadow: "0 14px 36px var(--blog-card-shadow)",
-              "&:hover": {
-                borderColor: "var(--blog-accent)",
-                bgcolor: "var(--blog-chip-bg)",
-                color: "var(--blog-accent)",
-              },
-            }}
-          >
-            더 보기 {nextCount}개 · {visiblePosts.length}/{posts.length}
-          </Button>
-        </Box>
+          {hasMoreListPosts && (
+            <Box
+              ref={listLoaderRef}
+              sx={{
+                mt: { xs: 2, md: 3 },
+                py: 2,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: "var(--blog-muted)",
+                  fontSize: "0.78rem",
+                  fontWeight: 800,
+                }}
+              >
+                다음 글을 불러오는 중
+              </Typography>
+            </Box>
+          )}
+        </>
+      ) : (
+        <>
+          <CardView posts={cardPagePosts} />
+
+          {totalCardPages > 1 && (
+            <Box
+              sx={{
+                mt: { xs: 3.5, md: 5 },
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Pagination
+                page={cardPage}
+                count={totalCardPages}
+                onChange={handleCardPageChange}
+                siblingCount={1}
+                boundaryCount={1}
+                shape="rounded"
+                sx={{
+                  "& .MuiPagination-ul": {
+                    gap: 0.45,
+                  },
+                  "& .MuiPaginationItem-root": {
+                    minWidth: 34,
+                    height: 34,
+                    borderRadius: 1.6,
+                    color: "var(--blog-subtle)",
+                    fontSize: "0.82rem",
+                    fontWeight: 850,
+                    border: "1px solid var(--blog-border)",
+                    bgcolor: "var(--blog-card-bg)",
+                    boxShadow: "0 10px 28px var(--blog-card-shadow)",
+                    "&:hover": {
+                      bgcolor: "var(--blog-chip-bg)",
+                      color: "var(--blog-accent)",
+                      borderColor: "var(--blog-accent)",
+                    },
+                    "&.Mui-selected": {
+                      bgcolor: "var(--blog-accent)",
+                      color: "var(--blog-active-text)",
+                      borderColor: "var(--blog-accent)",
+                      "&:hover": {
+                        bgcolor: "var(--blog-accent)",
+                      },
+                    },
+                  },
+                }}
+              />
+            </Box>
+          )}
+        </>
       )}
-    </>
+    </Box>
   );
 };
 
