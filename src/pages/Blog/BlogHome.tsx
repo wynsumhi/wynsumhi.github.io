@@ -72,8 +72,12 @@ const YEAR_GROUP_COLUMNS = {
 
 const LIST_INITIAL_VISIBLE_COUNT = 20;
 const LIST_LOAD_MORE_COUNT = 20;
-const CARD_PAGE_SIZE = 9;
 const CARD_PAGE_WINDOW = 5;
+const CARD_PAGE_SIZE_BY_WIDTH = {
+  mobile: 1,
+  tablet: 2,
+  desktop: 3,
+};
 
 type BlogSection = "all" | PostSection;
 
@@ -419,6 +423,29 @@ const getCardPageNumbers = (currentPage: number, totalPages: number) => {
   return Array.from({ length: pageCount }, (_, index) => startPage + index);
 };
 
+// 카드형은 한 화면 안에 들어오는 개수만 페이지에 담아 내부 스크롤을 피함
+const getCardPageSize = () => {
+  if (typeof window === "undefined") return CARD_PAGE_SIZE_BY_WIDTH.desktop;
+  if (window.innerWidth < 600) return CARD_PAGE_SIZE_BY_WIDTH.mobile;
+  if (window.innerWidth < 1200) return CARD_PAGE_SIZE_BY_WIDTH.tablet;
+  return CARD_PAGE_SIZE_BY_WIDTH.desktop;
+};
+
+const useCardPageSize = () => {
+  const [pageSize, setPageSize] = useState(getCardPageSize);
+
+  useEffect(() => {
+    const updatePageSize = () => setPageSize(getCardPageSize());
+
+    updatePageSize();
+    window.addEventListener("resize", updatePageSize);
+
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, []);
+
+  return pageSize;
+};
+
 // 미리보기 카드 뷰
 const CardView = ({ posts }: { posts: Post[] }) => {
   const navigate = useNavigate();
@@ -607,14 +634,15 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
   const [cardPage, setCardPage] = useState(1);
   const collectionTopRef = useRef<HTMLDivElement | null>(null);
   const listLoaderRef = useRef<HTMLDivElement | null>(null);
+  const cardPageSize = useCardPageSize();
   const isListView = viewMode === "list";
   const visibleListPosts = posts.slice(0, visibleCount);
   const hasMoreListPosts = visibleCount < posts.length;
-  const totalCardPages = Math.ceil(posts.length / CARD_PAGE_SIZE);
+  const totalCardPages = Math.ceil(posts.length / cardPageSize);
   const cardPageNumbers = getCardPageNumbers(cardPage, totalCardPages);
   const cardPagePosts = posts.slice(
-    (cardPage - 1) * CARD_PAGE_SIZE,
-    cardPage * CARD_PAGE_SIZE,
+    (cardPage - 1) * cardPageSize,
+    cardPage * cardPageSize,
   );
 
   useEffect(() => {
@@ -638,6 +666,10 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
 
     return () => observer.disconnect();
   }, [hasMoreListPosts, isListView, posts.length]);
+
+  useEffect(() => {
+    setCardPage((current) => Math.min(current, Math.max(totalCardPages, 1)));
+  }, [totalCardPages]);
 
   const handleCardPageChange = (page: number) => {
     setCardPage(page);
