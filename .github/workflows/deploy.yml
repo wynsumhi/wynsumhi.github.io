@@ -51,7 +51,6 @@ jobs:
         run: pnpm tsx scripts/fetch-notion.ts
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_TECH_DATABASE_ID: ${{ secrets.NOTION_TECH_DATABASE_ID }}
           NOTION_STUDY_DATABASE_ID: ${{ secrets.NOTION_STUDY_DATABASE_ID }}
           NOTION_LOG_DATABASE_ID: ${{ secrets.NOTION_LOG_DATABASE_ID }}

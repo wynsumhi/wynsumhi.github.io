@@ -22,7 +22,7 @@ const DATABASES: Array<{
 }> = [
   {
     section: "tech",
-    databaseId: process.env.NOTION_TECH_DATABASE_ID || process.env.NOTION_DATABASE_ID,
+    databaseId: process.env.NOTION_TECH_DATABASE_ID,
   },
   {
     section: "study",
