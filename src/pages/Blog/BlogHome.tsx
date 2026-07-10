@@ -153,18 +153,22 @@ const ListViewIcon = ({ active }: { active: boolean }) => (
 // 날짜 중심 리스트 뷰
 const ListView = ({ posts }: { posts: Post[] }) => {
   const navigate = useNavigate();
-  const groupedPosts = posts.reduce<Record<string, Post[]>>((groups, post) => {
-    const year = new Date(post.date).getFullYear().toString();
+  const groupedPosts = useMemo(() => {
+    const groups = new Map<string, Post[]>();
 
-    return {
-      ...groups,
-      [year]: [...(groups[year] ?? []), post],
-    };
-  }, {});
+    [...posts]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .forEach((post) => {
+        const year = new Date(post.date).getFullYear().toString();
+        groups.set(year, [...(groups.get(year) ?? []), post]);
+      });
+
+    return [...groups.entries()];
+  }, [posts]);
 
   return (
     <Box>
-      {Object.entries(groupedPosts).map(([year, yearPosts]) => (
+      {groupedPosts.map(([year, yearPosts]) => (
         <Box
           key={year}
           sx={{
