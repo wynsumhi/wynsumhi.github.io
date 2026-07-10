@@ -4,7 +4,7 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -574,8 +574,12 @@ const CardView = ({ posts }: { posts: Post[] }) => {
   );
 };
 
-// 블로그 목록 메인 화면
-const BlogHome = () => {
+type BlogHomeContentProps = {
+  activeSection: BlogSection;
+};
+
+// 블로그 목록 본문
+const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   // 저장된 보기 방식 초기값
   const [viewMode, setViewMode] = useState<"list" | "card">(
     () => (localStorage.getItem("blogViewMode") as "list" | "card") || "list",
@@ -584,19 +588,9 @@ const BlogHome = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedTag, setSelectedTag] = useState("All");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchParams] = useSearchParams();
-  const activeSection = getBlogSection(searchParams.get("section"));
 
   // 블로그 글 데이터 조회
   const { posts, loading, error } = usePosts();
-
-  // 섹션 변경 시 내부 필터 초기화
-  useEffect(() => {
-    setSearchKeyword("");
-    setSelectedCategory("All");
-    setSelectedTag("All");
-    setIsSearchOpen(false);
-  }, [activeSection]);
 
   // 현재 섹션 글 목록
   const sectionPosts = useMemo(() => {
@@ -1039,6 +1033,14 @@ const BlogHome = () => {
       )}
     </Box>
   );
+};
+
+// 블로그 목록 메인 화면
+const BlogHome = () => {
+  const [searchParams] = useSearchParams();
+  const activeSection = getBlogSection(searchParams.get("section"));
+
+  return <BlogHomeContent key={activeSection} activeSection={activeSection} />;
 };
 
 export default BlogHome;
