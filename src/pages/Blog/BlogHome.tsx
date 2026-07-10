@@ -22,6 +22,8 @@ import {
 } from "@mui/material";
 import {
   CloseRounded,
+  KeyboardDoubleArrowLeftRounded,
+  KeyboardDoubleArrowRightRounded,
   KeyboardArrowLeftRounded,
   KeyboardArrowRightRounded,
   KeyboardArrowUpRounded,
@@ -730,6 +732,31 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                   boxShadow: "0 14px 38px var(--blog-card-shadow)",
                 }}
               >
+                <Tooltip title="첫 페이지" placement="top">
+                  <span>
+                    <IconButton
+                      aria-label="첫 페이지"
+                      disabled={cardPage === 1}
+                      onClick={() => handleCardPageChange(1)}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        color: "var(--blog-subtle)",
+                        "&:hover": {
+                          bgcolor: "var(--blog-chip-bg)",
+                          color: "var(--blog-accent)",
+                        },
+                        "&.Mui-disabled": {
+                          color: "var(--blog-muted)",
+                          opacity: 0.35,
+                        },
+                      }}
+                    >
+                      <KeyboardDoubleArrowLeftRounded fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
                 <Tooltip title="이전 페이지" placement="top">
                   <span>
                     <IconButton
@@ -813,6 +840,31 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       }}
                     >
                       <KeyboardArrowRightRounded fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
+                <Tooltip title="마지막 페이지" placement="top">
+                  <span>
+                    <IconButton
+                      aria-label="마지막 페이지"
+                      disabled={cardPage === totalCardPages}
+                      onClick={() => handleCardPageChange(totalCardPages)}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        color: "var(--blog-subtle)",
+                        "&:hover": {
+                          bgcolor: "var(--blog-chip-bg)",
+                          color: "var(--blog-accent)",
+                        },
+                        "&.Mui-disabled": {
+                          color: "var(--blog-muted)",
+                          opacity: 0.35,
+                        },
+                      }}
+                    >
+                      <KeyboardDoubleArrowRightRounded fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
