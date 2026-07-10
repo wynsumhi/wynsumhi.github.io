@@ -4,7 +4,7 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -156,12 +156,10 @@ const ListView = ({ posts }: { posts: Post[] }) => {
   const groupedPosts = useMemo(() => {
     const groups = new Map<string, Post[]>();
 
-    [...posts]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .forEach((post) => {
-        const year = new Date(post.date).getFullYear().toString();
-        groups.set(year, [...(groups.get(year) ?? []), post]);
-      });
+    posts.forEach((post) => {
+      const year = new Date(post.date).getFullYear().toString();
+      groups.set(year, [...(groups.get(year) ?? []), post]);
+    });
 
     return [...groups.entries()];
   }, [posts]);
@@ -655,22 +653,6 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
 
 // 긴 목록에서 상단으로 빠르게 돌아가기 위한 버튼
 const ScrollTopButton = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > 420);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  if (!isVisible) return null;
-
   return (
     <Tooltip title="맨 위로" placement="left">
       <IconButton
@@ -718,7 +700,9 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
 
   // 현재 섹션 글 목록
   const sectionPosts = useMemo(() => {
-    const publishedPosts = posts.filter((post) => post.published);
+    const publishedPosts = [...posts]
+      .filter((post) => post.published)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     if (activeSection === "all") return publishedPosts;
     return publishedPosts.filter((post) => getPostSection(post) === activeSection);
