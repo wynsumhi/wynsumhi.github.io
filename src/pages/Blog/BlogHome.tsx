@@ -16,13 +16,14 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  Pagination,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import {
   CloseRounded,
+  KeyboardArrowLeftRounded,
+  KeyboardArrowRightRounded,
   KeyboardArrowUpRounded,
   SearchOffRounded,
   SearchOutlined,
@@ -72,6 +73,7 @@ const YEAR_GROUP_COLUMNS = {
 const LIST_INITIAL_VISIBLE_COUNT = 20;
 const LIST_LOAD_MORE_COUNT = 20;
 const CARD_PAGE_SIZE = 9;
+const CARD_PAGE_WINDOW = 5;
 
 type BlogSection = "all" | PostSection;
 
@@ -405,6 +407,18 @@ const formatCardDate = (dateString: string) => {
   return `${year}.${month}.${day}`;
 };
 
+// 카드 페이지 번호는 현재 페이지 주변만 노출해 탐색 부담을 줄임
+const getCardPageNumbers = (currentPage: number, totalPages: number) => {
+  const pageCount = Math.min(CARD_PAGE_WINDOW, totalPages);
+  const halfWindow = Math.floor(pageCount / 2);
+  const startPage = Math.min(
+    Math.max(currentPage - halfWindow, 1),
+    Math.max(totalPages - pageCount + 1, 1),
+  );
+
+  return Array.from({ length: pageCount }, (_, index) => startPage + index);
+};
+
 // 미리보기 카드 뷰
 const CardView = ({ posts }: { posts: Post[] }) => {
   const navigate = useNavigate();
@@ -597,6 +611,7 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
   const visibleListPosts = posts.slice(0, visibleCount);
   const hasMoreListPosts = visibleCount < posts.length;
   const totalCardPages = Math.ceil(posts.length / CARD_PAGE_SIZE);
+  const cardPageNumbers = getCardPageNumbers(cardPage, totalCardPages);
   const cardPagePosts = posts.slice(
     (cardPage - 1) * CARD_PAGE_SIZE,
     cardPage * CARD_PAGE_SIZE,
@@ -624,14 +639,8 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
     return () => observer.disconnect();
   }, [hasMoreListPosts, isListView, posts.length]);
 
-  const handleCardPageChange = (_: unknown, page: number) => {
+  const handleCardPageChange = (page: number) => {
     setCardPage(page);
-    requestAnimationFrame(() => {
-      collectionTopRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
   };
 
   return (
@@ -669,48 +678,125 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
           {totalCardPages > 1 && (
             <Box
               sx={{
-                mt: { xs: 3.5, md: 5 },
+                mt: { xs: 3.2, md: 4.6 },
                 display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: "center",
                 justifyContent: "center",
+                gap: 1.3,
               }}
             >
-              <Pagination
-                page={cardPage}
-                count={totalCardPages}
-                onChange={handleCardPageChange}
-                siblingCount={1}
-                boundaryCount={1}
-                shape="rounded"
+              <Box
                 sx={{
-                  "& .MuiPagination-ul": {
-                    gap: 0.45,
-                  },
-                  "& .MuiPaginationItem-root": {
-                    minWidth: 34,
-                    height: 34,
-                    borderRadius: 1.6,
-                    color: "var(--blog-subtle)",
-                    fontSize: "0.82rem",
-                    fontWeight: 850,
-                    border: "1px solid var(--blog-border)",
-                    bgcolor: "var(--blog-card-bg)",
-                    boxShadow: "0 10px 28px var(--blog-card-shadow)",
-                    "&:hover": {
-                      bgcolor: "var(--blog-chip-bg)",
-                      color: "var(--blog-accent)",
-                      borderColor: "var(--blog-accent)",
-                    },
-                    "&.Mui-selected": {
-                      bgcolor: "var(--blog-accent)",
-                      color: "var(--blog-active-text)",
-                      borderColor: "var(--blog-accent)",
-                      "&:hover": {
-                        bgcolor: "var(--blog-accent)",
-                      },
-                    },
-                  },
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.45,
+                  p: 0.45,
+                  borderRadius: 999,
+                  bgcolor: "var(--blog-card-bg)",
+                  border: "1px solid var(--blog-border)",
+                  boxShadow: "0 14px 38px var(--blog-card-shadow)",
                 }}
-              />
+              >
+                <Tooltip title="이전 페이지" placement="top">
+                  <span>
+                    <IconButton
+                      aria-label="이전 페이지"
+                      disabled={cardPage === 1}
+                      onClick={() => handleCardPageChange(cardPage - 1)}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        color: "var(--blog-subtle)",
+                        "&:hover": {
+                          bgcolor: "var(--blog-chip-bg)",
+                          color: "var(--blog-accent)",
+                        },
+                        "&.Mui-disabled": {
+                          color: "var(--blog-muted)",
+                          opacity: 0.35,
+                        },
+                      }}
+                    >
+                      <KeyboardArrowLeftRounded fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
+                {cardPageNumbers.map((page) => {
+                  const isCurrentPage = page === cardPage;
+
+                  return (
+                    <IconButton
+                      key={page}
+                      aria-label={`${page} 페이지`}
+                      aria-current={isCurrentPage ? "page" : undefined}
+                      onClick={() => handleCardPageChange(page)}
+                      sx={{
+                        width: { xs: 34, sm: 36 },
+                        height: { xs: 34, sm: 36 },
+                        borderRadius: 999,
+                        color: isCurrentPage
+                          ? "var(--blog-active-text)"
+                          : "var(--blog-subtle)",
+                        bgcolor: isCurrentPage ? "var(--blog-accent)" : "transparent",
+                        fontSize: "0.84rem",
+                        fontWeight: 900,
+                        transition:
+                          "background-color 0.18s ease, color 0.18s ease, transform 0.18s ease",
+                        "&:hover": {
+                          bgcolor: isCurrentPage
+                            ? "var(--blog-accent)"
+                            : "var(--blog-chip-bg)",
+                          color: isCurrentPage
+                            ? "var(--blog-active-text)"
+                            : "var(--blog-accent)",
+                          transform: "translateY(-1px)",
+                        },
+                      }}
+                    >
+                      {page}
+                    </IconButton>
+                  );
+                })}
+
+                <Tooltip title="다음 페이지" placement="top">
+                  <span>
+                    <IconButton
+                      aria-label="다음 페이지"
+                      disabled={cardPage === totalCardPages}
+                      onClick={() => handleCardPageChange(cardPage + 1)}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        color: "var(--blog-subtle)",
+                        "&:hover": {
+                          bgcolor: "var(--blog-chip-bg)",
+                          color: "var(--blog-accent)",
+                        },
+                        "&.Mui-disabled": {
+                          color: "var(--blog-muted)",
+                          opacity: 0.35,
+                        },
+                      }}
+                    >
+                      <KeyboardArrowRightRounded fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+
+              <Typography
+                sx={{
+                  color: "var(--blog-muted)",
+                  fontSize: "0.76rem",
+                  fontWeight: 850,
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {cardPage} / {totalCardPages}
+              </Typography>
             </Box>
           )}
         </>
