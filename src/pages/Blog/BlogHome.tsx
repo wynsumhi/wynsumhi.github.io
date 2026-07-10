@@ -4,10 +4,11 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   CardMedia,
@@ -22,6 +23,7 @@ import {
 } from "@mui/material";
 import {
   CloseRounded,
+  KeyboardArrowUpRounded,
   SearchOffRounded,
   SearchOutlined,
 } from "@mui/icons-material";
@@ -65,6 +67,16 @@ const TIMELINE_HEADER_HEIGHT = { xs: 32, md: 36 };
 const YEAR_GROUP_COLUMNS = {
   xs: "42px minmax(0, 1fr)",
   md: "58px minmax(0, 1fr)",
+};
+
+const VISIBLE_POST_COUNT = {
+  list: 20,
+  card: 12,
+};
+
+const LOAD_MORE_COUNT = {
+  list: 20,
+  card: 12,
 };
 
 type BlogSection = "all" | PostSection;
@@ -574,6 +586,114 @@ const CardView = ({ posts }: { posts: Post[] }) => {
   );
 };
 
+type PostCollectionProps = {
+  posts: Post[];
+  viewMode: "list" | "card";
+};
+
+// 많은 글을 한 번에 렌더링하지 않고 필요한 만큼만 보여주는 목록 래퍼
+const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_POST_COUNT[viewMode]);
+  const visiblePosts = posts.slice(0, visibleCount);
+  const hasMorePosts = visibleCount < posts.length;
+  const nextCount = Math.min(LOAD_MORE_COUNT[viewMode], posts.length - visibleCount);
+
+  const handleLoadMore = () => {
+    setVisibleCount((current) =>
+      Math.min(current + LOAD_MORE_COUNT[viewMode], posts.length),
+    );
+  };
+
+  return (
+    <>
+      {viewMode === "list" ? (
+        <ListView posts={visiblePosts} />
+      ) : (
+        <CardView posts={visiblePosts} />
+      )}
+
+      {hasMorePosts && (
+        <Box
+          sx={{
+            mt: { xs: 3.5, md: 5 },
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            onClick={handleLoadMore}
+            variant="outlined"
+            sx={{
+              minWidth: 168,
+              px: 2.6,
+              py: 1.05,
+              borderRadius: 999,
+              borderColor: "var(--blog-border)",
+              color: "var(--blog-subtle)",
+              bgcolor: "var(--blog-card-bg)",
+              fontSize: "0.82rem",
+              fontWeight: 850,
+              boxShadow: "0 14px 36px var(--blog-card-shadow)",
+              "&:hover": {
+                borderColor: "var(--blog-accent)",
+                bgcolor: "var(--blog-chip-bg)",
+                color: "var(--blog-accent)",
+              },
+            }}
+          >
+            더 보기 {nextCount}개 · {visiblePosts.length}/{posts.length}
+          </Button>
+        </Box>
+      )}
+    </>
+  );
+};
+
+// 긴 목록에서 상단으로 빠르게 돌아가기 위한 버튼
+const ScrollTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 420);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  if (!isVisible) return null;
+
+  return (
+    <Tooltip title="맨 위로" placement="left">
+      <IconButton
+        aria-label="맨 위로 이동"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        sx={{
+          position: "fixed",
+          right: { xs: 18, md: 34 },
+          bottom: { xs: 18, md: 32 },
+          zIndex: 30,
+          width: 46,
+          height: 46,
+          bgcolor: "var(--blog-card-bg)",
+          color: "var(--blog-accent)",
+          border: "1px solid var(--blog-border)",
+          boxShadow: "0 18px 44px var(--blog-card-shadow)",
+          "&:hover": {
+            bgcolor: "var(--blog-chip-bg)",
+          },
+        }}
+      >
+        <KeyboardArrowUpRounded />
+      </IconButton>
+    </Tooltip>
+  );
+};
+
 type BlogHomeContentProps = {
   activeSection: BlogSection;
 };
@@ -655,6 +775,15 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
 
   // 검색 또는 필터 적용 상태
   const hasActiveCondition = hasActiveSearch || hasActiveFilter;
+
+  // 표시 개수를 초기화할 조건 키
+  const collectionKey = [
+    activeSection,
+    viewMode,
+    searchKeyword.trim().toLowerCase(),
+    selectedCategory,
+    selectedTag,
+  ].join("|");
 
   // 목록 제목
   const listTitle = (() => {
@@ -1026,11 +1155,15 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
             />
           )}
         </Box>
-      ) : viewMode === "list" ? (
-        <ListView posts={filteredPosts} />
       ) : (
-        <CardView posts={filteredPosts} />
+        <PostCollection
+          key={collectionKey}
+          posts={filteredPosts}
+          viewMode={viewMode}
+        />
       )}
+
+      <ScrollTopButton />
     </Box>
   );
 };
