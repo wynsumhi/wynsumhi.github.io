@@ -14,6 +14,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 const NOTION_TOKEN = process.env.NOTION_TOKEN!;
 
 type BlogSection = "tech" | "study" | "log";
+type ProjectKind = "work" | "side";
 
 // Notion 데이터베이스 설정
 const DATABASES: Array<{
@@ -46,6 +47,35 @@ interface Post {
   content: string;
 }
 
+interface Project {
+  id: string;
+  kind: ProjectKind;
+  title: string;
+  description: string;
+  thumbnail: string;
+  tech: string[];
+  links: {
+    github?: string;
+    demo?: string;
+  };
+  period: {
+    start: string;
+    end?: string;
+  };
+  detail?: {
+    subtitle?: string;
+    problem?: string;
+    solution?: string;
+    results?: string[];
+    challenges?: string[];
+    info?: {
+      duration?: string;
+      team?: string;
+      role?: string;
+    };
+  };
+}
+
 interface NotionPage {
   id: string;
   object: string;
@@ -66,8 +96,12 @@ type NotionProperty =
       multi_select: Array<{ name: string }>;
     }
   | {
+      type: "rich_text";
+      rich_text: Array<{ plain_text: string }>;
+    }
+  | {
       type: "date";
-      date?: { start: string };
+      date?: { start: string; end?: string };
     }
   | {
       type: "status";
@@ -82,6 +116,10 @@ type NotionProperty =
       url?: string;
     }
   | {
+      type: "number";
+      number?: number;
+    }
+  | {
       type: string;
       [key: string]: unknown;
     };
@@ -94,6 +132,68 @@ const getProperty = (properties: NotionPage["properties"], names: string[]) => {
     normalizedNames.includes(name.toLowerCase()),
   )?.[1];
 };
+
+const getTitleText = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  return property?.type === "title"
+    ? property.title.map((text) => text.plain_text).join("").trim()
+    : "";
+};
+
+const getText = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  if (property?.type === "rich_text") {
+    return property.rich_text.map((text) => text.plain_text).join("").trim();
+  }
+
+  if (property?.type === "title") {
+    return property.title.map((text) => text.plain_text).join("").trim();
+  }
+
+  if (property?.type === "select") {
+    return property.select?.name ?? "";
+  }
+
+  if (property?.type === "url") {
+    return property.url ?? "";
+  }
+
+  return "";
+};
+
+const getSelectName = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  return property?.type === "select" ? property.select?.name ?? "" : "";
+};
+
+const getMultiSelectNames = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  return property?.type === "multi_select"
+    ? property.multi_select.map((tag) => tag.name)
+    : [];
+};
+
+const getDateRange = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  return property?.type === "date" ? property.date : undefined;
+};
+
+const getNumber = (properties: NotionPage["properties"], names: string[]) => {
+  const property = getProperty(properties, names);
+
+  return property?.type === "number" ? property.number : undefined;
+};
+
+const getList = (properties: NotionPage["properties"], names: string[]) =>
+  getText(properties, names)
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 
 // 공개 여부 추출
 const getPublished = (properties: NotionPage["properties"]) => {
@@ -130,7 +230,10 @@ const getPublished = (properties: NotionPage["properties"]) => {
 };
 
 // Notion DB 페이지 목록 조회
-async function fetchDatabasePages(databaseId: string) {
+async function fetchDatabasePages(
+  databaseId: string,
+  sorts?: Array<{ property: string; direction: "ascending" | "descending" }>,
+) {
   const pages: NotionPage[] = [];
   let startCursor: string | undefined;
 
@@ -145,12 +248,7 @@ async function fetchDatabasePages(databaseId: string) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sorts: [
-            {
-              property: "date",
-              direction: "descending",
-            },
-          ],
+          ...(sorts ? { sorts } : {}),
           start_cursor: startCursor,
         }),
       },
@@ -176,11 +274,7 @@ async function toPost(page: NotionPage, section: BlogSection): Promise<Post | nu
   const properties = page.properties;
 
   // 제목 추출
-  const titleProperty = getProperty(properties, ["title", "Title", "제목"]);
-  const title =
-    titleProperty?.type === "title"
-      ? titleProperty.title[0]?.plain_text || ""
-      : "";
+  const title = getTitleText(properties, ["title", "Title", "제목"]);
 
   // 카테고리 추출
   const categoryProperty = getProperty(properties, ["category", "Category", "카테고리"]);
@@ -190,11 +284,7 @@ async function toPost(page: NotionPage, section: BlogSection): Promise<Post | nu
       : "";
 
   // 태그 추출
-  const tagsProperty = getProperty(properties, ["tags", "Tags", "태그"]);
-  const tags =
-    tagsProperty?.type === "multi_select"
-      ? tagsProperty.multi_select.map((tag) => tag.name)
-      : [];
+  const tags = getMultiSelectNames(properties, ["tags", "Tags", "태그"]);
 
   // 날짜 추출
   const dateProperty = getProperty(properties, ["date", "Date", "날짜"]);
@@ -232,6 +322,121 @@ async function toPost(page: NotionPage, section: BlogSection): Promise<Post | nu
   };
 }
 
+const normalizeProjectKind = (kind: string): ProjectKind => {
+  const normalizedKind = kind.toLowerCase();
+
+  if (["side", "사이드", "개인", "personal"].includes(normalizedKind)) {
+    return "side";
+  }
+
+  return "work";
+};
+
+const toMonth = (date?: string) => date?.slice(0, 7) ?? "";
+
+function toProject(page: NotionPage): Project | null {
+  if (page.object !== "page") return null;
+
+  const properties = page.properties;
+  const published = getPublished(properties);
+
+  if (!published) {
+    return null;
+  }
+
+  const title = getTitleText(properties, ["title", "Title", "제목", "프로젝트명", "Name"]);
+  const dateRange = getDateRange(properties, ["period", "Period", "기간", "date", "Date", "날짜"]);
+  const start = getText(properties, ["start", "Start", "시작일"]) || toMonth(dateRange?.start);
+  const end = getText(properties, ["end", "End", "종료일"]) || toMonth(dateRange?.end);
+  const demo = getText(properties, ["demo", "Demo", "배포", "데모", "site", "Site", "URL"]);
+  const github = getText(properties, ["github", "GitHub", "깃허브", "repo", "Repository"]);
+  const tech = getMultiSelectNames(properties, [
+    "tech",
+    "Tech",
+    "기술",
+    "기술스택",
+    "stack",
+    "Stack",
+    "tags",
+    "Tags",
+    "태그",
+  ]);
+
+  if (!title || !start) {
+    return null;
+  }
+
+  return {
+    id: getText(properties, ["id", "ID", "slug", "Slug"]) || page.id,
+    kind: normalizeProjectKind(
+      getSelectName(properties, ["kind", "Kind", "구분", "type", "Type", "category", "Category", "카테고리"]),
+    ),
+    title,
+    description: getText(properties, ["description", "Description", "설명", "요약"]),
+    thumbnail: getText(properties, ["thumbnail", "Thumbnail", "썸네일", "image", "Image"]) || "",
+    tech,
+    links: {
+      ...(github ? { github } : {}),
+      ...(demo ? { demo } : {}),
+    },
+    period: {
+      start,
+      ...(end ? { end } : {}),
+    },
+    detail: {
+      subtitle: getText(properties, ["subtitle", "Subtitle", "부제", "한줄소개"]),
+      problem: getText(properties, ["problem", "Problem", "문제", "문제정의"]),
+      solution: getText(properties, ["solution", "Solution", "해결", "해결방안"]),
+      results: getList(properties, ["results", "Results", "성과", "결과"]),
+      challenges: getList(properties, ["challenges", "Challenges", "도전", "기술적도전"]),
+      info: {
+        duration: getText(properties, ["duration", "Duration", "개발기간"]),
+        team: getText(properties, ["team", "Team", "팀", "팀규모"]),
+        role: getText(properties, ["role", "Role", "역할", "담당"]),
+      },
+    },
+  };
+}
+
+const cleanProjects = (projects: Project[]) =>
+  projects
+    .map((project) => ({
+      ...project,
+      detail: project.detail
+        ? {
+            ...project.detail,
+            results: project.detail.results?.length ? project.detail.results : undefined,
+            challenges: project.detail.challenges?.length ? project.detail.challenges : undefined,
+            info:
+              project.detail.info?.duration || project.detail.info?.team || project.detail.info?.role
+                ? project.detail.info
+                : undefined,
+          }
+        : undefined,
+    }))
+    .map((project) => ({
+      ...project,
+      detail:
+        project.detail?.subtitle ||
+        project.detail?.problem ||
+        project.detail?.solution ||
+        project.detail?.results ||
+        project.detail?.challenges ||
+        project.detail?.info
+          ? project.detail
+          : undefined,
+    }));
+
+const createProjectsSource = (projects: Project[]) => `/**
+ * 프로젝트 데이터
+ *
+ * Notion 프로젝트 데이터베이스에서 자동 생성됩니다.
+ */
+import type { Project } from "@/types/portfolio";
+
+export const projects: Project[] = ${JSON.stringify(projects, null, 2)};
+`;
+
 async function fetchPosts() {
   try {
     if (!NOTION_TOKEN) {
@@ -248,7 +453,12 @@ async function fetchPosts() {
 
     // 섹션별 데이터베이스 조회
     for (const database of activeDatabases) {
-      const pages = await fetchDatabasePages(database.databaseId!);
+      const pages = await fetchDatabasePages(database.databaseId!, [
+        {
+          property: "date",
+          direction: "descending",
+        },
+      ]);
       const sectionPosts = await Promise.all(
         pages.map((page) => toPost(page, database.section)),
       );
@@ -265,6 +475,46 @@ async function fetchPosts() {
 
     console.log(`${posts.length}개의 글을 가져왔습니다.`);
     console.log("저장 위치:", outputPath);
+
+    if (process.env.NOTION_PROJECT_DATABASE_ID) {
+      const projectPages = await fetchDatabasePages(process.env.NOTION_PROJECT_DATABASE_ID);
+      if (projectPages.length === 0) {
+        console.log("프로젝트 데이터베이스에 페이지가 없어 기존 프로젝트 파일을 유지합니다.");
+        return;
+      }
+
+      const projects = cleanProjects(
+        projectPages
+          .map(toProject)
+          .filter((project): project is Project => Boolean(project))
+          .sort((a, b) => {
+            const orderA = getNumber(
+              projectPages.find((page) => page.id === a.id)?.properties ?? {},
+              ["order", "Order", "순서"],
+            );
+            const orderB = getNumber(
+              projectPages.find((page) => page.id === b.id)?.properties ?? {},
+              ["order", "Order", "순서"],
+            );
+
+            if (orderA !== undefined || orderB !== undefined) {
+              return (orderA ?? Number.MAX_SAFE_INTEGER) - (orderB ?? Number.MAX_SAFE_INTEGER);
+            }
+
+            return new Date(b.period.start).getTime() - new Date(a.period.start).getTime();
+          }),
+      );
+      if (projects.length === 0) {
+        console.log("변환 가능한 프로젝트가 없어 기존 프로젝트 파일을 유지합니다.");
+        return;
+      }
+
+      const projectsOutputPath = path.join(process.cwd(), "src/data/projects.ts");
+      fs.writeFileSync(projectsOutputPath, createProjectsSource(projects), "utf-8");
+
+      console.log(`${projects.length}개의 프로젝트를 가져왔습니다.`);
+      console.log("저장 위치:", projectsOutputPath);
+    }
   } catch (error) {
     console.error("에러 발생:", error);
     process.exit(1);

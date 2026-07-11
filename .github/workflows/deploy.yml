@@ -54,6 +54,7 @@ jobs:
           NOTION_TECH_DATABASE_ID: ${{ secrets.NOTION_TECH_DATABASE_ID }}
           NOTION_STUDY_DATABASE_ID: ${{ secrets.NOTION_STUDY_DATABASE_ID }}
           NOTION_LOG_DATABASE_ID: ${{ secrets.NOTION_LOG_DATABASE_ID }}
+          NOTION_PROJECT_DATABASE_ID: ${{ secrets.NOTION_PROJECT_DATABASE_ID }}
 
       # 6. 빌드 (scripts notion 후에 실행되므로 최신 데이터로 빌드됨)
       - name: Build
