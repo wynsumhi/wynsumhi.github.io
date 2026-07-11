@@ -1,15 +1,145 @@
 [
   {
-    "id": "398bdef7-22b6-8023-9ea4-e3396691d004",
-    "title": "log test",
-    "section": "log",
+    "id": "399bdef7-22b6-816e-847c-fa201f91dd43",
+    "title": "React 프로젝트에 클린 아키텍처를 적용하기 전에 — 폴더보다 의존성 방향",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "frontend"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> “React 클린 아키텍처”를 검색하면 정교한 폴더 구조부터 나온다. 처음에는 그 구조를 그대로 따라 하면 코드가 깔끔해질 것 같았다. 하지만 핵심은 폴더 이름이 아니라, UI와 비즈니스 규칙이 어디에 의존하는지 정하는 일이었다.\n\n## 클린 아키텍처를 프론트엔드에서 보는 방법\n\n\nReact는 UI를 만드는 라이브러리다. API 통신 방식, 도메인 규칙, 폴더 구조까지 정해 주지는 않는다. 프로젝트가 커지면 컴포넌트 안에 요청 코드와 데이터 변환, 검증, 화면 상태가 섞이기 쉽다.\n\n\n클린 아키텍처 관점에서는 변경 이유가 다른 코드를 분리하고, 핵심 규칙이 프레임워크와 외부 API에 지나치게 끌려가지 않도록 만든다.\n\n\n## 한 가지 예시 구조\n\n\n```plain text\nsrc/\n├─ domain/\n│  ├─ entities/\n│  └─ repositories/\n├─ application/\n│  └─ use-cases/\n├─ infrastructure/\n│  ├─ api/\n│  └─ repositories/\n└─ presentation/\n   ├─ components/\n   ├─ hooks/\n   └─ pages/\n```\n\n- domain: 화면이나 HTTP와 무관한 핵심 타입과 규칙\n- application: 사용자가 수행하는 작업의 흐름\n- infrastructure: API, 저장소, 브라우저 저장소 같은 외부 구현\n- presentation: React 컴포넌트와 화면 상태\n\n이 구조는 정답이 아니라 의존성 경계를 설명하기 위한 예시다.\n\n\n## 예: 사용자 조회 분리하기\n\n\n```typescript\nexport interface UserRepository {\n  findById(id: string): Promise<User>\n}\n\nexport class GetUser {\n  constructor(private readonly users: UserRepository) {}\n\n  execute(id: string) {\n    return this.users.findById(id)\n  }\n}\n```\n\n\nuse case는 Axios나 fetch를 직접 알지 않는다. 실제 HTTP 요청은 repository 구현이 맡는다. 덕분에 API 구현을 바꾸거나 테스트 대역을 넣을 때 핵심 흐름을 덜 건드릴 수 있다.\n\n\n## 모든 프로젝트에 필요한 것은 아니다\n\n\n작은 페이지나 짧은 실험 프로젝트에 여러 계층을 먼저 만들면 파일만 늘고 흐름을 따라가기 어려워질 수 있다. 복잡한 도메인 규칙, 여러 데이터 소스, 긴 유지보수 기간처럼 분리의 이점이 실제 비용보다 클 때 도입하는 편이 낫다.\n\n\n처음부터 거대한 구조를 만드는 대신 다음 신호가 보일 때 경계를 나누는 방법도 있다.\n\n- 같은 비즈니스 규칙이 여러 컴포넌트에 반복된다.\n- API 응답 구조가 UI 전체로 퍼진다.\n- 테스트하려면 브라우저와 네트워크가 항상 필요하다.\n- 상태관리 도구를 바꾸면 핵심 로직까지 수정해야 한다.\n\n## 내가 기억할 기준\n\n\n좋은 구조는 폴더가 많아 보이는 구조가 아니라 변경 범위를 예측할 수 있는 구조다. “어느 폴더에 넣을까?”보다 “이 코드는 무엇을 알아야 하고, 무엇을 몰라야 할까?”를 먼저 묻는 편이 클린 아키텍처의 목적에 가깝다.\n\n\n## 다음에 더 확인할 것\n\n- Feature-Sliced Design과의 차이\n- repository pattern의 프론트엔드 적용 범위\n- server state와 client state 경계\n- use case 단위 테스트\n\n## 참고 자료\n\n- [React — Thinking in React](https://react.dev/learn/thinking-in-react)\n- [원본 메모](https://ausekd.tistory.com/88)"
+  },
+  {
+    "id": "399bdef7-22b6-81b3-a4bf-e69246fbc216",
+    "title": "Kakao Developers 앱 등록과 API 키 — 프론트엔드에서 노출 범위까지 확인하기",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "frontend"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> 카카오 지도나 로그인을 붙이려면 먼저 Kakao Developers에서 애플리케이션을 등록하고 키를 발급받아야 한다. 처음에는 키 하나만 복사하면 끝이라고 생각했지만, 실제로는 플랫폼·도메인·Redirect URI와 키의 용도를 함께 설정해야 했다.\n\n## 1. 애플리케이션 등록\n\n\nKakao Developers에 로그인한 뒤 내 애플리케이션에서 새 앱을 만든다. 앱 이름과 사업자명 등 필요한 정보를 입력하면 앱 단위의 설정 공간과 여러 종류의 앱 키가 생성된다.\n\n\n## 2. 앱 키 구분하기\n\n\n카카오는 사용 환경에 따라 키를 구분한다.\n\n- JavaScript 키: 웹의 Kakao JavaScript SDK\n- REST API 키: REST API 요청\n- Native App 키: Android·iOS 네이티브 SDK\n- Admin 키: 관리 권한이 필요한 서버 측 요청\n\n키 이름에 맞는 환경에서 사용해야 한다. 특히 Admin 키를 브라우저 코드나 공개 저장소에 넣으면 안 된다.\n\n\n## 3. 웹 플랫폼 등록\n\n\n웹에서 JavaScript SDK나 카카오 로그인을 사용한다면 사이트 도메인을 등록한다.\n\n\n개발 환경과 운영 환경은 주소가 다르므로 필요한 도메인을 각각 확인한다.\n\n\n```plain text\nhttp://localhost:5173\nhttps://example.com\n```\n\n\n도메인, 프로토콜, 포트가 다르면 별도 출처로 취급될 수 있다. 로컬에서는 되는데 배포 후 실패한다면 키만 보기보다 플랫폼 등록 값을 먼저 확인해야 한다.\n\n\n## 4. Redirect URI 설정\n\n\nOAuth 로그인을 사용한다면 인증 완료 후 돌아올 Redirect URI를 설정한다.\n\n\n```plain text\nhttp://localhost:5173/auth/kakao/callback\nhttps://example.com/auth/kakao/callback\n```\n\n\n프론트엔드 라우트와 Kakao Developers에 등록한 URI가 정확히 일치해야 한다. 운영 주소로 바뀔 때 누락되기 쉬운 부분이다.\n\n\n## 프론트엔드 키는 어떻게 관리할까\n\n\n브라우저에서 사용하는 JavaScript 키는 네트워크 요청과 번들에서 확인될 수 있다. 따라서 “화면에 보이지 않게 .env에 넣었다”는 사실만으로 비밀키가 되지는 않는다.\n\n\nVite의 `VITE_` 변수처럼 브라우저 번들에 주입되는 값은 사용자에게 전달된다.\n\n\n```javascript\nVITE_KAKAO_JAVASCRIPT_KEY=...\n```\n\n\n```typescript\nconst kakaoKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY\n```\n\n\n.env는 저장소에 실수로 커밋하지 않도록 관리하는 데 유용하지만, 클라이언트 키를 암호화해 주는 장치는 아니다. 플랫폼 도메인 제한을 정확히 설정하고, Admin 키나 서버 비밀값은 백엔드 환경 변수에서만 관리해야 한다.\n\n\n## 체크리스트\n\n- 현재 기능에 맞는 키를 선택했는가?\n- 개발·운영 도메인을 등록했는가?\n- Redirect URI가 정확히 일치하는가?\n- Admin 키를 클라이언트에 넣지 않았는가?\n- 공개 저장소의 과거 커밋에도 키가 남지 않았는가?\n- 유출이 의심되면 키를 재발급했는가?\n\n## 다시 정리하며 알게 된 점\n\n\nAPI 키 발급은 복사 작업이 아니라 “어떤 앱이 어느 환경에서 어떤 권한으로 요청하는가”를 등록하는 과정이었다. 키 오류가 발생했을 때 코드만 반복해서 바꾸기보다 앱 설정, 플랫폼, Redirect URI, 키 종류를 나눠 확인하는 편이 빠르다.\n\n\n## 다음에 더 확인할 것\n\n- Kakao Login 인가 코드 흐름\n- 프론트엔드와 백엔드의 토큰 책임\n- Redirect URI와 CORS의 차이\n- 키 노출 사고 후 Git 이력 정리\n\n## 참고 자료\n\n- [Kakao Developers](https://developers.kakao.com/)\n- [원본 메모](https://ausekd.tistory.com/85)"
+  },
+  {
+    "id": "399bdef7-22b6-81ce-8fc4-defa3930bc2b",
+    "title": "TanStack은 React Query 하나가 아니었다 — Headless 도구 생태계 이해하기",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "frontend"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> TanStack 링크를 처음 저장했을 때는 React Query를 만든 곳 정도로만 이해했다. 다시 살펴보니 TanStack은 특정 UI 디자인을 제공하기보다, 복잡한 프론트엔드 기능의 상태와 동작을 다루는 headless 라이브러리 모음에 가까웠다.\n\n## Headless라는 의미\n\n\nHeadless 도구는 동작과 상태 관리는 제공하지만 화면 모양은 강제하지 않는다. 예를 들어 테이블의 정렬·필터·페이지네이션 로직을 제공하되, 실제 `table` 태그와 스타일은 개발자가 선택한다.\n\n\n이 방식은 디자인 시스템에 맞춰 UI를 자유롭게 구성하기 좋지만, 완성된 컴포넌트를 바로 가져다 쓰는 UI 라이브러리보다 초기 구현량이 많을 수 있다.\n\n\n## 대표 도구\n\n\n### TanStack Query\n\n\n서버에서 가져온 비동기 데이터를 캐시하고, 갱신하고, 요청 상태를 관리한다. 단순 전역 상태관리와 달리 server state의 freshness와 refetch 흐름에 초점을 둔다.\n\n\n### TanStack Table\n\n\n테이블의 정렬, 필터, 컬럼, 페이지네이션 같은 상태와 계산 로직을 제공한다. 렌더링 방식은 프로젝트가 결정한다.\n\n\n### TanStack Router\n\n\n타입 안전성을 강조하는 라우터다. URL 파라미터와 검색 파라미터를 애플리케이션 상태처럼 다루는 데 초점을 둔다.\n\n\n### TanStack Form·Virtual·Store\n\n\n폼 상태, 대량 목록 가상화, 반응형 저장소처럼 반복적으로 복잡해지는 기능을 각각 다룬다. 모든 도구를 한 프로젝트에 사용할 필요는 없다.\n\n\n## 왜 하나의 UI 프레임워크가 아닐까\n\n\nTanStack의 공통점은 특정 디자인보다 재사용 가능한 동작을 제공한다는 점이다. React뿐 아니라 도구별로 여러 프레임워크 어댑터를 제공하기도 한다. 따라서 “TanStack을 도입한다”보다 “현재 문제에 Query나 Table이 필요한가?”라고 개별적으로 판단하는 편이 정확하다.\n\n\n## 선택할 때 확인할 것\n\n- 팀이 headless API를 직접 조합할 여유가 있는가?\n- 디자인 자유도가 중요한가?\n- 데이터와 UI 상태의 책임을 구분했는가?\n- 작은 기능에 지나치게 큰 추상화를 도입하는 것은 아닌가?\n- 공식 예제의 프레임워크와 버전이 현재 프로젝트와 맞는가?\n\n## 내가 이해한 방식\n\n\nTanStack은 완성된 화면을 주는 상자가 아니라, 화면 뒤의 복잡한 상태를 다루는 도구 상자다. React Query만 알고 있을 때보다 생태계 전체를 보고 나니, 공통 브랜드보다 각 라이브러리가 해결하는 문제를 먼저 봐야 한다는 점이 분명해졌다.\n\n\n## 다음에 더 확인할 것\n\n- Query의 staleTime과 gcTime\n- Table의 controlled state\n- Router의 type-safe search params\n- 가상화가 필요한 목록의 기준\n\n## 참고 자료\n\n- [TanStack 공식 사이트](https://tanstack.com/)\n- [원본 메모](https://ausekd.tistory.com/87)"
+  },
+  {
+    "id": "399bdef7-22b6-81d6-b53e-c8eb8b0fd31e",
+    "title": "DataGrip을 처음 열기 전에 알아둘 것 — 연결·탐색·쿼리 실행 흐름",
+    "section": "tech",
+    "category": "Daily Content",
+    "tags": [
+      "MySQL",
+      "devops"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> DataGrip 링크를 저장해 두었지만, 시간이 지나 다시 보니 “데이터베이스 도구”라는 설명만으로는 왜 기록했는지 떠올리기 어려웠다. 그래서 처음 연결할 때 필요한 개념과 실제로 자주 쓰게 되는 흐름을 함께 정리한다.\n\n## DataGrip은 무엇인가\n\n\nDataGrip은 JetBrains가 만든 데이터베이스 IDE다. 여러 DBMS에 연결해 SQL을 작성하고 실행하며, 테이블·뷰·인덱스 같은 데이터베이스 객체를 탐색할 수 있다. 단순한 테이블 뷰어라기보다 SQL 작성과 스키마 탐색에 초점을 둔 개발 도구에 가깝다.\n\n\n## 처음 연결할 때 필요한 정보\n\n\n데이터베이스 연결에는 보통 다음 값이 필요하다.\n\n- Host: 데이터베이스 서버 주소\n- Port: MySQL은 보통 3306, PostgreSQL은 보통 5432\n- User와 Password\n- Database 또는 Schema\n- 필요한 경우 SSH 터널과 SSL 설정\n\nDataGrip은 이 연결 구성을 data source로 관리한다. 비밀번호나 운영 DB 접속 정보는 화면 공유, 저장소 커밋, 문서 복사 과정에서 노출되지 않도록 주의해야 한다.\n\n\n## 기본 작업 흐름\n\n1. 새 프로젝트를 만든다.\n2. Data Source를 추가하고 DBMS를 선택한다.\n3. 접속 정보를 입력한 뒤 Test Connection으로 확인한다.\n4. 필요한 schema만 선택한다.\n5. Query Console에서 SQL을 작성하고 실행한다.\n6. 결과를 확인하되 수정 쿼리는 트랜잭션과 대상 환경을 다시 확인한다.\n\n```sql\nSELECT id, name, created_at\nFROM users\nORDER BY created_at DESC\nLIMIT 20;\n```\n\n\n## 편리했던 기능\n\n\nDatabase Explorer에서는 테이블, 컬럼, 키, 인덱스를 계층적으로 볼 수 있다. Data Editor에서는 SQL을 직접 작성하지 않고도 데이터를 정렬하거나 필터링할 수 있고, 외래 키 관계를 따라 관련 행으로 이동할 수도 있다. 스키마 다이어그램과 객체 검색 기능은 낯선 프로젝트의 데이터 구조를 파악할 때 도움이 된다.\n\n\n## 주의할 점\n\n\nGUI에서 행을 직접 수정할 수 있다는 점은 편리하지만 운영 데이터에서는 위험할 수 있다. UPDATE와 DELETE 전에는 WHERE 조건을 먼저 SELECT로 확인하고, 자동 커밋 여부와 현재 연결된 환경을 점검하는 습관이 필요하다.\n\n\n또한 DataGrip의 연결 설정은 데이터베이스 자체를 백업하는 기능과 다르다. IDE에 data source가 등록되어 있다고 해서 데이터가 보존되는 것은 아니다.\n\n\n## 내가 이해한 위치\n\n\nDataGrip은 데이터베이스를 대신 설계해 주는 도구라기보다, 데이터베이스와 대화하기 위한 작업 공간이다. SQL을 직접 이해해야 기능을 안전하게 사용할 수 있고, GUI는 그 과정을 더 빠르게 만들어 준다.\n\n\n## 다음에 더 확인할 것\n\n- transaction과 auto-commit 설정\n- 실행 계획으로 느린 쿼리 확인하기\n- schema 비교와 migration\n- read-only data source 구성\n\n## 참고 자료\n\n- [DataGrip Getting Started](https://www.jetbrains.com/help/datagrip/getting-started.html)\n- [DataGrip Database Objects](https://www.jetbrains.com/help/datagrip/database-objects.html)\n- [원본 메모](https://ausekd.tistory.com/90)"
+  },
+  {
+    "id": "399bdef7-22b6-81eb-8da1-e4e6ef5245bf",
+    "title": "Flutter Debug Banner는 왜 보일까? — 개발 모드 표시 이해하고 제거하기",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "frontend"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> Flutter 화면을 캡처하거나 UI를 확인하다 보면 오른쪽 위의 DEBUG 배너가 먼저 눈에 들어온다. 처음에는 단순히 거슬리는 장식처럼 보였지만, 이 배너는 현재 앱이 디버그 빌드로 실행되고 있다는 사실을 알려주는 표시였다.\n\n## 배너가 나타나는 이유\n\n\nFlutter의 `MaterialApp`은 디버그 모드에서 기본적으로 DEBUG 배너를 표시한다. 개발 중인 앱과 실제 배포 빌드를 시각적으로 구분하기 위한 장치다. 릴리스 모드에서는 표시되지 않으므로 배너를 숨긴다고 해서 앱이 릴리스 빌드로 바뀌는 것은 아니다.\n\n\n## 제거 방법\n\n\n```dart\nMaterialApp(\n  debugShowCheckedModeBanner: false,\n  home: const HomePage(),\n)\n```\n\n\n`debugShowCheckedModeBanner`를 `false`로 설정하면 디버그 모드에서도 배너가 보이지 않는다.\n\n\n## 설정 위치가 중요한 이유\n\n\n이 속성은 개별 화면이 아니라 `MaterialApp` 또는 `CupertinoApp` 수준에서 설정한다. 앱 전체를 감싸는 루트 위젯의 설정이기 때문에 각 페이지마다 반복할 필요가 없다.\n\n\n```dart\nvoid main() {\n  runApp(const MyApp());\n}\n\nclass MyApp extends StatelessWidget {\n  const MyApp({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      debugShowCheckedModeBanner: false,\n      title: 'My App',\n      home: const HomePage(),\n    );\n  }\n}\n```\n\n\n## 숨겨도 되는 상황과 남겨둘 상황\n\n\n포트폴리오용 캡처, UI 발표, 디자인 확인처럼 화면 자체에 집중해야 할 때는 배너를 숨기는 편이 자연스럽다. 반대로 개발·릴리스 환경을 혼동하기 쉬운 팀 작업에서는 디버그 실행임을 바로 알 수 있도록 유지하는 것도 의미가 있다.\n\n\n중요한 점은 배너 제거를 배포 설정으로 착각하지 않는 것이다. 실제 배포 전에는 `flutter build apk --release`, `flutter build appbundle --release`, `flutter build ios --release`처럼 릴리스 빌드를 별도로 수행해야 한다.\n\n\n## 다시 정리하며 알게 된 점\n\n\n처음 기록은 속성 한 줄뿐이었지만, 다시 보니 기억해야 할 핵심은 “배너를 없애는 방법”보다 “이 배너가 빌드 모드를 알려주는 표시”라는 점이었다. 화면을 깨끗하게 만드는 설정과 앱을 배포 가능한 상태로 만드는 과정은 서로 다르다.\n\n\n## 다음에 더 확인할 것\n\n- Flutter의 debug·profile·release 모드 차이\n- `kDebugMode`, `kProfileMode`, `kReleaseMode`\n- Flavor로 개발·스테이징·운영 환경 나누기\n\n## 참고 자료\n\n- [Flutter API — debugShowCheckedModeBanner](https://api.flutter.dev/flutter/material/MaterialApp/debugShowCheckedModeBanner.html)\n- [원본 메모](https://ausekd.tistory.com/93)"
+  },
+  {
+    "id": "399bdef7-22b6-813e-b251-ff53f7bd2e09",
+    "title": "GitLab 저장소를 GitHub로 옮기며 커밋 이력까지 유지하기",
+    "section": "tech",
+    "category": "Daily Content",
+    "tags": [
+      "Git",
+      "devops"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> GitLab에 있던 프로젝트를 GitHub로 옮길 때 처음 떠올린 방법은 파일을 내려받아 새 저장소에 다시 올리는 것이었다. 하지만 그렇게 하면 코드의 최신 상태만 옮겨질 뿐, 그동안 쌓인 커밋과 브랜치 흐름은 이어지지 않는다. 저장소 이전에서 중요한 것은 파일 복사가 아니라 **Git 이력을 그대로 이동하는 것**이었다.\n\n## 왜 단순 복사로는 부족할까?\n\n\nGit 저장소에는 현재 보이는 파일만 있는 것이 아니다. 각 변경이 언제, 누구에 의해 만들어졌는지 기록한 커밋과 브랜치, 태그가 함께 저장된다.\n\n\n프로젝트 폴더만 복사해 새 저장소에서 다시 커밋하면 결과물은 같아 보일 수 있다. 하지만 이전 커밋 이력은 새 저장소에 포함되지 않는다. 과거 작업 흐름을 남기고 싶다면 원본 저장소의 Git 객체와 참조를 함께 가져와야 한다.\n\n\n여기서 사용한 방법이 다음 두 단계다.\n\n1. 원본 저장소를 bare 형태로 복제한다.\n2. 복제한 참조를 새 GitHub 저장소에 mirror 방식으로 push한다.\n\n## 이전 전에 확인할 것\n\n\n먼저 GitHub에 **비어 있는 새 저장소**를 만든다. README, 라이선스, .gitignore로 초기화하지 않은 저장소가 충돌을 피하기 쉽다.\n\n\n또한 아래 항목을 미리 확인하는 편이 안전하다.\n\n- GitLab 원본 저장소를 clone할 권한이 있는가?\n- GitHub 새 저장소에 push할 권한이 있는가?\n- 보호된 브랜치나 기본 브랜치 설정을 다시 구성해야 하는가?\n- Git LFS로 관리하는 파일이 있는가?\n- GitLab 이슈, Merge Request, Wiki, CI/CD 변수도 옮겨야 하는가?\n\n마지막 항목은 특히 중요하다. 아래 방법은 **Git 저장소 자체의 이력과 참조를 옮기는 방법**이다. GitLab의 이슈, Merge Request, 멤버 권한, CI/CD 변수처럼 플랫폼이 별도로 관리하는 데이터까지 자동으로 복사하는 것은 아니다.\n\n\n## 1. GitLab 저장소를 bare clone하기\n\n\n```bash\ngit clone --bare https://gitlab.com/USER/OLD-REPOSITORY.git\n```\n\n\n명령을 실행하면 일반 프로젝트 폴더가 아니라 `OLD-REPOSITORY.git` 형태의 디렉터리가 생성된다.\n\n\n일반적인 `git clone`은 파일을 직접 수정할 수 있는 작업 디렉터리와 Git 메타데이터를 함께 만든다. 반면 `--bare` clone은 작업용 파일 없이 Git 데이터만 가져온다. 저장소를 편집하려는 것이 아니라 다른 원격 저장소로 옮기는 상황에 잘 맞는다.\n\n\n## 2. 새 GitHub 저장소로 mirror push하기\n\n\n생성된 bare 저장소로 이동한다.\n\n\n```bash\ncd OLD-REPOSITORY.git\n```\n\n\n이제 GitHub에 미리 만든 새 저장소로 push한다.\n\n\n```bash\ngit push --mirror https://github.com/USER/NEW-REPOSITORY.git\n```\n\n\n`--mirror`는 일반 브랜치 하나만 올리는 것이 아니라 저장소가 가진 참조를 대상 저장소에 반영한다. GitHub 공식 문서도 외부 Git 저장소를 명령줄로 가져올 때 bare clone 후 mirror push하는 흐름을 안내한다.\n\n\n다만 mirror라는 이름처럼 대상 저장소의 참조를 원본 상태에 맞출 수 있기 때문에, **이미 사용 중인 GitHub 저장소를 대상으로 실행하면 의도하지 않은 브랜치나 태그 변경이 생길 수 있다.** 새로 만든 빈 저장소에서 진행하는 것이 안전하다.\n\n\n## 3. 이전 결과 확인하기\n\n\n명령이 성공했다고 바로 끝내지 않고 GitHub에서 다음 내용을 확인한다.\n\n- 기본 브랜치가 올바른가?\n- 필요한 브랜치가 모두 보이는가?\n- 태그와 릴리스 기준 커밋이 유지됐는가?\n- 과거 커밋이 정상적으로 조회되는가?\n- 저장소의 파일이 최신 상태와 일치하는가?\n\n커밋은 옮겨졌는데 GitHub의 contribution graph, 흔히 말하는 잔디가 기대한 대로 보이지 않을 수도 있다. GitHub는 커밋 작성자의 이메일, 기본 브랜치 포함 여부 등 여러 조건으로 contribution을 연결한다. 따라서 커밋 이력이 존재하는 것과 프로필 잔디에 표시되는 것은 같은 문제가 아니다.\n\n\n## Git LFS를 사용했다면\n\n\n저장소에서 Git LFS를 사용했다면 Git 객체만 옮겨서는 LFS 객체가 모두 이전되지 않을 수 있다. GitHub 공식 문서는 다음 절차를 별도로 안내한다.\n\n\n```bash\ngit clone --bare https://gitlab.com/USER/OLD-REPOSITORY.git\ncd OLD-REPOSITORY.git\n\ngit lfs fetch --all\ngit push --mirror https://github.com/USER/NEW-REPOSITORY.git\ngit lfs push --all https://github.com/USER/NEW-REPOSITORY.git\n```\n\n\nLFS를 사용 중인지 확실하지 않다면 원본 저장소의 `.gitattributes`와 GitLab의 LFS 사용 여부를 먼저 확인하는 편이 좋다.\n\n\n## 이전 후 다시 설정해야 하는 것\n\n\nGit 이력을 옮겼다고 프로젝트 환경 전체가 이전되는 것은 아니다. GitHub에서 다음 항목을 다시 확인해야 한다.\n\n\n### 기본 브랜치와 보호 규칙\n\n\nGitLab에서 사용하던 protected branch 설정은 GitHub의 branch protection rules와 별개다. 기본 브랜치, 직접 push 제한, 리뷰 승인 조건 등을 새 저장소에 맞게 다시 설정해야 한다.\n\n\n### CI/CD\n\n\n`.gitlab-ci.yml`은 저장소에 포함되어 함께 옮겨질 수 있지만 GitHub Actions가 이를 실행하지는 않는다. GitHub Actions를 사용하려면 `.github/workflows` 아래에 워크플로를 새로 작성해야 한다.\n\n\nGitLab에 저장한 비밀 변수도 자동 이전되지 않는다. GitHub Actions의 repository secrets 또는 environment secrets에 다시 등록해야 한다.\n\n\n### 배포·Webhook·외부 연동\n\n\n배포 서비스, Webhook, 이슈 트래커가 기존 GitLab URL을 바라보고 있다면 GitHub 저장소 주소로 갱신해야 한다. README의 배지나 clone URL도 놓치기 쉬운 항목이다.\n\n\n### 팀 권한\n\n\nGitLab 프로젝트의 멤버와 역할은 GitHub collaborator 또는 organization team 권한으로 자동 변환되지 않는다. 공개 범위와 팀 접근 권한을 다시 검토해야 한다.\n\n\n## bare와 mirror가 헷갈렸던 부분\n\n\n처음에는 `--bare`와 `--mirror`가 비슷한 옵션처럼 보였다. 다시 정리하면 역할이 다르다.\n\n- `git clone --bare`: 작업 디렉터리 없이 저장소 데이터를 복제한다.\n- `git push --mirror`: 로컬 저장소의 참조를 대상 원격 저장소에 반영한다.\n\n즉 하나는 **어떻게 가져올지**, 다른 하나는 **어떻게 내보낼지**에 대한 옵션이다.\n\n\n지속적으로 두 저장소를 동기화하는 mirror 운영과, 한 번만 GitLab에서 GitHub로 옮기는 마이그레이션도 구분해야 한다. 이번 기록은 일회성 이전을 기준으로 한다.\n\n\n## 정리\n\n\nGitLab에서 GitHub로 저장소를 옮길 때 중요한 것은 폴더를 복사하는 것이 아니라 Git 이력을 보존하는 것이다. bare clone과 mirror push를 사용하면 커밋, 브랜치, 태그 같은 Git 참조를 새 저장소로 이전할 수 있다.\n\n\n다만 저장소 이전은 프로젝트 이전의 일부일 뿐이다. 이슈, Merge Request, CI/CD 변수, 보호 규칙, 권한과 외부 연동은 별도로 점검해야 한다. 다음에 같은 작업을 한다면 “코드가 보이는가?”에서 끝내지 않고, **Git 데이터와 플랫폼 설정을 나누어 체크하는 것**부터 시작하려고 한다.\n\n\n## 다음에 더 확인할 것\n\n- GitHub Importer와 명령줄 방식의 차이\n- GitLab 이슈와 Merge Request 마이그레이션 방법\n- GitHub Actions로 CI/CD 전환하기\n- 작성자 이메일과 GitHub contribution 연결 조건\n- 대용량 저장소의 push 제한과 Git LFS\n\n---\n\n\n## 참고 자료\n\n- [GitHub Docs — Importing an external Git repository using the command line](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/importing-an-external-git-repository-using-the-command-line)\n- [GitHub Docs — Duplicating a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository)"
+  },
+  {
+    "id": "399bdef7-22b6-81a8-802d-da03ec75a1fc",
+    "title": "Windows 작업 중 자주 찾게 되는 CMD 명령어 정리",
+    "section": "tech",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "devops"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "프로젝트를 진행하다 보면 대부분의 작업은 GUI로 해결할 수 있지만, 시스템 상태를 빠르게 확인하거나 네트워크·프로세스 문제를 진단할 때는 명령어가 더 간단하고 정확한 경우가 있다.\n\n\n예전에 필요한 CMD 명령어를 짧게 모아두었지만, 명령어와 설명만 적어두니 시간이 지난 뒤에는 **어떤 상황에서 사용하려고 저장했는지** 다시 검색하게 됐다. 그래서 이번에는 모든 명령어를 나열하기보다, 개발 환경에서 다시 찾게 되는 조회·진단 명령어를 사용 상황과 함께 정리했다.\n\n\n## 시스템과 개발 환경 확인\n\n\n### Windows 시스템 정보 확인\n\n\n```bash\nsysteminfo\n```\n\n\n운영체제 버전, 빌드, 설치 날짜, 메모리, BIOS 등 시스템 정보를 한 번에 확인한다. 같은 코드가 특정 PC에서만 다르게 동작하거나 개발 환경의 차이를 비교해야 할 때 기본 정보를 확인하기 좋다.\n\n\n출력 내용이 많아 Windows 버전만 빠르게 보고 싶을 때는 다음 명령어가 더 간단하다.\n\n\n```bash\nwinver\n```\n\n\n현재 컴퓨터 이름은 다음과 같이 확인한다.\n\n\n```bash\nhostname\n```\n\n\n원격 접속이나 네트워크 환경에서 여러 장비를 구분할 때 유용하다.\n\n\n### 현재 사용자 확인\n\n\n```bash\nwhoami\n```\n\n\n현재 CMD를 실행한 사용자 계정을 확인한다. 권한 문제를 살펴볼 때 어떤 계정으로 실행 중인지 확인하는 용도로 사용할 수 있다.\n\n\n## 네트워크 상태 확인\n\n\n프론트엔드 개발 중 API가 연결되지 않거나 로컬 서버는 정상인데 특정 주소만 열리지 않는 상황이 생기면, 애플리케이션 코드만 보기 전에 네트워크 상태를 먼저 나눠서 확인하는 편이 좋다.\n\n\n### IP와 네트워크 설정 확인\n\n\n```bash\nipconfig\n```\n\n\n현재 네트워크 어댑터에 할당된 IP 정보를 확인한다. 더 자세한 정보가 필요하면 다음 명령어를 사용한다.\n\n\n```bash\nipconfig /all\n```\n\n\nIP 주소뿐 아니라 DNS 서버, DHCP 사용 여부, MAC 주소 등 네트워크 설정을 함께 확인할 수 있다.\n\n\n### 연결 상태 확인\n\n\n```bash\nping example.com\n```\n\n\n지정한 호스트까지 네트워크 통신이 가능한지 확인한다. 응답이 없다고 해서 반드시 서버가 중단된 것은 아니며, 방화벽이나 서버 정책에서 응답을 막았을 수도 있다. 따라서 연결 문제를 판단하는 여러 단서 중 하나로 보는 편이 좋다.\n\n\n목적지까지 어떤 경로를 거치는지 확인하려면 다음 명령어를 사용한다.\n\n\n```bash\ntracert example.com\n```\n\n\n### DNS 조회\n\n\n```bash\nnslookup example.com\n```\n\n\n도메인이 어떤 IP 주소로 해석되는지 확인한다. 브라우저 접속 문제와 DNS 문제를 구분할 때 유용하다.\n\n\n로컬 DNS 캐시를 초기화하는 명령도 있지만, 실행 전 현재 환경과 영향 범위를 확인하는 편이 안전하다.\n\n\n## 포트와 프로세스 확인\n\n\n로컬 개발 서버가 실행되지 않을 때는 이미 다른 프로세스가 같은 포트를 사용하고 있는 경우가 있다. 프론트엔드 개발에서는 `3000`, `5173`, `8080` 같은 포트에서 자주 마주치는 문제다.\n\n\n### 사용 중인 포트 확인\n\n\n```bash\nnetstat -ano\n```\n\n\n현재 연결과 수신 대기 중인 포트, 해당 프로세스의 PID를 확인한다. 특정 포트만 찾고 싶다면 `findstr`로 결과를 좁힐 수 있다.\n\n\n```bash\nnetstat -ano | findstr :5173\n```\n\n\n마지막 열의 숫자가 PID다.\n\n\n### PID에 해당하는 프로세스 확인\n\n\n```bash\ntasklist | findstr 12345\n```\n\n\nPID가 `12345`인 프로세스 이름을 확인하는 예시다.\n\n\n프로세스를 종료해야 할 때는 먼저 해당 PID가 정말 종료해도 되는 프로세스인지 확인해야 한다. 강제 종료 명령은 저장되지 않은 작업에 영향을 줄 수 있으므로 이 글에서는 조회 단계까지만 기록한다.\n\n\n## 파일과 폴더 확인\n\n\n### 현재 폴더 내용 확인\n\n\n```bash\ndir\n```\n\n\n현재 위치의 파일과 폴더 목록을 확인한다.\n\n\n### 경로 이동\n\n\n```bash\ncd 경로\n```\n\n\n다른 드라이브로 이동할 때는 드라이브 문자를 입력한다.\n\n\n```bash\nD:\n```\n\n\n### 폴더 구조 확인\n\n\n```bash\ntree\n```\n\n\n현재 경로 아래의 폴더 구조를 트리 형태로 확인한다. 프로젝트 디렉터리 구조를 빠르게 훑어볼 때 유용하다.\n\n\n삭제나 강제 변경이 포함된 명령은 경로를 잘못 지정하면 복구가 어려울 수 있으므로, 별도의 작업 기록에서 주의사항과 함께 다루는 편이 좋다.\n\n\n## Windows 관리 도구 빠르게 열기\n\n\nCMD나 실행 창에서 관리 도구를 바로 열 수 있다.\n\n\n| 명령어            | 실행되는 도구       |\n| -------------- | ------------- |\n| `control`      | 제어판           |\n| `appwiz.cpl`   | 프로그램 제거 또는 변경 |\n| `sysdm.cpl`    | 시스템 속성        |\n| `ncpa.cpl`     | 네트워크 연결       |\n| `services.msc` | 서비스 관리        |\n| `devmgmt.msc`  | 장치 관리자        |\n| `diskmgmt.msc` | 디스크 관리        |\n| `eventvwr.msc` | 이벤트 뷰어        |\n| `taskmgr`      | 작업 관리자        |\n\n\n설정 화면을 여러 단계 거쳐 찾아갈 필요 없이 바로 열 수 있어, 개발 환경이나 장치 문제를 확인할 때 편하다.\n\n\n## 내가 자주 사용하는 확인 흐름\n\n\n### 로컬 개발 서버 포트 충돌 확인\n\n\n먼저 포트를 점유한 PID를 찾는다.\n\n\n```bash\nnetstat -ano | findstr :5173\n```\n\n\n그다음 PID와 프로세스 이름을 확인한다.\n\n\n```bash\ntasklist | findstr 12345\n```\n\n\n여기까지 확인한 뒤, 실제로 종료해도 되는 프로세스인지 판단한다. 포트 번호만 보고 바로 프로세스를 종료하면 다른 개발 도구나 서비스에 영향을 줄 수 있다.\n\n\n### 도메인 변경 후 이전 주소가 계속 보일 때\n\n\nDNS 조회 결과를 확인한다.\n\n\n```bash\nnslookup example.com\n```\n\n\n브라우저, 운영체제, 사내 DNS 등 캐시가 여러 단계에 남을 수 있으므로 한 가지 결과만으로 원인을 단정하지 않는 편이 좋다.\n\n\n## 다시 정리하며 알게 된 점\n\n\n예전에는 명령어와 한 줄 설명만 저장해두면 충분하다고 생각했다. 하지만 시간이 지나 다시 찾아볼 때 필요한 것은 명령어의 정의보다 **어떤 문제에서 이 명령어를 사용해야 하는지**였다.\n\n\n같은 네트워크 문제처럼 보여도 실제로는 DNS, 포트 충돌, 프로세스, 방화벽 등 원인이 다를 수 있다. 그래서 명령어를 무작정 실행하기보다 현재 확인하려는 대상이 무엇인지 먼저 나누는 습관이 더 중요하다는 생각이 들었다.\n\n\n이 글은 Windows의 모든 CMD 명령어를 다루기 위한 목록이 아니다. 개발하면서 다시 찾게 된 명령어와 사용 맥락을 계속 보완하는 개인 레퍼런스로 남겨두려고 한다.\n\n\n## 이후 추가로 정리할 내용\n\n- `robocopy`: 대량 파일 복사와 폴더 동기화\n- `mklink`: 심볼릭 링크와 디렉터리 연결\n- `DISM`: Windows 이미지 점검과 복구\n- `powercfg`: 전원 설정과 배터리 리포트\n- `schtasks`: 작업 스케줄러 명령어\n- PowerShell에서는 같은 작업을 어떻게 처리하는지"
+  },
+  {
+    "id": "399bdef7-22b6-8114-a44e-ff34d75d54c7",
+    "title": "DAO와 DTO의 역할 — 데이터 접근과 데이터 전달을 구분하기",
+    "section": "study",
+    "category": "Backend",
+    "tags": [
+      "Backend"
+    ],
+    "date": "2026-07-11",
+    "published": true,
+    "content": "> DAO와 DTO라는 이름은 백엔드 프로젝트 구조에서 자주 보이지만, 처음에는 둘 다 데이터를 옮기는 클래스처럼 느껴졌다. 역할을 구분해 보니 하나는 저장소 접근을 감추고, 다른 하나는 계층 사이에 전달할 데이터의 모양을 정하는 객체였다.\n\n## DAO는 데이터 접근을 담당한다\n\n\nDAO(Data Access Object)는 데이터베이스나 외부 저장소에 접근하는 코드를 한곳에 모으는 역할이다. SQL 실행, 조회, 저장, 수정, 삭제처럼 영속성 계층과 관련된 작업을 담당한다.\n\n\n```java\npublic interface UserDao {\n    Optional<User> findById(Long id);\n    void save(User user);\n}\n```\n\n\n서비스가 JDBC 연결이나 SQL 세부사항을 직접 알지 않도록 경계를 만든다는 점이 핵심이다.\n\n\n```java\npublic class JdbcUserDao implements UserDao {\n    @Override\n    public Optional<User> findById(Long id) {\n        // Connection 획득, SQL 실행, 결과 매핑\n        return Optional.empty();\n    }\n\n    @Override\n    public void save(User user) {\n        // INSERT 실행\n    }\n}\n```\n\n\nJPA를 사용하는 프로젝트에서는 Repository가 이 역할을 맡는 경우가 많다. 이름은 달라도 애플리케이션 로직과 데이터 접근 구현을 분리한다는 목적은 비슷하다.\n\n\n## DTO는 전달할 데이터의 모양을 정한다\n\n\nDTO(Data Transfer Object)는 계층이나 프로세스 사이에서 데이터를 전달하기 위한 객체다. 엔티티 전체를 그대로 노출하지 않고 요청과 응답에 필요한 값만 담을 수 있다.\n\n\n```java\npublic record UserResponse(\n    Long id,\n    String name,\n    String email\n) {}\n```\n\n\n회원가입 요청은 또 다른 모양을 가질 수 있다.\n\n\n```java\npublic record CreateUserRequest(\n    String name,\n    String email,\n    String password\n) {}\n```\n\n\n같은 사용자 데이터라도 입력과 출력의 목적이 다르기 때문에 DTO를 분리하면 검증과 공개 범위를 명확히 할 수 있다.\n\n\n## Entity를 그대로 반환하면 생기는 문제\n\n\n엔티티를 API 응답으로 직접 반환하면 다음 문제가 생길 수 있다.\n\n- 데이터베이스 구조 변경이 API 응답에 바로 영향을 준다.\n- 비밀번호나 내부 상태처럼 노출하면 안 되는 필드가 섞일 수 있다.\n- 지연 로딩 관계가 의도하지 않은 쿼리나 직렬화 문제를 만든다.\n- 요청 검증 규칙과 영속성 규칙이 한 객체에 섞인다.\n\nDTO는 API와 도메인 모델 사이의 완충 지점이 된다. 다만 모든 계층마다 기계적으로 DTO를 만들면 변환 코드만 늘 수 있으므로 경계와 변경 가능성을 기준으로 판단해야 한다.\n\n\n## DAO와 DTO의 차이\n\n- DAO: 데이터를 **어디에서 어떻게 읽고 쓸지** 담당한다.\n- DTO: 데이터를 **어떤 모양으로 전달할지** 표현한다.\n\nDAO는 행동을 가진 데이터 접근 계층이고, DTO는 전달을 위한 데이터 구조다. 이름이 비슷하지만 책임은 완전히 다르다.\n\n\n## 전체 흐름으로 보기\n\n\n```plain text\nClient\n  ↓ Request DTO\nController\n  ↓\nService\n  ↓\nDAO / Repository\n  ↓\nDatabase\n  ↑\nService\n  ↑ Response DTO\nClient\n```\n\n\n컨트롤러는 요청 DTO를 받고, 서비스는 필요한 비즈니스 로직을 수행한다. DAO 또는 Repository가 저장소와 통신하고, 결과는 응답 DTO로 변환되어 클라이언트에 전달된다.\n\n\n## 프론트엔드와 연결해서 이해한 점\n\n\n프론트엔드에서 TypeScript로 API 응답 타입을 정의하는 것도 DTO의 경계를 이해하는 데 도움이 됐다.\n\n\n```typescript\ntype UserResponse = {\n  id: number\n  name: string\n  email: string\n}\n```\n\n\n다만 프론트엔드 타입 선언은 런타임 데이터를 자동으로 검증하지 않는다. 서버 응답을 신뢰할 수 없는 경계에서는 Zod 같은 검증 도구나 명시적인 파싱을 함께 고려할 수 있다.\n\n\n## 내가 기억할 기준\n\n\nDAO와 DTO를 외울 때 약어의 풀네임보다 질문으로 기억하는 편이 쉬웠다.\n\n- 이 코드는 저장소 접근 방법을 숨기는가? → DAO 또는 Repository\n- 이 객체는 계층 사이에서 전달할 데이터의 모양인가? → DTO\n\n구조를 나누는 목적은 파일을 늘리는 것이 아니라 변경 이유가 다른 코드를 분리하는 데 있다.\n\n\n## 다음에 더 확인할 것\n\n- DAO와 Repository 패턴의 차이\n- Entity·Domain Model·DTO의 경계\n- Mapper를 별도 객체로 분리할 기준\n- Java record와 validation\n- 프론트엔드 런타임 스키마 검증\n\n## 참고 자료\n\n- [원본 메모](https://ausekd.tistory.com/89)"
+  },
+  {
+    "id": "399bdef7-22b6-8112-81ac-d8bc3de55062",
+    "title": "DrawRun — AI가 그린 경로를 달려 완성하는 GPS Drawing 러닝 앱",
+    "section": "study",
     "category": "Project",
     "tags": [
-      "python"
+      "Flutter",
+      "Spring",
+      "java21",
+      "PostgreSQL",
+      "Docker",
+      "JWT"
     ],
-    "date": "2026-07-01",
+    "date": "2026-05-21",
     "published": true,
-    "content": ""
+    "content": "6인 수상 자율 프로젝트. AI가 생성한 그림 모양의 경로를 실제로 달리며 완성하고, GPS 유사도 점수로 기록하는 러닝 챌린지 서비스. 내 담당은 프론트엔드였다.\n\n\n---\n\n\n### 01. 무엇을 만들었나\n\n> 매주 EASY/HARD 챌린지 폴리곤이 공개되고, 달린 경로와 목표 폴리곤의 유사도를 0~100점으로 확인한다. '그림을 달린다'는 발상을 실제 서비스로 구현했다.\n\n---\n\n\n### 02. 핵심 기능\n\n- **챌린지 러닝** — 주차별 폴리곤 챌린지 + 주차별 랭킹.\n- **유사도 판별** — 두 경로를 500점으로 리샘플링, 회전각 탐색·정/얭방향 비교, Coverage+Adherence 평균.\n- **코스 생성·공유** — 난이도 자동 계산(거리·경사·고도), 무한 스크롤 검색.\n- **날씨·랭킹** — 기상청 API(Redis 캐시), Redis Sorted Set 랭킹.\n\n---\n\n\n### 03. 기술 스택과 내 역할(FE)\n\n\n> 🧩 **FE** Flutter·Dart·Riverpod·GoRouter·Dio · **BE** Spring Boot·Java 21·JPA+Hibernate Spatial·PostgreSQL+PostGIS·Redis·JTS · **Infra** EC2·Docker Compose·Nginx·Jenkins·Grafana\n\n\n내가 맡은 프론트엔드(Flutter): 지도·GPS 추적 화면, 챌린지·코스 UI, 상태관리(Riverpod)와 라우팅(GoRouter), Dio+JWT 인터셉터 기반 통신.\n\n> 공간 연산(Hibernate Spatial·PostGIS·JTS)과 GPS 유사도 알고리즘이 기술적 하이라이트. Flutter로 네이티브 지도·센서(geolocator·pedometer)를 다뤄 본 게 새로운 경험이었다.\n\n---\n\n\n### 마치며\n\n- AI 경로를 달려 완성하는 GPS Drawing 러닝(6인, 수상).\n- FE(Flutter)로 지도·GPS·센서·상태관리를 담당.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81bd-a1ff-dca2d7f1fadf",
+    "title": "성장 방향을 고민하다 — 디자인과 프론트, 그리고 AI 시대의 틈새시장",
+    "section": "log",
+    "category": "Career",
+    "tags": [
+      "커리어",
+      "성장"
+    ],
+    "date": "2026-04-15",
+    "published": true,
+    "content": "데일리 콘텐츠를 듣다가 성장에 대한 고민이 깊어졌고, 컸설팅 세션에서 나눈 이야기를 내 나름대로 정리해 봤다. 정답보다는 방향에 대한 기록.\n\n\n---\n\n\n### 01. 고민의 출발점\n\n\n디자인을 전공하고 프론트엔드로 일해 왔다. 스킬업과 역량을 더 키우고 싶은데, '결국 돌고 돌아 비슷한 자리로 되돌아가는 건 아닐까'라는 질문에서 출발했다.\n\n\n---\n\n\n### 02. 컸설팅에서 얻은 관점\n\n\n> 🧭 - 디자인 전공 + 프론트 현업 + 새로 배운 지식의 결합은 **오히려 넓은 선택지**를 준다.  \n>   \n> - 기획·브랜딩 + 개발 → **프로덕트 디자인**.  \n>   \n> - 디자인 + 프론트 → **UX 엔지니어**.  \n>   \n> - 장기 목표에 집착하기보다, 뭐를 하고 싶은지 질문하며 기회를 고르는 것.\n\n> '개발을 잘 못한다'는 불안은 경력 많은 개발자에게도 따라다니다. 큰 획을 그은 사람도 스스로를 '중위정도'라 여긴다는 이야기가 위로가 됐다. 비교보다 내 강점을 어떻게 살릴지가 더 중요하다.\n\n---\n\n\n### 03. AI 시대의 프론트, 틈새시장\n\n\n모두 AI가 프론트를 먼저 대체한다고 말하지만, 관점을 바꿔 보면 다르다. 최근 프론트 스택은 단순히 화면을 그리는 것을 넘어 **서버를 넘나드는 영역(SSR, 클라이언트 데이터 컨트롤)**으로 확장됐다. AI가 만든 결과를 보고 '이건 마음에 안 든다'고 판단해 수정할 수 있는 감각, 기획·디자인·개발을 가로지르는 커뮤니케이션 — 그게 틈새시장이라 생각한다.\n\n\n---\n\n\n### 마치며\n\n- 디자인+프론트+새 지식 = 넓은 선택지(프로덕트 디자인/UX 엔지니어).\n- 불안은 누구나 있다 — 비교보다 강점 살리기.\n- AI 시대에도 프론트의 틈새는 있다 — 서버를 넘나드는 역역 + 커뮤니케이션.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-810a-aa41-ea596016dde8",
+    "title": "WebSocket이 연결된 줄 알았다 — SockJS 폴백이 만든 착각",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "WebSocket",
+      "Backend"
+    ],
+    "date": "2026-04-02",
+    "published": true,
+    "content": "FE와 BE를 WebSocket + STOMP로 연결하는데 분명 CONNECTED라고 뜼는데 403/404가 떰다. 알고 보니 '연결된 것처럼 보이는' 착각이었다.\n\n\n---\n\n\n### 01. 무슨 문제가 있었나\n\n\nWebSocket 상위에 STOMP를 쓰고, 가이드 코드에 SockJS가 포함된 환경. 폴백(fallback)에 대한 이해가 앉은 채 '방지 코드로 넣으면 되겠지' 하고 작업을 시작했다. 연결 시 **403·404 에러**.\n\n\n---\n\n\n### 02. 진짜 원인 — SockJS 폴백\n\n\n> ⚠️ SockJS 때문에 '통신은 되니까' 소켓이 연결된 것처럼 보였다. 그런데 실제 네트워크를 확인하니 소켓 연결이 아니라 **XHR로 통신**하고 있었다.\n\n> 결론적으로 실제 WebSocket 연결이 안 된 상태인데, 모두 클라이언트로만 확인하니 CONNECTED처럼 보였다. SockJS는 WebSocket이 안 되면 XHR/폴링으로 자동 폴백하는데, 바로 그 폴백이 '연결된 듯한 착각'을 만든 것.\n\n---\n\n\n### 03. 교훈\n\n- **클라이언트 상태만 보지 말고 네트워크 탭을 볼 것** — 실제로 ws 프로토콜로 업그레이드됐는지(101 Switching Protocols) 확인.\n- **폴백은 안전망이지 가마개가 아니다** — SockJS 폴백을 '방지 코드'로 오해하면 진짜 연결 여부를 놓친다.\n- **env 설정 확인** — `API_URL`에 `/api` 같은 경로가 빠지면 403/404로 이어질 수 있다.\n\n---"
   },
   {
     "id": "326bdef7-22b6-80e9-847b-e8fcf3192224",
@@ -25,7 +155,7 @@
   },
   {
     "id": "31fbdef7-22b6-8056-9e1d-e3949019ca8b",
-    "title": "게임용 GPU가 AI를 만났을 때 —",
+    "title": "게임용 GPU가 AI를 만났을 때 —VRAM, Fine-tuning, 그리고 메모리 전략",
     "section": "tech",
     "category": "Coach Session",
     "tags": [],
@@ -45,7 +175,7 @@
   },
   {
     "id": "31ebdef7-22b6-80d5-b379-f45757bd595d",
-    "title": "“배포가 어쩌고 저쩌고”",
+    "title": "“배포가 어쩌고 저쩌고” — Deploy 의 본질과 자동화 전략",
     "section": "tech",
     "category": "Daily Content",
     "tags": [
@@ -61,7 +191,7 @@
   },
   {
     "id": "31bbdef7-22b6-804b-b11e-e3714037ea7b",
-    "title": "“그래봐야 Thread 아냐?” ",
+    "title": "“그래봐야 Thread 아냐?” — Virtual Thread와 No-GIL의 등장",
     "section": "tech",
     "category": "Daily Content",
     "tags": [
@@ -73,7 +203,7 @@
     ],
     "date": "2026-03-06",
     "published": true,
-    "content": "### “그래봐야 Thread 아냐?”\n\n\n맞다. Vitual Thread다. 다만 **OS와 HW의 제약을 벗어난 Thread**라는게 핵심이다. Platform Thread의 무거움을 JVM 레벨에서 추상화하고, Carrier Thread라는 중간 계층을 두어 수만 개의 동시 작업을 거의 무비용으로 처리한다. 비슷한 시기, Python도 오랜 족쇄였던 GIL을 걷어내기 시작했다.\n\n\n---\n\n\n### 01. Platform Thread vs Virtual Thread\n\n\n두 Thread의 차이는 **OS가 개입하느냐 아니냐**다. Platform Thread는 OS 스레드와 1:1로 매핑된다. OS가 하드웨어 안정성을 최우선으로 생성 여부를 제한하기 때문에, 수천 개 이상은 사실상 불가능하다.\n\n\n\n\n> PLATFORM THREAD  \n> **OS 스레드와 1:1**  \n>   \n> - 빠르고 안정적  \n>   \n> - **OS / HW의 제한을 받는다**  \n>   \n> - OS가 HW 안정성 최우선으로 생성 제한  \n>   \n> - 스레드 수 한계 → 동시성 병목  \n>   \n> - 스레드 하나당 ~1MB 스택 메모리 점유\n\n\n> VIRTUAL THREAD  \n> **Carrier Thread 경유**  \n>   \n> - 빠르고 **사실상 무제한**  \n>   \n> - OS / HW 제한에서 벗어남  \n>   \n> - 수십만 개 동시 생성 가능  \n>   \n> - 메모리 비용 극소 (수 KB 수준)  \n>   \n> - Java 21 (LTS) 정식 탑재\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/c501c97f-f80b-4e0c-8ba1-1c0f25b189b9/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4667DGKLT7W%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T100733Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCJcli70vfrV6IJWrEObeAN0Hx6Dc%2FnyHhoIHnc%2BLQN6wIgUhGLSFhC3YVe2Vakju4zxaGSdJD2IFX%2FmCqwZk0lqEgqiAQIs%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDPjhxvapfCwh28slGyrcA%2FiNYa9LrQ0QPHuUna%2BZWb9sOuLJIOLj9pn7fH8ACCyh7vxNcK156mYf%2FNFcvBY4Xkl0Zp%2F7XYJFxYbf7GsjIPkmtNJiW66SU80T8kOcdM02ZYA9XAUhTiVzgcwkYyFsGWkCNXocvR2HP5nb2M4JvZhPxldF0ESV3%2F1DM%2FUob6liIaP59ap%2Fydbzq5KtrGpcEHH68aOn8FTX2DXbbTV7xz75PjPH1Sd3AgrU4cP6vLD9nIkVHW%2BVW1VUCFCQ4yk3NreGJQ%2FnLC1Qs9UnZV3RUnfJyjrvhtaY%2FtolKP0upJdZSjdlk2rE%2BI3e%2B569CN8a3N4KqJQuV6ijL4MZO9McXQlMv%2BxksvaavRVkkyJ3c1pIN6AlPzVCOroYGhSrwKjRRWPcTwJUX7wkBygT9qsnAdw7haQOLXddUgiZDe7msuf1TtNSdvOQF2saxevcCnrtUvBb%2FBFNAYED5kZqaPNhSMDT9incFLIOYxDmEGIvmadgjLDjypmiUZYRgEXuIe9IogtLk0FD2WC1eF6BWCsQNXgt2BxvPAq2naspJJVEEZZiWoCjsmvqN1fFJ57OSjWI2Q8pG%2FK%2BdY09kb4MsHurQr5HYT3eAGkKVmwyiccaHOYMiA0nPEhp6gZ%2BnggyMPf%2BwtIGOqUBBCz7w29HLHBuyzypcWlfd0cfluz9n7XhG7NEOgQm6%2BOEiMHRxjFmAUxqRdw0wVil2uTCMS4aBMmi7wQj39yG8GU7gEiE%2FFsZij6Ok%2FSKcEEPNJJKU2dtEdMz7lLEieTH70z2351cw%2FBSs%2BBKBq6jfKng2soxJ23VE8w9H9fndeuF%2BFW3OA7AihZhZ3Ob2qDHxc5xiQ%2F%2FcK4SIgR8RgMst2Lq04F1&X-Amz-Signature=bf7649201a14800584c825f5474d6a0d6302c71b674136f394805f319d3db02e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\nVirtul Thread가 I/O 대기 상태가 되면 Carrier Thread에서 자동으로 **unmount** 되고, 다른 Virtual Thread가 그 자리를 채운다. Carrier Thread는 항상 일하고,  Virtual Thread는 가볍게 교체된다. 이 구조가 성능이 “사기적”인 이유다.\n\n\n---\n\n\n### 02. Virtual Thread의 한계 **— 완벽하지 않다**\n\n\nVirtaul Thread가 모든 상황에서 Platform Thread를 이기는 건 아니다. 특정 상황에서는 **오히려 시간적 비용이 크게 발생**한다.\n\n\n> **Blocking I/O**  \n> 일부 레거시 Blocking I/O는 VT의 unmount가 제대로 동작하지 않을 수 있다.\n\n\n> **synchronized (Pinning)**  \n> Native Code나 synchronized 블록 안에서 VT가 Carrier Thread에 고정(pin)된다.\n\n\n> **Context Switching / Parsing**  \n> 대량의 VT 전환이 발생할 때 스케줄링 오버헤드가 누적될 수 있다.\n\n\n> **Debugging**  \n> 수십만 개의 VT를 추적하는 디버깅 비용이 상당하다. 스택 트레이스 분석이 어렵다.\n\n\nJNI TRAP\n\n\nJNI(Java Native Interface)가 실행되면\n\n\nJNI가 호출되는 순간, Virtual Thread와 Platform Thread가 사실상 1:1 관계로 고정된다.\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/f6f2fbf2-e3a8-4368-9bb0-b13c81f4f7ea/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4667DGKLT7W%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T100733Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCJcli70vfrV6IJWrEObeAN0Hx6Dc%2FnyHhoIHnc%2BLQN6wIgUhGLSFhC3YVe2Vakju4zxaGSdJD2IFX%2FmCqwZk0lqEgqiAQIs%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDPjhxvapfCwh28slGyrcA%2FiNYa9LrQ0QPHuUna%2BZWb9sOuLJIOLj9pn7fH8ACCyh7vxNcK156mYf%2FNFcvBY4Xkl0Zp%2F7XYJFxYbf7GsjIPkmtNJiW66SU80T8kOcdM02ZYA9XAUhTiVzgcwkYyFsGWkCNXocvR2HP5nb2M4JvZhPxldF0ESV3%2F1DM%2FUob6liIaP59ap%2Fydbzq5KtrGpcEHH68aOn8FTX2DXbbTV7xz75PjPH1Sd3AgrU4cP6vLD9nIkVHW%2BVW1VUCFCQ4yk3NreGJQ%2FnLC1Qs9UnZV3RUnfJyjrvhtaY%2FtolKP0upJdZSjdlk2rE%2BI3e%2B569CN8a3N4KqJQuV6ijL4MZO9McXQlMv%2BxksvaavRVkkyJ3c1pIN6AlPzVCOroYGhSrwKjRRWPcTwJUX7wkBygT9qsnAdw7haQOLXddUgiZDe7msuf1TtNSdvOQF2saxevcCnrtUvBb%2FBFNAYED5kZqaPNhSMDT9incFLIOYxDmEGIvmadgjLDjypmiUZYRgEXuIe9IogtLk0FD2WC1eF6BWCsQNXgt2BxvPAq2naspJJVEEZZiWoCjsmvqN1fFJ57OSjWI2Q8pG%2FK%2BdY09kb4MsHurQr5HYT3eAGkKVmwyiccaHOYMiA0nPEhp6gZ%2BnggyMPf%2BwtIGOqUBBCz7w29HLHBuyzypcWlfd0cfluz9n7XhG7NEOgQm6%2BOEiMHRxjFmAUxqRdw0wVil2uTCMS4aBMmi7wQj39yG8GU7gEiE%2FFsZij6Ok%2FSKcEEPNJJKU2dtEdMz7lLEieTH70z2351cw%2FBSs%2BBKBq6jfKng2soxJ23VE8w9H9fndeuF%2BFW3OA7AihZhZ3Ob2qDHxc5xiQ%2F%2FcK4SIgR8RgMst2Lq04F1&X-Amz-Signature=7f9bdb5bbaad9defe8e93f2c54d4cf88959af12827c24b21c7c90a9652f3429e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\nVirtual Thread의 장점은 전혀 못 누리는데, Platform Thread의 한계는 그대로 가져간다. Native 라이브러리 의존이 많은 레거시 코드에서는 주의해야 한다.\n\n> 그럼에도 Virtual Thread의 가성비는 압도적이다. HW 투자 없이, 기존 코드 거의 그대로, 아주 적은 코드 변경만으로 대폭의 성능 향상을 기대할 수 있다.\n\n---\n\n\n### 03. 적정 Thread 개수는 어떻게 계산하나\n\n\nPlatform Thread를 쓰던 시절, 최적 스체드 수는 공식으로 계산했다.\n\n\n> Little's Law 기반 스레드 수 공식  \n> ```plain text  \n> 적정 Thread 수=  \n> 사용 가능한 Core 수×(1+대기시간/서비스시간)  \n>   \n> // Virtual Thread에서는 이 공식이 거의 의미 없다  \n> // JVM이 알아서 스케줄링하고, 개수 제한도 사실상 없으니까  \n> ```\n\n\nVirtual Thread 환경에서는 이 공식보다 “I/O 대기 구간이 얼마나 많은가”를 파악하는 게 더 중요하다. CPU-bound 작업은  VT 효과가 적고, I/O-bound 작업에서 극적인 차이가 난다.\n\n\n---\n\n\n### 04. 그럼 Kotlin, Go는 필요없나?\n\n\n> **Java 할 거면, Java 21+로 하자**  \n> Kotlin도, Go도 말리지 않는다. 각자의 장점이 있다. 다만 **Java를 쓸 거라면 Java 21 이상을 쓰지 않을 이유가 없다.** 기존 Platform Thread 기반 코드 그대로 두고, Virtual Thread만 적용해도 성능이 달라진다. 장점이 생겼는데 안 쓸 이유가 없잖아?\n\n> Kotlin의 Coroutine이 해결하려던 문제(경량 동시성)를 Java 21 Virtual Thread가 언어 레벨에서 해결했다. 완전히 같은 건 아니지만, **순수 Java 생태계에서의 이점은 훨씬 커졌다.**\n\n---\n\n\n### 05. **Python의 GIL — 그리고 No-GIL**\n\n\nPython 에도 오랫동안 비슷한 족쇄가 있었다.  바로  **GIL(Global Interpreter Lock)**이다.\n\n\n> **GIL — Global Interpreter Lock**  \n> 시스템 안정성을 위해 **한 번에 한 스레드만** Python 인터프리터를 통과시킨다는 제약이다.  \n>   \n> - 멀티코어 CPU 활용 불가  \n>   \n> - 멀티스레드 병렬 처리 사실상 차단  \n>   \n> - 현대 Python의 성능 병목 주범  \n>   \n> - CPython 구조상의 근본적 한계\n\n\n> **No-GIL Python 3.13 beta**  \n> GIL을 선택적으로 비활성화하여 진정한 멀티스레드 병렬 처리를 가능케 한다.  \n>   \n> - 멀티코어 CPU 완전 활용  \n>   \n> - 병렬 스레드 실행 가능  \n>   \n> - Virtual Thread와 유사한 방향  \n>   \n> - 기대 효과: 대규모 연산 성능 대폭 향상\n\n> 아직 beta 수준이지만, No-GIL의 의미는 크다. 수십 년간 Python의 발목을 잡았던 제약이 언어 레벨에서 해제된다는 것 자체가 패러다임 전환이다. Java의 Virtual Thread가 OS 제약을 JVM 레벨에서 우회했듯, Python은 인터프리터 레벨의 잠금을 풀어버리는 방향으로 가고 있다.\n\n---\n\n\n### 마치며  **— 플랫폼 제약이 언어 차원에서 풀린다**\n\n- Virtual Thread는 OS/HW 제약을 Carrier Thread로 우회한다. Thread지만, 차원이 다른 Thread다.\n- JNI와 synchronized는 VT의 장점을 무력화한다. 레거시 코드와 함께 쓸 때 반드시 주의.\n- Java를 쓴다면 Java 21+. 기존 코드 거의 그대로, 성능은 대폭 향상.\n- GIL은 Python 멀티스레드의 근본적 한계였다. No-GIL은 그 족쇄를 해제하는 시도다.\n- Java의 VT, Python의 No-GIL — 방향은 같다. 플랫폼 제약을 언어 레벨에서 지운다.\n\n---"
+    "content": "### “그래봐야 Thread 아냐?”\n\n\n맞다. Vitual Thread다. 다만 **OS와 HW의 제약을 벗어난 Thread**라는게 핵심이다. Platform Thread의 무거움을 JVM 레벨에서 추상화하고, Carrier Thread라는 중간 계층을 두어 수만 개의 동시 작업을 거의 무비용으로 처리한다. 비슷한 시기, Python도 오랜 족쇄였던 GIL을 걷어내기 시작했다.\n\n\n---\n\n\n### 01. Platform Thread vs Virtual Thread\n\n\n두 Thread의 차이는 **OS가 개입하느냐 아니냐**다. Platform Thread는 OS 스레드와 1:1로 매핑된다. OS가 하드웨어 안정성을 최우선으로 생성 여부를 제한하기 때문에, 수천 개 이상은 사실상 불가능하다.\n\n\n\n\n> PLATFORM THREAD  \n> **OS 스레드와 1:1**  \n>   \n> - 빠르고 안정적  \n>   \n> - **OS / HW의 제한을 받는다**  \n>   \n> - OS가 HW 안정성 최우선으로 생성 제한  \n>   \n> - 스레드 수 한계 → 동시성 병목  \n>   \n> - 스레드 하나당 ~1MB 스택 메모리 점유\n\n\n> VIRTUAL THREAD  \n> **Carrier Thread 경유**  \n>   \n> - 빠르고 **사실상 무제한**  \n>   \n> - OS / HW 제한에서 벗어남  \n>   \n> - 수십만 개 동시 생성 가능  \n>   \n> - 메모리 비용 극소 (수 KB 수준)  \n>   \n> - Java 21 (LTS) 정식 탑재\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/c501c97f-f80b-4e0c-8ba1-1c0f25b189b9/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466XWP5XAMB%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T195524Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQC0KI%2BYaziADlNwLmzHhhAKYv2lWqhHDRDF2lUMwYe3mwIgPzZy7EIRifsl08lp9dWUt0f3KAXHYYUH4q7CHYUWYA8qiAQIvf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDHZA9gko28BoALPt1SrcA0xK6HSfR68%2B9O51UqKyAHIQQ%2FZ69HREYuK7QlrVbAIErQpFhASeH1hWoyLGSkP7E%2BwEgkaSuggpIWA%2B%2Bn5ziEi4BXoh5%2FkESlsDky2oKyjdXN%2Fhi1vO%2FzePnRhSPOHNi%2FYNARLxN4ocY6HNTJV0jugOLrCKSgMnNM%2FP2kndFbMYhIqNUBIin4ml8i4Woj20LgKRNvMGpA%2FkRIIJN4LMv3dWgg%2Blo8Qgc%2BdkNzSKiUNTup%2BS%2BR4L3GXMnT6oCtrmy5A9UkAEOR%2Fy%2BP3NuefjvKJvHgDJPNWR7CdyhsrodsLjpZ1XcF9oCEFyxnsp9ugs0lMErm6t69OGfIttuhJ9E4n2EIO0%2FTCNqnz5nIsF4OwLOrvn78C73tZBq%2B%2BdaPZaEwEq%2F4CujYsQp%2BsMe8xU6cP%2BGB7I2iAITvQuVjKfSxqO20ipfAlb8%2F5PaY3pr6I6EflUEM8VLICeESBf7rF2MwSH8wk7MCeF%2F%2BWrdNcwL9qd3C4zaMX4xbW0eUJpqOJCad6ZVf5MHQqlF9%2F2B7X20vHUo7JoZbzGx%2FGoVEpGRYDqSIwLgtLRHWBygfbacOpcxBK7tttTqB3u6B6oIcPo8qBxvwhCkaRiJKZkLVA950f5QG55hGwXYPwet8GTMIKXxdIGOqUBdkCheLbem%2BYStoZJOz8%2F377Xq5sPIhnWO%2Fl8wWuymdHn4AEZhbrK5Plcv3gySoY1CF%2FKO8a6jkKh3G8ZafNd63JbRI4OS9UoGTFxZmdYh5GeIq%2Faq%2BzG9N9NXuE%2FbZWsTA%2FN74BdKI89E3YglsN%2BsM9WU%2B9lFGm5GBBwIBYAhMoxjPUUwWZV8fnSrQMBi2tTrCIBpvNAaZIQcga7kYKISaG9V5UY&X-Amz-Signature=d03edd733e60f74528e0c514b5bb9208fbcc24868294ab448394b41732cfffae&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\nVirtul Thread가 I/O 대기 상태가 되면 Carrier Thread에서 자동으로 **unmount** 되고, 다른 Virtual Thread가 그 자리를 채운다. Carrier Thread는 항상 일하고,  Virtual Thread는 가볍게 교체된다. 이 구조가 성능이 “사기적”인 이유다.\n\n\n---\n\n\n### 02. Virtual Thread의 한계 **— 완벽하지 않다**\n\n\nVirtaul Thread가 모든 상황에서 Platform Thread를 이기는 건 아니다. 특정 상황에서는 **오히려 시간적 비용이 크게 발생**한다.\n\n\n> **Blocking I/O**  \n> 일부 레거시 Blocking I/O는 VT의 unmount가 제대로 동작하지 않을 수 있다.\n\n\n> **synchronized (Pinning)**  \n> Native Code나 synchronized 블록 안에서 VT가 Carrier Thread에 고정(pin)된다.\n\n\n> **Context Switching / Parsing**  \n> 대량의 VT 전환이 발생할 때 스케줄링 오버헤드가 누적될 수 있다.\n\n\n> **Debugging**  \n> 수십만 개의 VT를 추적하는 디버깅 비용이 상당하다. 스택 트레이스 분석이 어렵다.\n\n\nJNI TRAP\n\n\nJNI(Java Native Interface)가 실행되면\n\n\nJNI가 호출되는 순간, Virtual Thread와 Platform Thread가 사실상 1:1 관계로 고정된다.\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/f6f2fbf2-e3a8-4368-9bb0-b13c81f4f7ea/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466XWP5XAMB%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T195524Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQC0KI%2BYaziADlNwLmzHhhAKYv2lWqhHDRDF2lUMwYe3mwIgPzZy7EIRifsl08lp9dWUt0f3KAXHYYUH4q7CHYUWYA8qiAQIvf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDHZA9gko28BoALPt1SrcA0xK6HSfR68%2B9O51UqKyAHIQQ%2FZ69HREYuK7QlrVbAIErQpFhASeH1hWoyLGSkP7E%2BwEgkaSuggpIWA%2B%2Bn5ziEi4BXoh5%2FkESlsDky2oKyjdXN%2Fhi1vO%2FzePnRhSPOHNi%2FYNARLxN4ocY6HNTJV0jugOLrCKSgMnNM%2FP2kndFbMYhIqNUBIin4ml8i4Woj20LgKRNvMGpA%2FkRIIJN4LMv3dWgg%2Blo8Qgc%2BdkNzSKiUNTup%2BS%2BR4L3GXMnT6oCtrmy5A9UkAEOR%2Fy%2BP3NuefjvKJvHgDJPNWR7CdyhsrodsLjpZ1XcF9oCEFyxnsp9ugs0lMErm6t69OGfIttuhJ9E4n2EIO0%2FTCNqnz5nIsF4OwLOrvn78C73tZBq%2B%2BdaPZaEwEq%2F4CujYsQp%2BsMe8xU6cP%2BGB7I2iAITvQuVjKfSxqO20ipfAlb8%2F5PaY3pr6I6EflUEM8VLICeESBf7rF2MwSH8wk7MCeF%2F%2BWrdNcwL9qd3C4zaMX4xbW0eUJpqOJCad6ZVf5MHQqlF9%2F2B7X20vHUo7JoZbzGx%2FGoVEpGRYDqSIwLgtLRHWBygfbacOpcxBK7tttTqB3u6B6oIcPo8qBxvwhCkaRiJKZkLVA950f5QG55hGwXYPwet8GTMIKXxdIGOqUBdkCheLbem%2BYStoZJOz8%2F377Xq5sPIhnWO%2Fl8wWuymdHn4AEZhbrK5Plcv3gySoY1CF%2FKO8a6jkKh3G8ZafNd63JbRI4OS9UoGTFxZmdYh5GeIq%2Faq%2BzG9N9NXuE%2FbZWsTA%2FN74BdKI89E3YglsN%2BsM9WU%2B9lFGm5GBBwIBYAhMoxjPUUwWZV8fnSrQMBi2tTrCIBpvNAaZIQcga7kYKISaG9V5UY&X-Amz-Signature=311a9910d4b9eccceb9c92d61ad7f35d2a0de49c4e4045a768a70732ad6d859e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\nVirtual Thread의 장점은 전혀 못 누리는데, Platform Thread의 한계는 그대로 가져간다. Native 라이브러리 의존이 많은 레거시 코드에서는 주의해야 한다.\n\n> 그럼에도 Virtual Thread의 가성비는 압도적이다. HW 투자 없이, 기존 코드 거의 그대로, 아주 적은 코드 변경만으로 대폭의 성능 향상을 기대할 수 있다.\n\n---\n\n\n### 03. 적정 Thread 개수는 어떻게 계산하나\n\n\nPlatform Thread를 쓰던 시절, 최적 스체드 수는 공식으로 계산했다.\n\n\n> Little's Law 기반 스레드 수 공식  \n> ```plain text  \n> 적정 Thread 수=  \n> 사용 가능한 Core 수×(1+대기시간/서비스시간)  \n>   \n> // Virtual Thread에서는 이 공식이 거의 의미 없다  \n> // JVM이 알아서 스케줄링하고, 개수 제한도 사실상 없으니까  \n> ```\n\n\nVirtual Thread 환경에서는 이 공식보다 “I/O 대기 구간이 얼마나 많은가”를 파악하는 게 더 중요하다. CPU-bound 작업은  VT 효과가 적고, I/O-bound 작업에서 극적인 차이가 난다.\n\n\n---\n\n\n### 04. 그럼 Kotlin, Go는 필요없나?\n\n\n> **Java 할 거면, Java 21+로 하자**  \n> Kotlin도, Go도 말리지 않는다. 각자의 장점이 있다. 다만 **Java를 쓸 거라면 Java 21 이상을 쓰지 않을 이유가 없다.** 기존 Platform Thread 기반 코드 그대로 두고, Virtual Thread만 적용해도 성능이 달라진다. 장점이 생겼는데 안 쓸 이유가 없잖아?\n\n> Kotlin의 Coroutine이 해결하려던 문제(경량 동시성)를 Java 21 Virtual Thread가 언어 레벨에서 해결했다. 완전히 같은 건 아니지만, **순수 Java 생태계에서의 이점은 훨씬 커졌다.**\n\n---\n\n\n### 05. **Python의 GIL — 그리고 No-GIL**\n\n\nPython 에도 오랫동안 비슷한 족쇄가 있었다.  바로  **GIL(Global Interpreter Lock)**이다.\n\n\n> **GIL — Global Interpreter Lock**  \n> 시스템 안정성을 위해 **한 번에 한 스레드만** Python 인터프리터를 통과시킨다는 제약이다.  \n>   \n> - 멀티코어 CPU 활용 불가  \n>   \n> - 멀티스레드 병렬 처리 사실상 차단  \n>   \n> - 현대 Python의 성능 병목 주범  \n>   \n> - CPython 구조상의 근본적 한계\n\n\n> **No-GIL Python 3.13 beta**  \n> GIL을 선택적으로 비활성화하여 진정한 멀티스레드 병렬 처리를 가능케 한다.  \n>   \n> - 멀티코어 CPU 완전 활용  \n>   \n> - 병렬 스레드 실행 가능  \n>   \n> - Virtual Thread와 유사한 방향  \n>   \n> - 기대 효과: 대규모 연산 성능 대폭 향상\n\n> 아직 beta 수준이지만, No-GIL의 의미는 크다. 수십 년간 Python의 발목을 잡았던 제약이 언어 레벨에서 해제된다는 것 자체가 패러다임 전환이다. Java의 Virtual Thread가 OS 제약을 JVM 레벨에서 우회했듯, Python은 인터프리터 레벨의 잠금을 풀어버리는 방향으로 가고 있다.\n\n---\n\n\n### 마치며  **— 플랫폼 제약이 언어 차원에서 풀린다**\n\n- Virtual Thread는 OS/HW 제약을 Carrier Thread로 우회한다. Thread지만, 차원이 다른 Thread다.\n- JNI와 synchronized는 VT의 장점을 무력화한다. 레거시 코드와 함께 쓸 때 반드시 주의.\n- Java를 쓴다면 Java 21+. 기존 코드 거의 그대로, 성능은 대폭 향상.\n- GIL은 Python 멀티스레드의 근본적 한계였다. No-GIL은 그 족쇄를 해제하는 시도다.\n- Java의 VT, Python의 No-GIL — 방향은 같다. 플랫폼 제약을 언어 레벨에서 지운다.\n\n---"
   },
   {
     "id": "31abdef7-22b6-8001-ac19-de48aabd2dbb",
@@ -105,7 +235,37 @@
     ],
     "date": "2026-03-04",
     "published": true,
-    "content": "Agile 의 핵심 키워드는 하나다. **최대한 작게, 자주, 반복.** 문제를 발견하면 즉시 수정하고, 다시 돌린다. 거창한 계획보다 빠른 피드백 루프가 먼저다. 이 사고방식은 Agile 에서 시작해서 MSA 까지 이어지는 현대 개발 트렌드의 근간이다.\n\n\n---\n\n\n### 01. Aglie 4대 가치 (Agile Manifesto)\n\n\n2001년 발표된 Agile 선언문에는 네 가지 핵심 가치가 담겨있다. 오른쪽 항목도 가치 있지만, 왼쪽을 더 중요하게 여긴다는 선언이다.\n\n\n> **개인과 상호작용**  \n> : 팀원 간의 소통과 협력을 도구와 프로세스보다 우선한다.  \n>   \n> ---  \n>   \n> over 프로세스 & 도구\n\n\n> **작동하는 소프트웨어**  \n> : 실제로 돌아가는 결과물이 방대한 문서보다 중요하다.  \n>   \n> ---  \n>   \n> over 포괄적 문서\n\n\n> **고객과의 협력**  \n> : 계약서보다 고객과의 지속적인 소통이 더 나은 결과를 만든다.  \n>   \n> ---  \n>   \n> over 계약 협상\n\n\n> **변화에 대응**  \n> : 계획을 따르되, 상황 변화에 빠르게 반응하는 것이 우선이다.  \n>   \n> ---  \n>   \n> over 계획 따르기\n\n\n---\n\n\n### 02. Waterfall - 근본 중의 근본, 그러나\n\n\nwaterfall 은 프로세스 방법론의 원형이다. **한 번에 한 단계만 진행**하고, 이전 단계가 완전히 끝나야 다음으로 넘어간다. 물건을 만드는 제조업 공정에서 왔다.\n\n\n> WATERFALL 프로세스 흐름  \n> `요구분석` ↓ `설계` ↓ `구현` ↓ `테스트` ↓ `배포` ↓ **`문제 발생`** ↑↑↑ **`처음으로`**\n\n\n> **WATERFALL**  \n> - 프로세스의 직진성 → 가장 큰 특징  \n>   \n> - 의도는 완벽한 절차지향형 진행  \n>   \n> - 단계별 명확한 산출물 존재  \n>   \n> - 문제 발생 시 끝없는 비용 낭비  \n>   \n> - 변화에 느리고, 후반부 수정이 치명적\n\n\n> **AGILE**  \n> → 짧은 사이클로 반복(Sprint)  \n>   \n> → 문제 발견 즉시 순발력 있게 수정  \n>   \n> → 매 Sprint 마다 동작하는 결과물  \n>   \n> → 변화를 수용하는 구조  \n>   \n> → 팀 단위의 자율적 운영\n\n> Waterfall의 가장 큰 단점은 설계가 잘못됐을 때 드러난다. 마지막 단계에서 요구사항이 바뀌면, 전체 프로세스를 처음부터 다시 해야 한다. Agile은 이 문제를 작은 단위로 쪼개 조기에 발견하고 즉시 반영하는 방식으로 해결한다.\n\n---\n\n\n### 03. Agile → MSA, 개발 트렌드의 흐름\n\n\n“작게, 자주, 반복” 이라는 철학은 코드 단위에서도 그대로 이어진다. Agile 방법론이 팀의 일하는 방식이라면, **MSA(Microservies Arrchitecture)는 그 철학이 시스템 설계로 확장된 결과**다.\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/75da7394-91ad-49e3-a984-db2dcf2b70c9/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4667W57UM2W%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T100733Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCICbuDa108wrlrzrI5k5L1Y8iOtrnvwsTpKvWJRmmsztvAiEAmfIovSOvy7RX4z%2Bi223TMNanQ3Gwbo7Z4F0bVo3x9psqiAQIs%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDDWe4b35MIbnonQCwircAxJqtFJUQ%2Fh75Ui0er%2BZ%2B0gdqP24kNGx9FUIVZKtjfzJerMyK9VFlv%2BPEq7hmBlxuttb0GjO5UTvive02MA%2FwZjjqxYjITEQF%2FN7JFjVIWtNA%2F%2B1yfWaSLS2T5cvyIoUm3muip1lfPjKQ7psxEtUjCSuuHxQoBQJORDMl%2FWtecbrb6b%2B32Dyp0UmFWxmOISrxr8tULtE3AyLoheDzRblN9X3U1VtAgkGflpRwStCCOc%2B5Vs0kStH3r1YlmUdmXUorB7FFh8LlGCbnUe88zFy%2BR%2FKfrcYJ%2B1BBeProSSuXuaZbgh8Z%2F4qGqc7fj%2FgBEi0MUrwdcw7ckpah7sMnmydbJzrLyNWkL%2FjQBKWsrEObrTcW8q8b40LpBGa7JVCp3jW4ZOyRsAiJ19E4fZ%2BdRGhi77PgVkW456qnde%2BGUZc81GsIeWMIFeNFQc71va5aIK%2F0Hvf2IS8lapJDr0sXnfmChoUNIPWf86Gb1JcFoPKWtOqySSDDPrAbPu4hqaC0u%2BgmqsR%2BrOxI5FVuqJ9t0S8LWqQ4tFLAeqKRJ%2FpRQamGTslujpvsFQF3xU1eaikUESu7rTOuhf2I9fkcYWxZXHu1aPvGUvVthlB6PX7XvCNkzvz0tBYp4W7RenyuDCyMKb8wtIGOqUBzD6hSPpLwT6nFUlp9sdusOwSLXyCdKexNdTsiQWks3AtuqjnSLEm1HdcCiPPHZHmu6sVFtwl6ZAhVWweniPF14nUCA7JBI%2BbN6rDyd5e3Cjseh9Unj9tLfzlTuXJvmQokBxrH8gXD55suiz8sd4nzh36O%2FqQSuGOq4cR5ZcZ7xM5IFGDstwQ2jKcE7Qs28Vb8TAfehPhf3Dk%2B3zxrwMbc0FLe6lt&X-Amz-Signature=a865bb833b826a5eac8b1b2e8b218d7922a272e9c28b647f5e7d47eee7f7711f&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\n모두 같은 방향을 가리킨다. **빠르게 배포하고, 문제를 격리하고, 독립적으로 확장**한다.\n\n\n---\n\n\n### 04. Scrum - Agile 을 실천하는 프레임워크\n\n\nAgile 이 철학이라면, Scrum은 그 철학을 팀에서 실제로 돌리는 방법이다. 각자 역할이 있고, 짧은 Sprint 단위로 일하며, 매일 짧게 모여 공유한다.\n\n\n> 🏃🏻 **Sprint**  \n> 보통 1~2주 단위의 개발 사이클. 각 Sprint 종료 시 동작하는 결과물이 나와야 한다. 작은 단위로 반복함으로써 방향 수정 비용을 최소화한다.\n\n\n> 🃏 **Planning Poker**  \n> 팀원이 각자 작업의 복잡도/공수를 카드로 동시에 공개하는 추정 방식. 앵커링 편향 없이 팀 전체의 체감 난이도를 모은다.\n\n\n> 📋 **역할 분리**  \n> Product Owner(무엇을), Scrum Master(어떻게), 개발팀(실행)으로 역할이 나뉜다. 각자 역할이 명확해야 Daily Scrum의 공유가 의미 있어진다.\n\n\n> 🏉 **Scrum, 프레임워크로 조금 더 정확히**  \n> Scrum은 3개의 역할(Product Owner·Scrum Master·Developers)과 5개의 이벤트(Sprint·Sprint Planning·Daily Scrum·Sprint Review·Retrospective)로 굴러간다. 참고로 Planning Poker는 Wideband Delphi 기법에서 나왔고, 애자일 선언 참여자인 James Grenning이 2002년 정리하고 Mike Cohn이 2005년 저서로 대중화했다.\n\n\n---\n\n\n### 05. Daily Scrum - 짧고 고통스럽게\n\n\nDaily Scrum 의 핵심은 역설적으로 **“빨리 끝내고 싶게 만드는 것”**이다. 서서 진행하거나, 플랭크·스쿼트 같은 신체 활동을 넣는 것도 그 이유다. 불편해야 집중된다.\n\n\n**Daily Scrum 의 원칙**\n\n- 최대한 짧게 — 보통 15분 이내. 길어지면 목적을 잃는다.\n- 말하기 위해 준비한다 — 스크럼 전에 오늘 할 일을 미리 정리하고 생각해둔다.\n- 3가지만 공유 — 어제 한 것 / 오늘 할 것 / 블로커(막힌 것)\n- 몸을 힘들게 — 빨리 끝내고 싶다는 동기 부여. 집중력이 자연히 올라간다.\n- 팀 내 전파 — 각자의 일을 공유해야 중복·충돌을 사전에 막을 수 있다.\n> 역할이 나뉘어 있다면 오늘 내가 할 일을 공하는 것은 기본이다. 알아서 하는 게 아니라, **팀이 같이 알고 있어야** 의존성이 보이고, 리스크가 보인다.\n\n---\n\n\n### 마치며 - Agile은 방법이 아니라 태도다\n\n- Waterfall 은 나쁜게 아니다. 다만 변화가 적은 환경에서만 빛난다.\n- Agile 의 핵심은 “작게, 자주, 반복” - 빠른 피드백 루프를 만드는 것이다.\n- Agile 4대 가치는 프로세스·계약보다 사람·소통·작동하는 결과를 우선한다.\n- Daily Scrum은 짧고 고통스러울수록 집중력이 올라간다. 설계가 그렇게 되어있다.\n- Agile → DevOps → CI/CD → MSA, 모두 같은 철학의 확장이다.\n\n---"
+    "content": "Agile 의 핵심 키워드는 하나다. **최대한 작게, 자주, 반복.** 문제를 발견하면 즉시 수정하고, 다시 돌린다. 거창한 계획보다 빠른 피드백 루프가 먼저다. 이 사고방식은 Agile 에서 시작해서 MSA 까지 이어지는 현대 개발 트렌드의 근간이다.\n\n\n---\n\n\n### 01. Aglie 4대 가치 (Agile Manifesto)\n\n\n2001년 발표된 Agile 선언문에는 네 가지 핵심 가치가 담겨있다. 오른쪽 항목도 가치 있지만, 왼쪽을 더 중요하게 여긴다는 선언이다.\n\n\n> **개인과 상호작용**  \n> : 팀원 간의 소통과 협력을 도구와 프로세스보다 우선한다.  \n>   \n> ---  \n>   \n> over 프로세스 & 도구\n\n\n> **작동하는 소프트웨어**  \n> : 실제로 돌아가는 결과물이 방대한 문서보다 중요하다.  \n>   \n> ---  \n>   \n> over 포괄적 문서\n\n\n> **고객과의 협력**  \n> : 계약서보다 고객과의 지속적인 소통이 더 나은 결과를 만든다.  \n>   \n> ---  \n>   \n> over 계약 협상\n\n\n> **변화에 대응**  \n> : 계획을 따르되, 상황 변화에 빠르게 반응하는 것이 우선이다.  \n>   \n> ---  \n>   \n> over 계획 따르기\n\n\n---\n\n\n### 02. Waterfall - 근본 중의 근본, 그러나\n\n\nwaterfall 은 프로세스 방법론의 원형이다. **한 번에 한 단계만 진행**하고, 이전 단계가 완전히 끝나야 다음으로 넘어간다. 물건을 만드는 제조업 공정에서 왔다.\n\n\n> WATERFALL 프로세스 흐름  \n> `요구분석` ↓ `설계` ↓ `구현` ↓ `테스트` ↓ `배포` ↓ **`문제 발생`** ↑↑↑ **`처음으로`**\n\n\n> **WATERFALL**  \n> - 프로세스의 직진성 → 가장 큰 특징  \n>   \n> - 의도는 완벽한 절차지향형 진행  \n>   \n> - 단계별 명확한 산출물 존재  \n>   \n> - 문제 발생 시 끝없는 비용 낭비  \n>   \n> - 변화에 느리고, 후반부 수정이 치명적\n\n\n> **AGILE**  \n> → 짧은 사이클로 반복(Sprint)  \n>   \n> → 문제 발견 즉시 순발력 있게 수정  \n>   \n> → 매 Sprint 마다 동작하는 결과물  \n>   \n> → 변화를 수용하는 구조  \n>   \n> → 팀 단위의 자율적 운영\n\n> Waterfall의 가장 큰 단점은 설계가 잘못됐을 때 드러난다. 마지막 단계에서 요구사항이 바뀌면, 전체 프로세스를 처음부터 다시 해야 한다. Agile은 이 문제를 작은 단위로 쪼개 조기에 발견하고 즉시 반영하는 방식으로 해결한다.\n\n---\n\n\n### 03. Agile → MSA, 개발 트렌드의 흐름\n\n\n“작게, 자주, 반복” 이라는 철학은 코드 단위에서도 그대로 이어진다. Agile 방법론이 팀의 일하는 방식이라면, **MSA(Microservies Arrchitecture)는 그 철학이 시스템 설계로 확장된 결과**다.\n\n\n![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/1cc9bc25-29ac-4ce4-b056-285d218ffaf2/75da7394-91ad-49e3-a984-db2dcf2b70c9/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4667M5IGG42%2F20260710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260710T195524Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQD8emC2tqRcpcSxrQ7JebRqbvlpHm9BdxeP4iVGuTGAmQIhAPHehBkHnWrr6eiwJRbejfyxcr%2F3mIKEXM31qXBKZXtGKogECL3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1IgwAlWuslWpT437PqKAq3ANnCxX7X6g2j887d337wYlCYQQhGb9bztNC6bzC%2FU4ddtIrusfKpphdG9%2Fja2hCHMD4Z0Ptk5pWNt%2FXYXzvNQDhzg6M1h1uBqvV9ITOxXswywTo%2FtTfRA2DQBLLef3GBbOlIAvV76CX6pddioypkKFzBOpufyVZmFP7VVSUlDtrG6W4mLErczyQ3sn6ulNye1mxaHyyGBGmDd5DGOolfIt0E4elff41H6vhzPeOVtfZ40JDCi0sYNYyQHYITbUX6ENsLKgG0wq9QCKNwX77Qqpdr%2BKAe5vtM7ENI%2FgHGRMA736VNydIo%2FL50Wb%2Bn8k3mYV4I9TF63SBplON3IF8gHARrJ3Nmst2%2BoHkhGG2%2BBSyczJSp85TuGZAmJUt1IUf0JqTprwC2QDzpvqI2oMz75xpZ9nbJaa8ECFe7thM1chUd1D1ohdZ3ON5ofzqL8kRn3ya0l%2BlA7lv6MeyehjfDEN4yRiy7DLSDJ6Jj2w67LA0zc%2FHghcARkRlkp0JBlL2lYhJ4uswFALiegDLoJOVYHRupPVAHCBhu%2F8uclcLxTsipz28%2BOWq25w7s7u73ZQYowARYLvMdtgRBGnikkj301YPwpCTmtXlRaFbSOytrmb2k%2FRBLMiKvMIhsS7wmzCVlcXSBjqkAdThSlQZdjlkuv4rfwRegf5Nr0rDyCcDN46xCfeX4q6RFty%2FVJuJTZxWzkaNsLiaP1wkTNGPMNroIIHCaVJHUwJNcnCsaWCqhvCNl5oTadW4m5RP1VKwANH0FYKNnqykiL8jjWgJfFae3gu1FioGaB9hKj6cYYqzjQ6gBhuc8y560V5%2FyZ7Ym8wt972jy3BPeqgKLBX6ZBsPocStCvFP3vH1%2F4oj&X-Amz-Signature=b4f33c85136c58054a9f823814f55113f5fd9fe82171e6fc254c3b753b54b232&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject)\n\n\n모두 같은 방향을 가리킨다. **빠르게 배포하고, 문제를 격리하고, 독립적으로 확장**한다.\n\n\n---\n\n\n### 04. Scrum - Agile 을 실천하는 프레임워크\n\n\nAgile 이 철학이라면, Scrum은 그 철학을 팀에서 실제로 돌리는 방법이다. 각자 역할이 있고, 짧은 Sprint 단위로 일하며, 매일 짧게 모여 공유한다.\n\n\n> 🏃🏻 **Sprint**  \n> 보통 1~2주 단위의 개발 사이클. 각 Sprint 종료 시 동작하는 결과물이 나와야 한다. 작은 단위로 반복함으로써 방향 수정 비용을 최소화한다.\n\n\n> 🃏 **Planning Poker**  \n> 팀원이 각자 작업의 복잡도/공수를 카드로 동시에 공개하는 추정 방식. 앵커링 편향 없이 팀 전체의 체감 난이도를 모은다.\n\n\n> 📋 **역할 분리**  \n> Product Owner(무엇을), Scrum Master(어떻게), 개발팀(실행)으로 역할이 나뉜다. 각자 역할이 명확해야 Daily Scrum의 공유가 의미 있어진다.\n\n\n> 🏉 **Scrum, 프레임워크로 조금 더 정확히**  \n> Scrum은 3개의 역할(Product Owner·Scrum Master·Developers)과 5개의 이벤트(Sprint·Sprint Planning·Daily Scrum·Sprint Review·Retrospective)로 굴러간다. 참고로 Planning Poker는 Wideband Delphi 기법에서 나왔고, 애자일 선언 참여자인 James Grenning이 2002년 정리하고 Mike Cohn이 2005년 저서로 대중화했다.\n\n\n---\n\n\n### 05. Daily Scrum - 짧고 고통스럽게\n\n\nDaily Scrum 의 핵심은 역설적으로 **“빨리 끝내고 싶게 만드는 것”**이다. 서서 진행하거나, 플랭크·스쿼트 같은 신체 활동을 넣는 것도 그 이유다. 불편해야 집중된다.\n\n\n**Daily Scrum 의 원칙**\n\n- 최대한 짧게 — 보통 15분 이내. 길어지면 목적을 잃는다.\n- 말하기 위해 준비한다 — 스크럼 전에 오늘 할 일을 미리 정리하고 생각해둔다.\n- 3가지만 공유 — 어제 한 것 / 오늘 할 것 / 블로커(막힌 것)\n- 몸을 힘들게 — 빨리 끝내고 싶다는 동기 부여. 집중력이 자연히 올라간다.\n- 팀 내 전파 — 각자의 일을 공유해야 중복·충돌을 사전에 막을 수 있다.\n> 역할이 나뉘어 있다면 오늘 내가 할 일을 공하는 것은 기본이다. 알아서 하는 게 아니라, **팀이 같이 알고 있어야** 의존성이 보이고, 리스크가 보인다.\n\n---\n\n\n### 마치며 - Agile은 방법이 아니라 태도다\n\n- Waterfall 은 나쁜게 아니다. 다만 변화가 적은 환경에서만 빛난다.\n- Agile 의 핵심은 “작게, 자주, 반복” - 빠른 피드백 루프를 만드는 것이다.\n- Agile 4대 가치는 프로세스·계약보다 사람·소통·작동하는 결과를 우선한다.\n- Daily Scrum은 짧고 고통스러울수록 집중력이 올라간다. 설계가 그렇게 되어있다.\n- Agile → DevOps → CI/CD → MSA, 모두 같은 철학의 확장이다.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-810b-a6e3-e017b8804865",
+    "title": "pammap 회고 — 종이 팬플릿을 디지털로, 스마트 축제 가이드",
+    "section": "log",
+    "category": "회고",
+    "tags": [
+      "회고"
+    ],
+    "date": "2026-02-13",
+    "published": true,
+    "content": "pammap 프로젝트 회고. 사람이 몰리는 축제에서 제대로 즐기지 못하고 돌아오는 경험을, 디지털 가이드로 풀어보려 했다.\n\n\n---\n\n\n### 01. 왜 기록했는가\n\n\n사람이 많이 몰리는 축제(예: 지역 축제)에서는 정작 제대로 즐기지 못하고 돌아오는 사람이 많다. 그 불편을 서비스로 풀어본 경험이라, 나중의 내가 '왜 이렇게 설계했는지'를 다시 떠올리기 위해 남긴다.\n\n> 종이 팸플릿을 디지털화해 위치·시간·공지·날씨를 실시간으로 통합 제공하는 스마트 축제 가이드. 핵심 가치는 '축제를 즐기는 데 필요한 편의를 제공하자'였다.\n\n---\n\n\n### 02. 내가 이해한 방식\n\n\n처음엔 '축제 정보를 한 화면에 모으면 끝'이라고 생각했다. 그런데 만들다 보니, 사용자가 진짜 원하는 건 '지금 내 위치에서, 지금 시간에' 맞는 정보였다. 그래서 지도 API와 실시간 알림을 엮어 '맥락이 있는 정보'로 바꿔 나갔다. 기술 스택은 React·Next.js·MUI.\n\n\n---\n\n\n### 03. 추가로 찾아본 것\n\n\n> 🔍 '팸플릿(pamphlet)'의 표준 표기는 오래 헷갈렸는데, 국립국어원 기준 올바른 표기는 **'팸플릿'**이다('팔플릿'·'팜플렛'은 비표준). 서비스 이름·카피를 쓸 때도 이런 용어 표기를 통일해두는 게 나중에 헷갈리지 않는다.\n\n\n---\n\n\n### 04. 실무에서는?\n\n\n이런 '정보 통합 + 실시간 알림' 구조는 축제뿐 아니라 박람회·콘퍼런스·테마파크 가이드 같은 곳에서 반복적으로 쓰인다. 공통으로 가장 손이 많이 가는 건 '화면'이 아니라 **운영 측**(관리자가 공지·장소를 쉽게 수정하는 백오피스)이다. 이번에 그걸 과소평가한 게 가장 큰 아쉬움이었다.\n\n> '만드는 것'만큼 '운영하는 것'도 설계 단계에서 고려했어야 했다 — 결국 서비스는 배포 후가 시작이니까.\n\n---\n\n\n### 05. 다음에 공부할 것\n\n- 관리자 페이지 설계(RBAC, CRUD 관리자 툴)\n- 지도 API 최적화 — 마커 클러스터링, 지오코딩 캐싱\n- 실시간 알림 — WebSocket vs SSE vs 푸시 알림(FCM) 비교\n\n---\n\n\n### 마치며\n\n- 종이 팸플릿 → 디지털 축제 가이드(React·Next.js·MUI).\n- 화면보다 사용자의 맥락(위치·시간), 구현보다 운영까지 설계 단계에서 본다는 교훈.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8140-90d3-ee3a842623b6",
+    "title": "지구깡 — 랜덤 뽑기로 서울의 숨은 장소를 발견하는 위치 기반 추천 플랫폼",
+    "section": "study",
+    "category": "Project",
+    "tags": [
+      "Django",
+      "DRF",
+      "Vue",
+      "Pinia",
+      "PostgreSQL",
+      "JWT",
+      "AI"
+    ],
+    "date": "2025-12-26",
+    "published": true,
+    "content": "2인 수상 프로젝트. 공공 관광데이터 API를 활용해 '랜덤 뽑기'로 서울의 숨은 장소를 발견하는 위치 기반 소셜 플랫폼. 내 담당은 프론트엔드였다.\n\n\n---\n\n\n### 01. 기획 의도 — 결정 피로를 즐거움으로\n\n\n기존 여행 플랫폼은 과도한 정보로 결정 피로를 준다. 지구깡은 **랜덤 뽑기**라는 게임적 요소로 즉흥적이고 새로운 여행 경험을 준다. 사용자 게시글과 AI 생성 게시글을 가챠 형태로 추천하고, 저장 개수를 제한해 선택에 가치를 부여한다.\n\n\n---\n\n\n### 02. 핵심 기능\n\n- **뽑기 시스템** — 랜덤 모드(조건 내 완전 랜덤) / AI 모드(좋아요 기록 기반 선호도).\n- **위치 기반 필터링** — Haversine 공식으로 정확한 거리 계산(1~10km).\n- **익명 댓글** — 1게시글 1댓글(DB 제약), 게시글별 익명 순번 자동 부여.\n- **소셜** — 팔로우 피드, 좋아요 토글.\n\n---\n\n\n### 03. AI 추천 알고리즘\n\n\n> 🧠 한국어 임베딩 모델(ko-sroberta-multitask)로 게시글을 768차원 벡터화 → 최근 좋아요 20개의 가중 평균(최근에 더 높은 가중치)으로 선호도 벡터 → 코사인 유사도 상위 20% 후보군에서 가중 랜덤 선택. 완전 결정론을 피해 다양성을 확보한 게 핵심.\n\n> 폴백: 좋아요 3개 미만이면 완전 랜덤모드, 유사도 0 이하면 균등 랜덤. 데이터 부족 상황을 자동 처리.\n\n---\n\n\n### 04. 기술 스택과 내 역할(FE)\n\n\n**BE** Django 5.2·DRF·PostgreSQL·SimpleJWT·NumPy · **FE** Vue 3(Composition API)·Vue Router·Pinia·Axios · **API** Visit Seoul·Kakao Map.\n\n\n내가 맡은 프론트엔드: 화면 구성, JWT 인증(httponly 쿠키 + CORS credentials), 반응형 페이지, GitHub 관리. Vue Composition API·Pinia·Vue Router를 실전에서 익혔다.\n\n\n---\n\n\n### 05. 회고\n\n- 기획 단계에서 기능 범위를 과다 설정한 게 아쉬움 → MVP 우선순위의 중요성을 배움.\n- N+1 쿼리, UniqueConstraint·CheckConstraint, PostgreSQL JSONB를 실전에서 체감.\n\n---"
   },
   {
     "id": "399bdef7-22b6-8131-8577-fce65c765d2f",
@@ -287,6 +447,187 @@
     "content": "Django 템플릿 렌더링을 벗어나 백엔드를 'API 서버'로 만드는 단계. DRF로 REST API를 쉽게 만들면서, REST의 자원·행위·표현과 Serializer를 배운다.\n\n\n---\n\n\n### 01. REST — 자원을 정의하고 주소를 지정하는 약속\n\n\nREST는 API 서버 설계 방법론. '자원'을 세 가지로 다룬다.\n\n\n> 🧭 - **식별** — URI(자원의 주소).  \n>   \n> - **행위** — HTTP Method(GET·POST·PUT·DELETE).  \n>   \n> - **표현** — JSON(언어·플랫폼 독립적). REST는 JSON 응답을 권장.\n\n> URL만 보고도 '어떤 데이터를 어떻게 처리할지' 예측될 수 있어야 RESTful하다. '자원 중심 + 동작 명확화 + 일관된 응답 포맷'이 기준.\n\n---\n\n\n### 02. Serializer\n\n\n직렬화(Serialization)는 **DB의 데이터/객체를 어디서든 읽을 수 있는 포맷(JSON)으로 변환**하는 과정 — '공통 언어로의 번역'이다. **ModelSerializer**는 모델과 연결된 Serializer로, `Meta`에 model·fields를 적으면 자동으로 필드에 맞춰 직렬화한다.\n\n\n```python\nclass ArticleListSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Article\n        fields = ('id', 'title', 'content')\n\n@api_view(['GET'])   # 함수형 뷰에서 허용 메서드 명시(DRF 데코레이터)\ndef article_list(request):\n    articles = Article.objects.all()\n    serializer = ArticleListSerializer(articles, many=True)  # QuerySet은 many=True\n    return Response(serializer.data)\n```\n\n\n---\n\n\n### 03. CRUD & 상태코드\n\n\n| 메서드       | 동작        | 성공 상태코드              |\n| --------- | --------- | -------------------- |\n| GET       | 조회        | 200 OK               |\n| POST      | 생성        | 201 Created (실패 400) |\n| PUT/PATCH | 수정(전체/부분) | 200 OK               |\n| DELETE    | 삭제        | 204 No Content       |\n\n\n> 💡 - **PATCH = 부분 수정** — DRF엔 `partial=True`로 구현. False면 일부 필드만 바꿀 때도 모든 필수 필드를 보내야 한다.  \n>   \n> - **`is_valid(raise_exception=True)`** — 검증 실패 시 ValidationError를 띄워 DRF가 자동으로 400 응답. 400은 대부분 입력 데이터 문제니 is_valid()부터 확인.\n\n\n---\n\n\n### 마치며\n\n- REST = 식별(URI)·행위(Method)·표현(JSON).\n- Serializer는 객체↔JSON 번역. ModelSerializer + Meta, QuerySet은 many=True.\n- 상태코드: 200/201/204/400. PATCH는 partial=True.\n\n---"
   },
   {
+    "id": "399bdef7-22b6-81d0-b760-c4b247b2c3d4",
+    "title": "SSAFY AI 2 — 13일간 AI 왕초보에서 웹 챗봇까지, 수료 회고",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-30",
+    "published": true,
+    "content": "AI 사전 지식이 전혀 없는 상태에서 시작해 13일 만에 동작하는 AI 에이전트 웹 챗봇을 만들기까지. 이론보다 '실제로 작동하는 코드'를 직접 짜보며 배운 과정의 회고다.\n\n\n---\n\n\n### 01. 13일의 여정\n\n\n> 🗺️ **Day1~5 기초** — Python 문법, NumPy 회귀, pandas 분석·EDA, MLP, 토큰화·임베딩.  \n> **Day6~8 모델 활용** — 전이학습 CNN(ResNet-18), 이미지 생성(Diffusion), 합성 데이터.  \n>   \n> **Day9~13 에이전트** — RAG 에이전트, PEFT/LoRA, ReAct 에이전트, Gradio 서비스화(★핵심), ONNX 최적화.\n\n\n---\n\n\n### 02. 가장 값진 경험 — Day12 Gradio 웹 챗봇\n\n\n터미널에서만 돌리던 코드가 아니라 브라우저에서 실제로 쓸 수 있는 형태로 만들었다. `gr.ChatInterface`로 UI를 만들고, Day9·11의 에이전트를 함수로 감싸 연결. 에이전트를 전역 변수로 미리 로딩해 응답 속도를 높였다. \"배송이 지연되면 보상 받나요?\"라고 물으면 정책 문서를 검색해 답변하는 진짜 서비스 같은 경험.\n\n\n---\n\n\n### 03. 배운 점\n\n- **AI 시스템의 전체 흐름** — 데이터 준비→모델 선택→학습→평가→배포를 직접 경험.\n- **프레임워크 활용** — PyTorch·LangChain·Gradio로 복잡한 시스템도 빠르게. 밑바닥 구현보다 도구 활용이 중요.\n- **점진적 개발** — echo 챗봇로 시작해 점진적으로 기능 확장.\n- **AI는 도구일 뿐** — 프롬프트·데이터에 따라 결과가 완전히 달라진다. 마법처럼 모든 걸 해결하진 않는다.\n\n---\n\n\n### 04. 솔직한 아쉬움\n\n> 실습 위주라 코드는 쓰는데 원리를 모르는 경우가 많았다. Attention·Transformer 같은 용어는 들어봤지만 내부 작동은 모른다. GPU 시간 관리 실패, 프롬프트 작성의 어려움, 성능 평가 미흡도 숫진 지점들. 그래도 AI의 전반적 흐름을 깨닫고 간단한 시스템까지 만들 수 있게 된 건 소중한 경험.\n\n---\n\n\n### 마치며\n\n- 기초(Python/NumPy/pandas)→모델 활용(CNN/Diffusion)→에이전트(RAG/ReAct/Gradio/ONNX)의 13일 여정.\n- 하이라이트는 Day12 웹 챗봇 서비스화 — '동작하는 것'을 만든 성취감.\n- AI는 도구, 사람이 설정한 대로 작동한다는 깨달음.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81a7-9428-db91170c21da",
+    "title": "온디바이스 AI와 정수 연산 양자화 — 값이 아니라 '연산'을 양자화한다",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-28",
+    "published": true,
+    "content": "서울대 김형신 교수님의 'AI 모델 활용' 강의. 가속기를 위한 100% 정수 연산 양자화가 핵심 주제였다.\n\n\n---\n\n\n### 01. 왜 온디바이스 AI인가\n\n\n온라인이 끊겨도 동작해야 하는 상황—생명과 직결된 응용(의료·차량)에서는 클라우드에 의존할 수 없다. 그래서 기기 위에서 직접 돌리는 온디바이스 AI가 필요하다.\n\n\n---\n\n\n### 02. AI 가속기의 특성\n\n\n> ⚡ - **CPU** — 범용성이 크다. 뭐든 연산하지만 느리다.  \n>   \n> - **가속기(NPU/GPU)** — 범용성은 줄지만 빠르다. 특정 연산(행렬곱)에 특화.\n\n\n---\n\n\n### 03. '값'이 아니라 '연산'을 양자화한다\n\n\n핵심 통찰은 이것이다. 단순히 가중치 값만 int8로 바꾸는 게 아니라, **연산 과정 전체를 정수로** 수행한다. 값만 양자화하면 중간 연산에서 다시 실수로 풀어야 하지만, 연산까지 정수화하면 가속기가 100% 정수 연산만으로 돌 수 있다.\n\n> 장점은 모델 크기 감소만이 아니다 — 정수 연산은 부동소수보다 훨씬 빠르고 전력을 덜 먹어, 저전력 엣지 디바이스에서 실시간 추론이 가능해진다.\n\n---\n\n\n### 마치며\n\n- 온디바이스 AI: 네트워크 없이도 동작(생명·안전 응용).\n- CPU(범용·느림) vs 가속기(특화·빠름).\n- 값만 아니라 연산까지 양자화 → 100% 정수 연산, 속도·전력 이득.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-819d-bb02-c26090ffd58a",
+    "title": "AI Agent 입문 — LLM의 진화와 Agentic AI, 그리고 멀티에이전트",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI"
+    ],
+    "date": "2025-10-27",
+    "published": true,
+    "content": "서울대 도재영 교수님의 'Mastering AI Agent' 강의. 생성형 AI에서 한 발 더 나아간 '스스로 목표를 세우고 실행하는' 에이전트 이야기다.\n\n\n---\n\n\n### 01. LLM의 진화사\n\n\n> 📜 - **1980s LM** — 이전 토큰으로 다음 토큰을 예측하는 확률 모델.  \n>   \n> - **2017 Transformer** — 긴 문장 학습 한계·훈련 비용을 개선(선택적 집중, 대규모 사전학습).  \n>   \n> - **2018~ LLM** — MLM(마스킹)·NTP(다음 토큰 예측)으로 대규모 학습.  \n>   \n> - **2022~ 확장** — MLLM(텍스트+시각·음성), **Agentic AI**(응답 생성을 넘어 자율적으로 목표·계획·실행).\n\n\n---\n\n\n### 02. AI Agent란\n\n\n에이전트는 '다른 사람/단체를 대신해 행동하는 주체'. **AI 에이전트는 AI를 사용해 사용자를 대신해 목표를 추구하고 작업을 수행하는 소프트웨어 시스템**이다. 현대 LLM 관점에선 AI와 AI 에이전트의 경계가 점점 모호해진다.\n\n> 에이전트의 주요 특성: **자율성·인식·기억·추론·학습·동작**. 단순히 답하는 게 아니라, 상황을 인식하고 기억을 활용해 추론하고 도구를 실행한다.\n\n---\n\n\n### 03. 멀티 에이전트 시스템\n\n\n여러 에이전트가 협업하는 구조(Multi-Agent System). 두루두루 잘하는 범용 LLM보다 **특정 도메인에 특화된 모델**을 여러 개 조합하는 흐름이 늘고 있다(예: 한 학생을 전담하는 개인화 교육 LLM).\n\n\n---\n\n\n### 마치며\n\n- LM→Transformer→LLM→MLLM/Agentic AI로 진화.\n- AI 에이전트 = AI로 사용자 대신 목표 추구·작업. 자율·인식·기억·추론·학습·동작.\n- 범용 LLM보다 도메인 특화 + 멀티 에이전트.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-817a-89e9-db99aeeb6c09",
+    "title": "리소스 효율적 AI — 수 체계, 양자화, 그리고 PEFT",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-22",
+    "published": true,
+    "content": "카이스트 이영주 교수님의 '리소스 효율적 AI' 강의. 모델을 가볍게 만드는 모든 이야기가 '수를 어떻게 표현하느냐'에서 시작한다는 게 핵심.\n\n\n---\n\n\n### 01. 컴퓨터의 수 체계\n\n- **고정소수점** — 정수·소수 자리수를 고정. 단순하고 빠르지만 표현 범위가 좁다.\n- **부동소수점(float)** — 지수·가수로 **아주 크거나 아주 작은 수**를 효과적으로. 다만 비트가 많을수로 메모리·연산 비용이 크다(FP32 > FP16 > …).\n> 모델의 파라미터를 몇 bit로 표현하느냐가 곳 **메모리 사용량과 연산 복잡도**를 결정한다. 이게 경량화의 출발점.\n\n---\n\n\n### 02. 양자화(Quantization)\n\n\n> 📦 파라미터를 낮은 정밀도(예: FP16 → 8bit → 4bit)로 바꿐 메모리를 줄인다. LLM은 놀랍게도 **4bit 수준까지** 떨어뜨려도 성능이 크게 무너지지 않는다. 단, 양자화 잡음으로 미세한 성능 저하는 감수한다.\n\n\n---\n\n\n### 03. PEFT — 파라미터 효율적 파인튜닝\n\n\n전체 파라미터를 다 학습(Full FT)하는 대신, **일부만 효율적으로 학습**하는 PEFT(Parameter-Efficient Fine-Tuning). 대표가 **LoRA**(작은 저랭크 어댑터만 학습)와 **QLoRA**(4bit 양자화 base + LoRA). 정확도는 거의 유지하면서 복잡도·비용을 크게 낮춘다.\n\n> 상세는 [게임용 GPU가 AI를 만났을 때] 글에서 다뤄다 — Full FT→LoRA→QLoRA, Paging, 양자화 전략을 함께 보면 좋다.\n\n---\n\n\n### 마치며\n\n- 수 체계(고정/부동소수점)가 메모리·연산 복잡도를 결정.\n- 양자화는 정밀도를 낮추어 경량화(LLM은 4bit까지 OK).\n- PEFT(LoRA/QLoRA)로 적게 바꾸고 정확도는 유지.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8198-877d-ea1d8b46c10a",
+    "title": "합성 데이터 만들기 — API 비동기 통신, 프롬프트 엔지니어링, LLM as Judge",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "HTTP"
+    ],
+    "date": "2025-10-21",
+    "published": true,
+    "content": "LLM으로 학습 데이터를 직접 '생성'하고, 그 품질을 다시 LLM으로 평가하는 실습. 가상의 영화 추천 챗봇용 데이터를 만들었다.\n\n\n---\n\n\n### 01. 환경 변수로 API 키 안전하게\n\n\n> 🔐 API 키를 코드에 직접 적으면 GitHub에 올릴 때 유출된다. `.env` 파일에 넣고 `os.environ`(또는 `dotenv`)으로 읽어, `.gitignore` 처리하면 안전. 보안 + 유연성(개발/배포 서버 키 교체)이 장점.\n\n\n---\n\n\n### 02. httpx와 비동기 통신\n\n\nhttpx는 requests API 스타일을 계승하면서 **비동기(Async)와 HTTP/2**를 지원하는 차세대 HTTP 클라이언트. 왜 비동기인가 — 네트워크 응답을 기다리는 동안 멈추지 않고 여러 API를 동시에 호출할 수 있어서다. `asyncio.gather`로 여러 프롬프트를 병렬 처리.\n\n\n---\n\n\n### 03. JSON과 Structured Output\n\n\nJSON은 사람도 읽기 쉽고 모든 언어가 처리하기 쉽은 웹 표준 데이터 형식. LLM의 **structured output**에서 지정된 형식으로 generate하게 만들 때 대표적으로 JSON을 쓴다. 프롬프트에 output_format을 명시해 원하는 구조를 받는다.\n\n\n---\n\n\n### 04. LLM as Judge\n\n> 생성만큼 중요한 게 **평가**다. 생성된 합성 데이터의 품질을 사람이 일일이 보는 대신, '평가자' LLM을 설계해 자동으로 점수를 매긴다. 프롬프트 엔지니어링으로 평가 기준을 설계하는 게 핵심.\n\n---\n\n\n### 마치며\n\n- 환경변수(.env)로 API 키 보안.\n- httpx 비동기(asyncio.gather)로 여러 호출 병렬화.\n- JSON structured output으로 합성 데이터 생성.\n- LLM as Judge로 품질 자동 평가.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81b7-994d-d6ce15f23e9f",
+    "title": "거대 언어 모델(LLM) — 파운데이션 모델, 규모의 법칙, 그리고 창발성",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-20",
+    "published": true,
+    "content": "연세대 김재형 교수님의 거대 언어 모델 강의. GPT는 왜 BERT와 다른가, '키워놓으니 되더라'는 창발성이란 무엇인가를 정리했다.\n\n\n---\n\n\n### 01. 파운데이션 모델\n\n\n대량 데이터로 사전 학습된 대규모 AI 모델. 다양한 작업의 '기초(foundation)' 역할을 한다(텍스트 ChatGPT, 영상 SORA, 멀티모달).\n\n\n> 🧱 **파운데이션 모델의 3요소** — ① 빅데이터, ② 자가학습(self-supervised: 사람이 정답을 줄 필요 없이 다음 토큰 예측), ③ 어텐션 기반 트랜스포머(더 많은 데이터를 학습하는 신경망 구조).\n\n\n---\n\n\n### 02. 거대 언어 모델의 특이점\n\n\nGPT-1, BERT에도 이미 3요소가 있었는데 왜 거대 모델은 다를까? 크게 두 가지 특이점 때문이다.\n\n- **규모의 법칙(Scaling Law)** — 더 많은 데이터·학습이 더 좋은 성능으로 이어진다.\n- **창발성(Emergent Property)** — 키워놓으니 안 배운 어려운 문제를 푸는 능력이 창발. ① 인컨텍스트 학습(설명·예시만으로 수행), ② 추론 능력.\n> 성능 지표 **perplexity**는 응답을 잘 만들수록 낮아진다(모델이 얼마나 다음 토큰을 덜 놓라워하는가).\n\n---\n\n\n### 03. 폐쇄형 vs 개방형\n\n- **폐쇄형** — 정보가 닫혀 있어 답변 근거를 알 방법이 없을 수 있다. ChatGPT(OpenAI) — 최다 활성 유저.\n- **개방형** — LLaMA(Meta), Gemma(Google), Qwen(Alibaba). 무료 다운로드, 모든 정보 공개.\n\n---\n\n\n### 04. 지시 학습·추론·평가\n\n\n지시 학습(Instruction tuning)은 주어진 지시에 어떤 응답이 나와야 하는지를 가르치는 과정(InstructGPT). 디코딩 알고리즘은 다음 토큰을 어떻게 고를지를 결정한다. 정답이 정해지지 않은 평가는 거대 언어 모델로 대체하기도 한다(LLM as Judge). 주의할 문제는 **환각(Hallucination)**과 **탈옥(Jailbreaking)**.\n\n\n---\n\n\n### 마치며\n\n- 파운데이션 3요소: 빅데이터·자가학습·트랜스포머.\n- LLM 특이점: 규모의 법칙, 창발성(인컨텍스트 학습·추론). perplexity.\n- 폐쇄형(ChatGPT) vs 개방형(LLaMA/Gemma/Qwen). 환각·탈옥 주의.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-817c-91ba-e86ae908d3cf",
+    "title": "CNN과 전이학습 실전 — ResNet-18 리니어 프로빙과 미세조정",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-17",
+    "published": true,
+    "content": "사전 학습된 ResNet-18을 가져와 CIFAR-10 분류에 적용하는 전이학습 실습. PyTorch와 HuggingFace로 비전 모델을 붙이며 CNN과 트랜스포머를 비교했다.\n\n\n---\n\n\n### 01. CNN의 구조\n\n\n> 🧩 [입력 이미지] → [특징 추출: Convolution + Pooling] → [분류: Fully Connected] → [출력]\n\n\n합성곱과 풀링은 이미지의 특징을 점점 더 추상화하며 추출한다. 이때 배우는 특징(엣지·색상·질감·단순 패턴)은 매우 일반적이라 다양한 이미지에 공통으로 유용하다. 반면 마지막 층은 태스크에 특화된 정보라 재학습이 필요하다 — 이게 전이학습의 핵심 직관이다.\n\n\n---\n\n\n### 02. 리니어 프로빙 vs 미세조정\n\n- **리니어 프로빙(Linear Probing)** — 특성 추출부를 동결(freeze)하고 마지막 분류층만 학습. PyTorch에선 `requires_grad=False`로 파라미터를 동결하면 역전파 시 그래디언트가 계산되지 않는다. 빠르고 훈련 시간 단축.\n- **미세조정(Fine-tuning)** — 모든 층을 다시 학습. 데이터 증강(Augmentation) + 학습률 스케줄러로 성능을 끌어올린다.\n> 실습 결과 — 리니어 프로빙 약 78%, 전체 미세조정 약 85% 정확도. 처음부터 학습하지 않고도 좋은 성능이 나오는 게 전이학습의 힘.\n\n---\n\n\n### 03. 전처리와 재현성\n\n\nCIFAR-10은 32×32인데 ResNet-18은 224×224 입력이라 크기를 맞추고, ImageNet 통계값으로 정규화해 입력을 안정화한다. 실험 재현성을 위해 `torch.manual_seed`·`cuda.manual_seed`·`np.random.seed`를 고정하고 cuDNN을 결정론적으로 설정한다.\n\n\n---\n\n\n### 마치며\n\n- CNN: Conv+Pooling(일반 특징) → FC(태스크 특화). 마지막 층만 재학습.\n- 리니어 프로빙(freeze, 빠름, ~78%) vs 미세조정(전체, 증강·스케줄러, ~85%).\n- 전처리(리사이즈·정규화) + 시드 고정으로 재현성.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81a6-86e2-c4f0b3b69e2d",
+    "title": "비전 파운데이션 모델 — ViT와 CLIP, 스테이블 디퓨전, 그리고 전이학습",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-17",
+    "published": true,
+    "content": "카이스트 오태현 교수님·김준호 강사님의 이미지 파운데이션 모델 강의. 자연어에서 성공한 트랜스포머를 이미지로 가져온 흐름을 정리했다.\n\n\n---\n\n\n### 01. AI 모델은 결국 함수\n\n> AI 모델은 입력과 출력을 연결해주는 함수(또는 프로그램)다. 성능은 결국 '데이터를 얼마나 깨끗하게 잘 준비했느냐'에 크게 좌우된다.\n\n---\n\n\n### 02. ViT — 이미지를 문장처럼\n\n\n비전 트랜스포머(ViT)는 이미지를 **문장처럼** 다룬다. 이미지를 조각(**패치, patch**)으로 나누고, 각 패치를 토큰처럼 취급해 셔프 어텐션으로 관계를 학습한다. 패치로 나누는 게 곧 이미지의 패턴화다.\n\n\n---\n\n\n### 03. CLIP — 텍스트와 이미지를 대조하며\n\n\n> 🔗 **CLIP**(Contrastive Language-Image Pre-training)은 올바르게 짝지어진 텍스트-이미지 쌍을 만들어 함께 대조하며 학습한다. 생성이 아니라 **이해·표현**이 목적이라 디코더(압축을 푸는 과정)가 필요 없다 — 인코더로 압축만 한다.\n\n\n---\n\n\n### 04. 스테이블 디퓨전 — 노이즈를 조각하듯\n\n\nTEXT → IMAGE 생성. 선명한 이미지에 노이즈를 계속 추가해 노이즈 덩어리로 만들고, 그것을 **역으로 되돌리며** 프롬프트에 맞게 노이즈를 제거해 나가며 이미지를 조각한다.\n\n\n---\n\n\n### 05. 전이학습과 리니어 프로빙\n\n\n생성한 데이터로 기존 모델(예: ResNet18/50)에 새 클래스를 학습시키는 **전이학습(Transfer Learning)**. 사전 학습된 모델의 특징 추출기는 그대로 두고 마지막 분류층만 학습하는 게 **리니어 프로빙**(예: 여우/개 분류). CNN 실습과 자연스럽게 연결된다.\n\n\n---\n\n\n### 마치며\n\n- ViT: 이미지를 패치로 나누어 문장처럼 처리.\n- CLIP: 텍스트-이미지 대조 학습, 이해·표현용(디코더 불필요).\n- 스테이블 디퓨전: 노이즈 제거로 text→image.\n- 전이학습·리니어 프로빙으로 적은 데이터로도 새 분류기 구축.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-818e-83d5-ef6c3df4a003",
+    "title": "토큰화와 임베딩 — 문장을 숫자로, 숫자를 의미로 (허깅페이스 실습)",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-16",
+    "published": true,
+    "content": "딥러닝 모델은 '안녕하세요'를 직접 이해하지 못한다 — 오직 숫자만 받는다. 그래서 필요한 게 **토큰화(문장→숫자)**와 **임베딩(숫자→의미의 좌표)**이다.\n\n\n---\n\n\n### 01. 토큰화 — 문장을 숫자로\n\n\n텍스트를 토큰 ID 시퀀스로 바꾸는 과정. 토크나이저 종류가 있다.\n\n\n> ✂️ - **단어/규칙 기반** — 공백 분리(한국어에 약함), 형태소 분석기(한국어에 강함).  \n>   \n> - **서브워드 기반** — 현대 LLM 주류. **BPE**(빈번한 문자 쌍을 병합, GPT 계열), **WordPiece**(확률 기반, BERT 계열). 사전에 없는 단어(OOV)를 아는 조각으로 나눠 처리한다.\n\n> `자연어처리`가 사전에 없어도 `[자연어, ##처리]`로 쪼개 처리. `##`는 '앞 토큰에 이어 붙임' 표시. 분해도 안 되면 `[UNK]`.\n\n특수 토큰도 있다 — `[CLS]`(문장 시작·요약), `[SEP]`(문장 구분), `[PAD]`(배치 길이 맞춤), `[UNK]`(미지어), `[MASK]`(BERT 사전학습).\n\n\n---\n\n\n### 02. 임베딩 — 숫자를 의미의 좌표로\n\n\n토큰 ID(45번)는 44·46번과 아무 수학적 관계가 없다. 그래서 **의미 있는 공간의 벡터**로 바꿜다. 발전 과정:\n\n- **원핫 인코딩** — 하나만 1, 나머지 0. 차원의 저주 + 의미 관계 표현 불가.\n- **정적 임베딩** — Word2Vec(주변 단어로 의미 결정: CBOW/Skip-gram), GloVe(전체 통계).\n- **RNN/LSTM** — 문맥 반영 시도, 하지만 장기 의존·속도 문제.\n- **Transformer/BERT** — 셔프 어텐션으로 모든 단어 관계를 병렬 계산, 위치 임베딩으로 순서 정보 추가. BERT는 양방향 문맥.\n\n> 💡 PyTorch `nn.Embedding`은 (단어사전 크기 × 벡터 차원)의 **학습 가능한 룩업 테이블**. 두 벡터가 얼마나 같은 방향인지는 **코사인 유사도**(1에 가까울수록 유사)로 쟰다. 허깅페이스의 사전학습 모델(예: Klue/bert-base) 임베딩을 내 사전의 같은 단어에 복사해 오는 게 전이학습(Transfer Learning)의 기본기다.\n\n\n---\n\n\n### 마치며\n\n- 토큰화: 단어/규칙 vs 서브워드(BPE/WordPiece, OOV 해결). 특수토큰 [CLS]/[SEP]/[PAD]/[UNK]/[MASK].\n- 임베딩: 원핫→Word2Vec/GloVe→RNN→Transformer/BERT. nn.Embedding, 코사인 유사도.\n- 허깅페이스 사전학습 모델로 전이학습.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-812d-a896-c33c965d4be0",
+    "title": "자연어 처리 개관 — 워드 임베딩과 순차 모델(RNN→Seq2seq→Attention)",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-15",
+    "published": true,
+    "content": "연세대 여진영 교수님의 NLP 강의(거대언어모델 직전). '단어를 어떻게 처리할까'에서 출발해 순차 모델까지의 큰 그림을 정리했다.\n\n\n---\n\n\n### 01. 원핫 인코딩의 한계\n\n\n규칙·통계 기반 NLP는 단어를 쌊c 수 없는 기호로 보고, 벡터로는 **한 원소만 1이고 나머지는 0**인 원핫 벡터로 표현했다. 하지만 단어 사전이 커지면 벡터도 커지고(차원의 저주), 단어 간 의미 관계를 담지 못한다.\n\n\n---\n\n\n### 02. 워드 임베딩\n\n\n그래서 단어를 **저차원의 의미 있는 실수 벡터**로 압축한다. '비슷한 맥락에 나타나는 단어는 비슷한 의미'라는 가정이 핵심이다(Word2Vec 등).\n\n\n---\n\n\n### 03. 순차 모델 — RNN→Seq2seq→Attention\n\n\n> 🔁 - **RNN** — 순차적 데이터(문장)를 앞에서부터 처리. 문장이 길면 앞 정보가 사라지는 **장기 의존성 문제**.  \n>   \n> - **Seq2seq** — 입력 시퀀스를 인코더로 압축하고 디코더로 출력 시퀀스 생성(번역 등).  \n>   \n> - **Attention** — 출력을 만들 때 입력의 **어느 부분에 집중**할지 가중치로 결정 — 장기 의존성을 해소하며 후에 Transformer로 이어진다.\n\n> 이 흐름의 끝이 Transformer·BERT·GPT다. 상세한 토큰화·임베딩 실습은 [토큰화와 임베딩] 글 참고.\n\n---\n\n\n### 마치며\n\n- 원핫은 차원의 저주 + 의미 관계 부재 → 워드 임베딩.\n- RNN(장기의존)→Seq2seq(인코더/디코더)→Attention(집중)→Transformer.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-816e-a724-eed0c7903294",
+    "title": "EDA와 모델 평가 — 데이터를 먼저 이해하고, 성적표를 제대로 읽기",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-14",
+    "published": true,
+    "content": "모델보다 먼저 데이터다. 탐색적 데이터 분석(EDA)부터 분류 모델 평가 지표, 비지도 학습까지 한 번에 정리한 날.\n\n\n---\n\n\n### 01. EDA — 데이터를 먼저 이해하기\n\n\n> ⚠️ **상관관계 ≠ 인과관계.** 함께 움직인다고 원인은 아니다. 아이스크림 판매량과 상어 공격은 함께 늘지만, 진짜 원인은 '더위'라는 숨은 변수다.\n\n- **단변수 분석** — 개별 변수의 분포·이상치 확인(히스토그램, 박스플롯).\n- **다변수 분석** — 변수 간 관계(산점도, 상관계수).\n- **데이터 전처리** — EDA 결과를 바탕으로 결측치·이상치 처리, 스케일링, 인코딩.\n\n---\n\n\n### 02. 분류 모델 평가 — 성적표 읽기\n\n\n정확도만 보면 속는다. **혼동 행렬**(Confusion Matrix)로 TP·FP·FN·TN을 나눠 본다.\n\n\n> 🎯 - **정밀도(Precision)** — 양성이라 예측한 것 중 진짜 양성. '예측이 얼마나 정확한가'. 스팸 분류 같이 오탐(FP)이 치명적일 때 중요.  \n>   \n> - **재현율(Recall)** — 실제 양성 중 맞힌 비율. '놓치지 않았는가'. 암 진단 같이 놓침(FN)이 치명적일 때 중요.\n\n> 정밀도와 재현율은 보통 트레이드오프 관계 — F1 점수로 균형을 본다. 성능 검증은 학습/검증/테스트 분할로.\n\n---\n\n\n### 03. 비지도 학습\n\n\n정답(레이블) 없이 데이터 구조를 찾는다.\n\n- **차원 축소** — 꿀 필요한 정보만 남기기(PCA 등). 시각화·계산 효율·노이즈 제거.\n- **군집화(클러스터링)** — 비슷한 것끼리 묶기. **K-Means**는 K개 중심을 잡고 가장 가까운 군집에 할당·중심 재계산을 반복.\n\n---\n\n\n### 마치며\n\n- 상관 ≠ 인과. EDA는 단변수·다변수 분석 + 전처리.\n- 분류 평가: 혼동행렬, 정밀도 vs 재현율(트레이드오프).\n- 비지도: 차원축소(PCA), 군집화(K-Means).\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8109-8685-eebbea10289e",
+    "title": "선형회귀와 분류 — 최소제곱법, 다중회귀, 로지스틱 회귀",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-14",
+    "published": true,
+    "content": "머신러닝의 가장 기본 모델은 선형회귀다. '직선 하나'로 시작해서 다중회귀·로지스틱 회귀로 확장되는 흐름을 정리했다.\n\n\n---\n\n\n### 01. 단순 선형회귀\n\n\n입력 X와 출력 Y 사이를 **직선으로 근사**해 예측한다. `Y = β0 + β1X + ε` (ε는 측정 오차, +도 -도). 데이터가 꼭 선형이 아니어도 선형회귀 자체는 할 수 있다.\n\n\n> 📐 **최소제곱법(Least Squares)** — 실제값 y와 예측값 ŷ의 차이(잔차, residual)를 제곱해 합한 값(**RSS, 잔차제곱합**)을 최소화하는 직선을 찾는다. 제곱하는 이유는 부호를 없애고 큰 오차를 더 크게 벌주기 위해서다.\n\n> 주의: 선형회귀로 관계를 찾았다고 **인과관계를 기대하면 안 된다.** 상관≠인과.\n\n---\n\n\n### 02. 다중 선형회귀\n\n\n설명변수(Feature)가 여러 개일 때. `Y = β0 + β1X1 + β2X2 + … + ε`. 여러 독립변수를 동시에 고려해 Y와의 관계를 구한다.\n\n\n---\n\n\n### 03. 분류와 로지스틱 회귀\n\n\n분류(Classification)는 정해진 범주 중 하나로 지정하는 것. 이름은 '회귀'지만 **로지스틱 회귀는 사실 분류 모델**이다.\n\n\n> 💡 보강 — 선형회귀의 출력은 무한대 범위의 숫자라 확률(0~1)에 안 맞는다. 로지스틱 회귀는 선형 결과를 **시그모이드(sigmoid)** 함수에 통과시켜 0~1 확률로 누르고, 임계값(보통 0.5) 기준으로 범주를 판정한다. 이진 분류의 기본기다.\n\n\n---\n\n\n### 마치며\n\n- 단순 선형회귀(Y=β0+β1X+ε), 최소제곱법(RSS 최소화).\n- 피처 여러 개면 다중 선형회귀. 상관≠인과.\n- 분류는 로지스틱 회귀(시그모이드로 0~1 확률).\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8134-b1d8-ecd7aba61151",
+    "title": "AI Math — 단순 선형 회귀에서 다중 선형 회귀로",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "CS",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-13",
+    "published": true,
+    "content": "AI의 수학적 밑바탕을 다지는 날. 선형 회귀를 다시 보면서 '왜 실생활 문제는 다중 회귀인가'를 정리했다.\n\n\n---\n\n\n### 01. 단순 선형 회귀\n\n\n변수가 하나라 이해하기 쉽고, 2차원 공간에서 선형 함수로 그릴 수 있어 시각화가 쉽다. 하지만 현실 문제는 변수가 하나인 경우가 거의 없다.\n\n\n---\n\n\n### 02. 다중 선형 회귀\n\n\n> 📝 $y = \\beta_0 + \\beta_1 X_1 + \\beta_2 X_2 + \\cdots + \\beta_k X_k + \\varepsilon$\n\n- **y** — 종속 변수(예측 대상)\n- **βk** — 회귀 계수(각 변수의 영향력)\n- **Xk** — 독립 변수(입력 특징)\n- **ε** — 오차항(모델로 설명할 수 없는 부분)\n> X1까지만 있으면 단순 선형 회귀, X2 이상이면 다중 선형 회귀. 집값을 예측할 때 면적만이 아니라 방 개수·연식·위치를 함께 보는 게 현실적이다.\n\n---\n\n\n### 마치며\n\n- 단순 회귀: 시각화·이해 쉽지만 비현실적.\n- 다중 회귀: y = β₀ + ΣβₖXₖ + ε. 계수·독립변수·오차항의 의미.\n\n---"
+  },
+  {
     "id": "398bdef7-22b6-81f6-be6b-f2148e92e574",
     "title": "머신러닝 기초 한 바퀴 — 지도/비지도, 평가지표, 그리고 과적합",
     "section": "study",
@@ -301,6 +642,20 @@
     "content": "머신러닝 수업을 들으면서 가장 먼저 깨달은 건, 결국 '데이터 안에 숨은 진짜 관계를 추측하는 일'이라는 점이었다. 규칙을 직접 코딩하는 게 아니라, 데이터를 주고 그 관계를 찾게 하는 것. 오늘은 기초 개념들을 한 바퀴 정리해봤다.\n\n\n---\n\n\n### 01. AI ⊃ ML ⊃ DL\n\n\n용어가 자주 섞이는데, 포함 관계로 보면 깔끔하다.\n\n- **AI** — 환경·데이터를 인지·학습·추론해 목표를 달성하는 시스템 (규칙 기반 시스템도 포함)\n- **ML** — AI 안에서, 데이터로부터 학습해 목적을 달성하는 방법론\n- **DL** — ML 안에서, 신경망(Neural Network)을 쓰는 접근\n> '규칙 기반(휴리스틱) 시스템'은 AI지만 ML은 아니다. ML의 핵심은 '규칙을 사람이 짜지 않고 데이터가 학습하게 한다'는 데 있다.\n\n---\n\n\n### 02. 데이터의 언어 — Feature, Label, 그리고 미지의 최함수 f*\n\n- **Feature(특성)** — 모델의 입력으로 쓰이는 설명 변수\n- **Label(라벨, 정답)** — 모델이 예측하려는 목표값\n\n수업에서는 데이터를 `y = f*(feature) + ε` 로 봤다. 여기서 `f*`(참함수)는 feature와 label 사이의 실제 평균 관계로 **직접 관측할 수 없고**, `ε`(측정 오차)도 섞여 있어 관측 불가능하다. 우리가 보는 건 '오차가 포함된 점들'뿐이다.\n\n\n> 💡 그래서 학습이란 가설 공간(Hypothesis Space, 예: '1차함수들') 안의 후보 함수들 중에서, 성능첨도를 기준으로 최적의 모델 f를 고르는 과정이다. 데이터 D → 가설공간 F → 선택된 모델 f.\n\n\n---\n\n\n### 03. 지도학습 — 회귀(Regression)와 그 평가\n\n\n지도학습은 입력 + 정답(label)이 쌍으로 있는 데이터로 학습한다. 목표는 훈련 데이터가 아니라 **처음 보는 데이터에서의 예측 성능**이다. 예측값이 숫자면 회귀, 범주면 분류다.\n\n\n회귀를 잘했는지 정량화하는 지표:\n\n- **MSE(평균제곱오차)** = (1/n) Σ(yᵢ - ŷᵢ)² — 큰 오류를 더 크게 벌줌(penalty)\n- **RMSE** = √MSE — 데이터와 같은 단위로 보고 싶을 때\n- **R²(결정계수)** = 1 - Σ(yᵢ-ŷᵢ)² / Σ(yᵢ-ȳ)² — 평균만 쓰는 예측보다 얼마나 더 잘 맞추는지를 0~1로. 예측이 평균보다 못하면 음수도 가능.\n\n---\n\n\n### 04. 지도학습 — 분류(Classification)와 '정확도의 함정'\n\n\n정확도(Accuracy) = 전체 중 맞춘 비율. 직관적이지만 함정이 있다.\n\n\n> ⚠️ **불균형 데이터의 함정** — 양성 1%, 음성 99%라면, 전부 '음성'이라고만 해도 정확도가 99%로 보인다. 그래서 정확도만 보면 안 된다.\n\n\n혼동행렬(Confusion Matrix)을 기반으로 더 안전한 지표를 본다.\n\n- **정밀도(Precision)** = TP/(TP+FP) — 양성이라 판정한 것 중 진짜 양성 비율\n- **재현율(Recall)** = TP/(TP+FN) — 진짜 양성 중 잡아난 비율\n- **F1-score** = 2PR/(P+R) — 정밀도와 재현율의 조화평균. 둘이 균형 있게 클 때 높다.\n> 정밀도와 재현율은 보통 상충한다. 스팸필터(오탐을 줄이기)라면 정밀도를, 암 진단(놓치면 큰일)이라면 재현율을 우선한다. 지표 선택은 결국 '어떤 실수가 더 치명적인가'의 문제다.\n\n---\n\n\n### 05. 과적합 vs 과소적합, 훈련오류 vs 테스트오류\n\n- **과적합(Overfitting)** — 모델이 너무 복잡해서 잡음까지 외움. 훈련은 잘 맞추지만 테스트는 나쁨. 샘플 몇 개만 바뀌어도 예측이 크게 흔들린다(일반화 실패).\n- **과소적합(Underfitting)** — 모델이 너무 단순해 중요한 패턴을 놓침.\n\n훈련오류는 '암기한 걸 틀림', 테스트오류는 '응용문을 틀림'에 가깝다. 보통 훈련오류는 테스트오류를 과소평가한다. 목표는 **테스트 오류의 U자 곡선에서 밑바닥**이 되는 적절한 복잡도를 찾는 것.\n\n\n---\n\n\n### 06. 테스트 데이터가 부족할 때 — 재표본화(Resampling)\n\n\n현실엔 테스트만을 위한 데이터가 따로 없는 경우가 많다. 그래서 데이터를 더 알뜽게 써서 일반화 오차를 추정한다.\n\n- **검증셋(Hold-out)** — 데이터를 무작위로 훈련셋/검증셋으로 나눠 학습과 평가를 분리. (반드시 반반으로 나눌 필요는 없음)\n- **K-겹 교차검증(K-fold CV)** — 데이터를 K개 폴드로 나누고, 각 폴드를 돌아가며 검증셋으로 써서 K개 MSE를 평균. 검증셋 하나에 우연히 의존하는 걸 줄인다.\n- **LOOCV(Leave-One-Out)** — K=n. 관측치 하나만 빼고 나머지로 학습, 이를 n번 반복. 정밀하지만 비용이 크다.\n\n---\n\n\n### 07. 비지도학습 — 정답 없이 구조를 찾다\n\n\n라벨 없이 데이터의 구조·패턴·집단을 찾는다. 출력은 '정답 예측'이 아니라 구조·요약·표현(embedding)이다. 대표가 클러스터링.\n\n- **K-means** — 군집 수 K를 먼저 정하고, '클러스터 내부 변동의 합이 최소'가 되도록 분할. 중심 계산 → 가장 가까운 중심으로 재할당을 반복. 단, 전역 최적은 보장 안 되고 초기값에 따라 지역 최소로 수렴할 수 있다.\n- **계층적 군집(Hierarchical)** — K를 미리 고정하지 않고 덴드로그램으로 전체 구조를 제시. 수평선 높이로 잘라 K를 정한다.\n> 클러스터링은 스케일링(변수 단위 차이)에 민감하니 전처리가 중요하고, 한 번만 돌리지 말고 여러 번 시도하는 게 좋다.\n\n---\n\n\n### 마치며 — 결국 '일반화'가 목표다\n\n- ML은 데이터에서 관계를 찾는 것. 참함수 f*도 오차 ε도 직접 볼 수 없다.\n- 회귀는 MSE/RMSE/R², 분류는 정밀도/재현율/F1로 평가한다. 정확도만 믿지 말 것.\n- 목표는 훈련 성능이 아니라 테스트(일반화) 성능. 그래서 교차검증이 필요하다.\n- 비지도학습은 정답 없이 구조를 찾고, 대표는 클러스터링이다.\n\n---"
   },
   {
+    "id": "399bdef7-22b6-8141-99f7-ecce4c204a04",
+    "title": "AI를 위한 Python — NumPy와 pandas로 데이터 다루기",
+    "section": "study",
+    "category": "Daily Content",
+    "tags": [
+      "python",
+      "AI",
+      "ML"
+    ],
+    "date": "2025-10-10",
+    "published": true,
+    "content": "기계학습은 결국 데이터를 숫자로 처리하는 일. 그 두 기둥이 **NumPy**(수치 계산·행렬)와 **pandas**(표 형태 분석)다. AI를 위한 Python의 핵심을 정리했다.\n\n\n---\n\n\n### 01. NumPy — 왜 빠른가\n\n\n> ⚡ 100만 개 원소를 2배하는 연산: 파이썬 리스트 약 0.042초 vs NumPy 약 0.0008초. **수십 배 차이**는 C 기반 내부 최적화 + 벡터화 연산 덕분. 대규모에선 반복문 대신 NumPy가 필수.\n\n\n기본 속성 4종 세트는 `ndim`(차원)·`shape`(모양)·`size`(원소 수)·`dtype`(타입). 생성은 `zeros`·`ones`·`full`·`arange`·`linspace`.\n\n\n---\n\n\n### 02. 인덱싱과 뷰(View) — 주의!\n\n> 파이썬 리스트 슬라이싱은 **복사본**, NumPy 슬라이싱은 **뷰(view)**다. 즉 NumPy 슬라스를 수정하면 원본도 바뀜다(메모리 연속 저장 → 참조). 원본 보존이 필요하면 `.copy()`.\n- **불리언 인덱싱** — `data[data > 3]`처럼 조건으로 필터링. 여러 조건은 `&`·`|` 사용(`and`/`or` ❌).\n- **팬시 인덱싱** — `arr[[0,2,5]]`처럼 인덱스 리스트로 선택. 복사본 반환.\n- **reshape** — 원소 수 유지 조건. `-1`은 자동 계산. `flatten()`(복사) vs `ravel()`(가능하면 뷰).\n\n---\n\n\n### 03. 연산과 브로드캐스팅\n\n\n`*`는 **요소별 곱**, 행렬 곱은 `@` 또는 `np.dot()`. 서로 다른 shape끼리 연산할 때 NumPy가 자동으로 형태를 맞추는 게 **브로드캐스팅**(차원을 앞에 1로 맞추고, 길이가 같거나 1이면 OK). 집계는 `sum`·`mean`·`std`·`argmax` 등, `axis=0`(열)·`axis=1`(행).\n\n\n---\n\n\n### 04. pandas — 표 데이터\n\n\nDataFrame은 SQL 테이블과 유사. 구조 확인은 `info()`·`describe()`·`shape`. 선택은 `loc`(라벨 기반, 끝 포함) vs `iloc`(위치 기반, 끝 미포함). 조건 필터링은 `df[df['점수'] >= 90]`, 결측치는 `dropna()`·`fillna()`, 타입 변환은 `astype()`.\n\n\n---\n\n\n### 마치며\n\n- NumPy: 벡터화로 수십 배 빠름. 속성 4종, 생성 함수, 뷰 vs 복사(슬라이싱 주의), 브로드캐스팅, 집계 axis.\n- pandas: DataFrame, loc/iloc, 조건 필터링, 결측치 처리.\n\n---"
+  },
+  {
     "id": "399bdef7-22b6-81ad-88fc-cdf3e2d80352",
     "title": "Django Static & Media 파일 — 정적 경로와 업로드 파일 다루기",
     "section": "study",
@@ -311,6 +666,19 @@
     "date": "2025-10-10",
     "published": true,
     "content": "정적 파일(static)은 서버가 고정적으로 제공하는 파일(CSS·JS·이미지), 미디어(media)는 사용자가 업로드하는 파일이다. 둘 다 '접근할 고유한 주소'가 필요하다는 게 핵심.\n\n\n---\n\n\n### 01. Static files\n\n\n기본 경로는 `앱/static/`. 템플릿에서는 `{% load static %}` 후 `{% static 'stylesheets/style.css' %}`로 불러온다.\n\n- **STATIC_URL** — 정적 파일의 웹 주소.\n- **STATICFILES_DIRS** — 기본 경로 외에 추가로 탐색할 경로 목록. 프로젝트 최상위 `static/`을 넣으려면 `STATICFILES_DIRS = [BASE_DIR / 'static']`.\n\n---\n\n\n### 02. Media files\n\n\n사용자 업로드 파일. 준비는 두 단계다.\n\n- **MEDIA_ROOT** — 미디어 파일의 실제 창고(디스크 경로).\n- **MEDIA_URL** — 미디어 파일의 웹 주소 별명.\n\n설정 후 `settings`와 `static()`을 urls에 추가해 실제 URL로 제공한다. 모델엔 `ImageField`를 쓰고, `blank=True`로 두면 업로드가 선택사항이 된다.\n\n\n> ⚠️ `ImageField`를 쓰려면 **Pillow** 패키지가 필요하다(`pip install Pillow`). 이걸 빼먹으면 마이그레이션/폼 단계에서 에러가 난다.\n\n\n---\n\n\n### 마치며\n\n- static: 앱/static/, {% static %}, STATIC_URL, STATICFILES_DIRS(추가 경로).\n- media: 사용자 업로드, MEDIA_ROOT(실제)/MEDIA_URL(주소). ImageField+Pillow.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8106-b81d-ed773a6874f5",
+    "title": "React Native 입문 — React.js + Native, 그리고 Expo vs CLI",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "ReactNative",
+      "frontend"
+    ],
+    "date": "2025-10-04",
+    "published": true,
+    "content": "웹에서 쓰던 React를 모바일 앱으로. React Native의 구조와 Expo·CLI 선택을 정리했다.\n\n\n---\n\n\n### 01. React.js + React Native = 모바일 앱\n\n\n> 🧩 **React.js**(UI 라이브러리) + **React Native**(React의 특별한 컴포넌트) = **iOS·Android 네이티브 앱**. React 자체는 플랫폼에 중립적(agnostic)이고, 웹은 React DOM, 모바일은 React Native가 렌더러 역할을 맡는다.\n\n> 핵심 차이: 네이티브 기기는 브라우저가 아니라 DOM이 없다. 그래서 HTML 요소(`div`·`span`)를 못 쓰고, `View`·`Text` 같은 네이티브 컴포넌트를 쓴다. 스타일은 NativeWind(Tailwind 문법) 같은 도구로 붙일 수 있다.\n\n---\n\n\n### 02. Expo vs CLI\n\n- **Expo** — 빠르게 시작하기 좋지만, 네이티브 기능(예: 알람 푸시) 접근에 제약이 있어 폰을 깊게 못 건드린다.\n- **CLI** — 설정은 번거롭지만 네이티브 기능을 직접 제어. 푸시 알람 같은 기능이 필요하면 CLI가 낫다.\n\n협업은 task 브랜치 → 이슈 → PR 흐름과 git 컨벤션을 맞추고, 수정 후 시뮬레이터로 확인한다.\n\n\n---\n\n\n### 마치며\n\n- React(agnostic) + React Native → iOS·Android. DOM·HTML 없음, View/Text 사용.\n- 스타일은 NativeWind 등.\n- 푸시 알람 같은 네이티브 기능이 필요하면 Expo보다 CLI.\n\n---"
   },
   {
     "id": "399bdef7-22b6-81c2-8d72-f2a2610508b4",
@@ -586,6 +954,18 @@
     "content": "알고리즘을 본격적으로 들어가기 전, '문제를 어떻게 생각할 것인가'를 먼저 잡았다. 프로그래밍이 어려운 이유는 직관과 논리가 다르기 때문이다. 논리·증명·재귀·DP로 이어지는 사고의 기초를 정리했다.\n\n\n---\n\n\n### 01. 직관 ≠ 논리\n\n\n대표적인 함정이 '원인이 거짓이면 결과는 참'(공허적 참, vacuous truth). 직관과 다른 논리가 코드에서 버그를 만들기 쉬우니, '내 논리의 어디가 틀렸을까'를 의심하는 습관이 중요하다.\n\n\n---\n\n\n### 02. 증명법\n\n- **직접증명** — Trivial(자명)·Vacuous(공허) Proof.\n- **간접증명** — 대우명 이용.\n- **귀납법** — 기저 + 귀납 단계.\n- **귀류법** — 반대를 가정해 모순을 이끕. 그리디 최적성 증명에 자주 쓰인다.\n\n---\n\n\n### 03. 재귀와 DP\n\n\n재귀호출은 **n중 for문과 같은 효과** — 모든 경우의 수, 같은 구조 반복, 되돌아오며 재계산. 그런데 재계산이 많으면 느리다. 여기서 동적계획법(DP)이 나온다.\n\n\n> 💡 - **메모이제이션(Top-down)** — 재귀하되 한 번 계산한 값을 저장해 재활용.  \n>   \n> - **타뷸레이션(Bottom-up)** — 아래에서부터 점화식으로 쌓아올린다.  \n>   \n> 둘 다 '한 번 계산했으면 다시 계산하지 말자'가 핵심이다.\n\n\n---\n\n\n### 04. 카테고리로 본 '사고력'\n\n- **컴퓨팅 사고력** — 논리적으로(직접·간접·귀납·귀류).\n- **수학적 사고** — 수와 표현(비트·log), 집합·조합론(부분집합·경우의 수), 기초 수식(재귀 시간복잡도).\n- **프로그래밍 사고** — 재귀호출/동적계획법.\n\n---\n\n\n### 마치며\n\n- 직관이 아니라 논리로. 증명법(직접/간접/귀납/귀류)은 그리디 검증에도 쓰인다.\n- 재귀 = n중 for, 재계산이 많으면 DP(메모이제이션/타뷸레이션).\n\n---"
   },
   {
+    "id": "399bdef7-22b6-8116-a718-e87f07acbd9f",
+    "title": "파이썬 패키지와 모듈 — import 구조와 settings 분리",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "python"
+    ],
+    "date": "2025-08-25",
+    "published": true,
+    "content": "파이썬 코드가 커지면 파일 하나로는 관리가 안 된다. 모듈·패키지로 나누고 설정을 분리하는 구조를 정리했다.\n\n\n---\n\n\n### 01. 모듈과 패키지\n\n- **모듈(module)** — `.py` 파일 하나. 함수·클래스·변수를 담는다.\n- **패키지(package)** — 모듈을 모은 디렉토리. `__init__.py`가 있으면 패키지로 인식된다(파이썬 3.3+는 없어도 네임스페이스 패키지로 동작하지만, 명시적 패키지에는 두는 게 안전).\n\n---\n\n\n### 02. 설정 분리 패턴\n\n\n설정값(이름·URL·키)을 `conf/settings.py`로 모으고, 기능은 `utils/`로 나누면 import로 조립한다.\n\n\n```python\nfrom conf import settings\nfrom utils.create_url import create_url\n\nresult = create_url(settings.NAME, settings.MAIN_URL)\nprint(result)\n```\n\n> 설정을 코드와 분리하면, 같은 로직을 두고도 settings만 바꿔 다른 환경(개발/배포)에 재사용할 수 있다. 민감한 키는 settings가 아니라 환경변수(`os.environ`)로 빼는 게 안전.\n\n---\n\n\n### 마치며\n\n- 모듈(.py) → 패키지(디렉토리 + **init**.py).\n- 설정은 conf/settings, 기능은 utils로 분리. 민감 정보는 환경변수.\n\n---"
+  },
+  {
     "id": "398bdef7-22b6-81ee-9a39-e0e50373f331",
     "title": "알고리즘 기초 한 바퀴 — 카운팅정렬·델타탐색·검색·자료구조 메서드",
     "section": "study",
@@ -651,7 +1031,7 @@
   },
   {
     "id": "398bdef7-22b6-81b9-abc8-e9fc37c72139",
-    "title": "파이썬 상속의 함정 — super(), @classmethod의 cls, 그리고 ",
+    "title": "파이썬 상속의 함정 — super(), @classmethod의 cls, 그리고 str",
     "section": "study",
     "category": "Backend",
     "tags": [
@@ -697,5 +1077,119 @@
     "date": "2025-07-23",
     "published": true,
     "content": "함수는 '재사용 가능한 코드 묶음'이라고 배우지만, 파이썬에서 실제로 발목을 잡는 건 항상 '인자를 어떻게 받고 넘기느냐'와 '변수가 어느 스코프에 살아있느냐'였다. 오늘은 함수의 인자 종류, LEGB 규칙, 그리고 패킹/언패킹까지 한 번에 정리해본다.\n\n\n---\n\n\n### 01. 매개변수 vs 인자, 그리고 return\n\n\n용어부터 정리. **매개변수(parameter)**는 함수를 정의할 때 받기로 한 변수, **인자(argument)**는 호출할 때 실제로 넘기는 값이다. 함수는 `return`으로 값을 돌려주고, `return`이 없으면 `None`을 반환한다. `print()`가 대표적으로 반환값이 없는(=None) 함수다.\n\n> 팀인 하나: 파이썬 함수는 **언제나 오직 하나의 값만 반환**한다. `return a, b`처럼 보여도 사실은 하나의 튜플로 패킹된 것이다.\n\n---\n\n\n### 02. 인자 4형제 (+ 순서 규칙)\n\n\n> 📥 - **위치 인자(Positional)** — 순서대로 전달. 생략하면 TypeError.  \n>   \n> - **기본값(Default)** — `def f(x, y=30)`. 안 넘기면 기본값 사용.  \n>   \n> - **키워드 인자(Keyword)** — `f(name='Dave')`. 순서 무관, 단 위치 인자 뒤에 와야 함.  \n>   \n> - **가변 인자** **`*args`** **/ `**kwargs`** — 정해지지 않은 개수를 튜플(`_`)·딜셔너리(`_*`)로 받음.\n\n\n권장 작성 순서는 **위치 → 기본 → 가변(*args) → 가변 키워드(**kwargs). 호출 시 키워드 인자는 위치 인자 뒤에 와야 한다.\n\n\n> 💡 보강 — 파이썬에는 `*`로 구분하는 **키워드 전용 인자**와 `/`로 구분하는 **위치 전용 인자**도 있다. 또, **가변 기본값(리스트·딜셔너리)을 기본 인자로 쓰면 위험**하다 — `def f(x, acc=[])`처럼 쓰면 기본값이 호출 간에 공유되어 버그가 된다. `None`을 기본값으로 두고 함수 안에서 초기화하는 게 정석.\n\n\n---\n\n\n### 03. 스코프와 LEGB 규칙\n\n\n함수는 내부에 local scope를 만든다. 이름을 찾을 때 파이썬은 **L → E → G → B** 순서로 탐색한다.\n\n- **L**ocal → **E**nclosed(한 단계 위 함수) → **G**lobal → **B**uilt-in\n\n이 규칙 때문에 `sum = 5`처럼 내장함수 이름을 전역에서 덮어쓰면, 이후 `sum(range(3))`이 TypeError를 낸다(이제 `sum`은 정수니까). 내장 이름을 변수명으로 쓰지 말자.\n\n\n> ⚠️ 함수 안에서 바깥 스코프 변수를 **읽는 건 되지만 수정은 안 된다.** 전역 변수를 수정하려면 `global`(또는 중첩 함수엔 `nonlocal`) 선언이 필요하고, 그 선언은 함수 맨 앞에 와야 한다. 다만 전역 상태를 막 수정하는 설계는 되도록 피하는 게 좋다.\n\n\n---\n\n\n### 04. 패킹 & 언패킹 —  _와_ *의 두 얼굴\n\n\n같은 `*`, `**`가 **상황에 따라 반대로** 동작한다. 이게 한번에 정리되면 많은 게 풀린다.\n\n\n| 구분  | 상황      | `*`               | `**`             |\n| --- | ------- | ----------------- | ---------------- |\n| 패킹  | 함수 정의 시 | 여러 위치인자 → 튜플로     | 여러 키워드인자 → 딜셔너리로 |\n| 언패킹 | 함수 호출 시 | 리스트/튜플 → 개별 위치인자로 | 딜셔너리 → 개별 키워드인자로 |\n\n\n```python\ndef func(pos1, pos2, default='d', *args, **kwargs):\n    ...\nfunc(1, 2, 3, 4, 5, key1='v1')\n# pos1=1, pos2=2, default=3, args=(4,5), kwargs={'key1':'v1'}\n```\n\n\n---\n\n\n### 05. 램다(lambda) — 한 줄지리 익명 함수\n\n\n`lambda 매개변수: 표현식` 형태. `sorted`의 `key`, `map`, `filter`처럼 **함수를 인자로 넘길 때** 진가를 발휘한다.\n\n\n```python\nstudents = [(21, 90), (19, 95), (25, 85)]\nsorted(students, key=lambda s: s[0])  # 나이순 정렬\n```\n\n\n---\n\n\n### 마치며 — '인자와 스코프'를 잡으면 함수가 보인다\n\n- 매개변수≠인자, return 없으면 None.\n- 인자는 위치→기본→_args→_*kwargs 순서. 가변 기본값은 함정.\n- 이름 탐색은 LEGB. 내장명을 덮어쓰지 말 것.\n- `*`/`**`는 정의 시 패킹, 호출 시 언패킹.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8194-a27c-f1aa9be6402c",
+    "title": "The Interview — 당신의 목소리가 한 편의 매거진이 되다 (AI 음성 인터뷰)",
+    "section": "study",
+    "category": "Project",
+    "tags": [
+      "Next.js",
+      "AI",
+      "RAG",
+      "WebSocket",
+      "TypeScript"
+    ],
+    "date": "2025-06-11",
+    "published": true,
+    "content": "5인 팀 수상 프로젝트. AI가 맥락에 맞는 질문을 던지고, 사용자는 음성으로 답하며 자신을 탐색하는 AI 음성 인터뷰 플랫폼. 내 담당은 프론트엔드였다.\n\n\n---\n\n\n### 01. 왜 만들었나\n\n> 인터뷰는 원래 유명인에게만 주어지는 경험이다. The Interview는 그걸 누구에게나 열어준다. 글쓰기가 어려도, AI의 질문에 음성으로 답하면 당신의 이야기가 한 편의 매거진이 된다.\n\n일기는 뭐를 쓸지 막막하고, SNS는 타인의 시선 때문에 솔직하기 어렵다. '기록하고 싶은 욕구와 실제 기록 사이의 간극'을 AI 인터뷰 구조로 푸는 게 목표였다.\n\n\n---\n\n\n### 02. 주요 기능\n\n- **AI 인터뷰** — RAG 기반 개인화 질문 흐름, 실시간 음성→텍스트 변환.\n- **인터뷰 리포트** — 답변 키워드 추출·음성 상태 시각화.\n- **아카이브·공유** — 결과물을 매거진처럼 편집해 링크로 공유, 받은 사람이 남긴 질문으로 새 인터뷰 시작.\n\n---\n\n\n### 03. 기술 스택과 내 역할(FE)\n\n\n> 🧩 **FE** Next.js·React·TypeScript·Zustand · **BE** Spring Boot·JPA·WebSocket(STOMP) · **AI** FastAPI·Whisper(STT)·Claude·Qdrant(RAG) · **Infra** EC2·Docker·Nginx·Jenkins·Grafana\n\n\n내가 맡은 프론트엔드 작업:\n\n- Next.js 기반 음성 인터뷰 클라이언트 개발(TypeScript, pnpm)\n- **WebSocket(STOMP) 기반 실시간 인터뷰 상태 동기화** — 음성 입출력을 서버와 실시간으로 주고받음\n- 음성 파형 시각화·인터랙션 UI, 음성 기반 UX 설계와 상태 흐름 관리\n- SSR 환경에서 프록시 서버를 활용한 API 라우팅·통신 구조 설계\n> 이 프로젝트에서 겪은 SockJS 폴백 문제는 [WebSocket이 연결된 줄 알았다] 글에 따로 정리했다.\n\n---\n\n\n### 마치며\n\n- RAG 기반 AI 인터뷰 + 음성 아카이브링(5인, 수상).\n- FE로 Next.js 클라이언트·실시간 WebSocket 동기화·음성 UX를 담당.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-810f-b6b3-dcfc7a3c6fc7",
+    "title": "자율 프로젝트 회고 — 완벽보다 실행, 가정보다 현실",
+    "section": "log",
+    "category": "회고",
+    "tags": [
+      "회고",
+      "성장",
+      "Flutter"
+    ],
+    "date": "2025-05-21",
+    "published": true,
+    "content": "DrawRun(GPS Drawing 러닝 앱) 자율 프로젝트를 마치며 남긴 회고. 기획부터 개발까지, 매일의 기록과 그 속에서 배운 것들을 정리했다.\n\n\n---\n\n\n### 01. 기획은 쉽게 흐려진다\n\n\n처음엔 아이트래킹 기반 서비스로 출발했지만, POC를 돌리며 기술적 한계를 마주했고 결국 GPS Drawing으로 도메인을 픽스했다. 그 과정에서 가장 크게 느낌 건, **같은 방향을 보는 듯했으나 각도가 조금씩 달랐다**는 것. 팀의 시선을 맞추는 데 생각보다 많은 소통이 필요했다.\n\n\n---\n\n\n### 02. 배운 것 — 완벽보다 실행\n\n\n> 💡 - 예외 상황을 과도하게 걱정하지 말고 **핵심 케이스부터** 해결.  \n>   \n> - 모든 걸 설계·계획해 시작하기보다, **허술한 프로토타입이라도 먼저 만들고 개선**.  \n>   \n> - 천천히 하나하나보다 **빠른 완성 후 수정**이 낫다.  \n>   \n> - 자신감 부족으로 의사결정을 미루지 말기 — 팀의 역량을 믿고 줏대 있게.\n\n> 항상 기대 이상의 무언가를 만들고 싶어 과한 욕심으로 시작하고, 마무리할 때쯤 너덤너덩 지쳐 쓰러지는 패턴을 반복했다. 이번어 배운 건 '주요 타겟을 명확히 정했으면 직접 연결되지 않는 요소는 과감하라'는 것.\n\n---\n\n\n### 03. 기술적으로 남은 것\n\n- 새로운 언어(Dart/Flutter)를 배우는 재미, 변화에 유연하게 대처하는 능력.\n- JDK 21 virtual thread, GlobalExceptionHandler, 도메인형 vs 계층형 구조, converter로 DTO 빌더 모아 관리 같은 설계 고민들.\n- '작게 자주 움직이기' — 레거시 위에서 빠르게 대처하는 게 팀 개발의 현실임을 체감.\n\n---\n\n\n### 마치며\n\n- 기획은 쉽게 흐려진다 — 타겟과 우선순위를 명확히.\n- 완벽보다 실행, 가정보다 현실. 프로토타입 후 개선.\n- 자신의 판단을 믿고 결정에 책임지기.\n> 프로젝트 자체는 [DrawRun — GPS Drawing 러닝 앱] 글에 정리해둔다.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81dc-8662-d091509699cf",
+    "title": "Git 브랜치 전략과 Merge — Merge Commit·Rebase·Squash, 그리고 MR",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "Git",
+      "CS"
+    ],
+    "date": "2025-03-01",
+    "published": true,
+    "content": "팀 프로젝트에서 Git 브랜치 전략과 Merge 방식을 정리했다. 세 가지 Merge가 각각 언제 적합한지가 핵심.\n\n\n---\n\n\n### 01. 브랜치 전략\n\n- **master(main)** — 언제든 배포 가능한 안정 브랜치.\n- **develop** — 다음 릴리스를 모으는 통합 브랜치.\n- **feature** — 기능 단위로 따는 작업 브랜치.\n> 각자 맡은 작업은 feature 브랜치 → 이슈 → PR/MR 흐름으로. 이슈·PR 템플릿을 맞추면 누가 뭐를 했는지 추적이 쉽다.\n\n---\n\n\n### 02. Merge Request(MR)의 세 방식\n\n\n> 🔀 - **Merge Commit** — 두 브랜치를 그대로 합치며 병합 커밋을 남긴다. 히스토리가 가장 사실적이지만 복잡해질 수 있다.  \n>   \n> - **Rebase and Merge** — 커밋을 재배치해 선형 히스토리. 누가 뭐를 했는지 보기 쉽지만, 다수가 동시 작업하는 브랜치엔 명령 충돌 위험이 있어 충분한 소통이 필요.  \n>   \n> - **Squash** — 여러 커밋을 하나로 압축. 중간 히스토리는 사라지므로 커밋 메시지를 디테일하게 적는 게 중요.\n\n\n작업 중 급히 브랜치를 전환해야 할 때는 **git stash**로 미커밋 변경을 임시 보관한다.\n\n\n---\n\n\n### 마치며\n\n- 브랜치: master(배포)·develop(통합)·feature(기능). feature→이슈→PR.\n- Merge Commit(사실적)·Rebase(선형·협업 필요)·Squash(압축).\n- 급한 전환은 git stash.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-81a9-81ad-e4ec9d69d258",
+    "title": "Java 빌드와 퍼시스턴스 — javac부터 JPA·Spring Data JPA까지",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "Backend",
+      "java21",
+      "JPA",
+      "Spring"
+    ],
+    "date": "2025-01-14",
+    "published": true,
+    "content": "자바 애플리케이션을 만들 때 '빌드는 어떻게 되고, 데이터는 어떻게 저장되는가'를 정리했다. 빌드 단계와 퍼시스턴스(영속성) 프레임워크를 한 번에 본다.\n\n\n---\n\n\n### 01. 자바 빌드\n\n\n> 🔨 1. **컴파일** — `.java` → `.class`(바이트코드), `javac`  \n>   \n> 2. **패키징** — `.class`와 리소스를 JAR/WAR로 묶기  \n>   \n> 3. **의존성 관리** — 외부 라이브러리 다운로드·포함(Maven/Gradle)  \n>   \n> 4. **테스트** — JUnit·TestNG로 검증  \n>   \n> 5. **배포** — 아카이브를 서버에 올려 실행 가능한 상태로\n\n\n빌드 도구는 세 가지. **Maven**(pom.xml, 표준 디렉토리·생명주기), **Gradle**(Groovy/Kotlin DSL, 유연·고성능), **Ant**(build.xml, 유연하지만 의존성 관리 약함).\n\n\n---\n\n\n### 02. 퍼시스턴스 — 데이터의 영속성\n\n\n퍼시스턴스(persistence)는 애플리케이션이 종료돼도 데이터가 유지되는 것. DB 같은 저장 매체에 남겨 재시작 후에도 다시 불러온다. 자바 진영에서 자주 쓰는 도구들:\n\n- **Hibernate** — 대표적 ORM. 객체↔테이블 매핑 자동화, HQL, 1·2차 캐싱, 트랜잭션 관리.\n- **JPA** — 자바 표준 ORM API. Hibernate·EclipseLink 등 구현체와 호환. 어노테이션 기반 매핑, JPQL.\n- **Spring Data JPA** — JPA 기반. 리포지토리 패턴으로 CRUD 자동, 메서드 이름만으로 쿼리 생성, 페이징·정렬.\n- **MyBatis** — SQL 매핑. SQL을 직접 쓰면서 객체와 매핑, 동적 SQL(if·foreach) 지원.\n- **JdbcTemplate** — JDBC의 복잡함을 추상화. SQL 실행·배치 처리, ResultSet 매핑.\n- **jOOQ** — SQL을 타입 안전한 자바 코드로 작성.\n> 큰 축은 둘이다 — ORM(Hibernate/JPA)은 객체 중심으로 매핑을 자동화하고, SQL 매퍼(MyBatis)는 쿼리를 직접 통제한다. 복잡한 쿼리 비중이 크면 MyBatis, 반복 CRUD가 많으면 Spring Data JPA가 편하다.\n\n---\n\n\n### 마치며\n\n- 빌드: 컴파일→패키징→의존성→테스트→배포. 도구는 Maven/Gradle/Ant.\n- 퍼시스턴스: ORM(Hibernate/JPA/Spring Data JPA) vs SQL 매퍼(MyBatis/JdbcTemplate/jOOQ).\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-810e-9469-d69b8e07df07",
+    "title": "MySQL + Spring Boot 연동 — Docker로 DB 띄우고 JPA·MyBatis 붙이기",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "Backend",
+      "MySQL",
+      "Docker",
+      "Spring"
+    ],
+    "date": "2024-09-23",
+    "published": true,
+    "content": "로컬마다 MySQL을 깔아 설치하는 건 자원 낭비다. Docker로 DB를 띄우고 Spring Boot에 붙이는 과정을 정리했다.\n\n\n---\n\n\n### 01. Docker로 MySQL 띄우기\n\n\n프로젝트 루트에 `docker-compose.yml`을 두고 컨테이너로 DB를 올린다. 포트와 자기셋(utf8mb4)을 명시하는 게 핵심.\n\n\n```yaml\nservices:\n  db:\n    image: mysql:latest\n    container_name: mysql-latest\n    ports:\n      - \"3309:3306\"\n    command:\n      - --character-set-server=utf8mb4\n      - --collation-server=utf8mb4_unicode_ci\n    volumes:\n      - ./data/:/var/lib/mysql\n    environment:\n      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}\n      - MYSQL_DATABASE=cms_solution\n```\n\n\n> 🔐 비밀번호는 코드에 직접 적지 말고 환경변수(`.env`)로 주입하고 `.gitignore` 처리. 이 글의 예시도 실제 값 대신 `${DB_PASSWORD}`로 둔 이유다.\n\n\n```bash\ndocker-compose up -d   # 포트 충돌 시 yml의 3309를 다른 포트로\n```\n\n\n---\n\n\n### 02. 의존성과 연결 설정\n\n\nMySQL 드라이버와 Spring Data JPA 스타터를 추가한다.\n\n\n```xml\n<dependency>\n  <groupId>com.mysql</groupId>\n  <artifactId>mysql-connector-j</artifactId>\n  <scope>runtime</scope>\n</dependency>\n<dependency>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-starter-data-jpa</artifactId>\n</dependency>\n```\n\n\n`application.properties`에서 연결 URL·프로파일·DDL 옵션을 지정한다. 주요 포인트:\n\n- `spring.datasource.url` — `jdbc:mysql://localhost:3309/cms_solution?createDatabaseIfNotExist=true`\n- `spring.jpa.hibernate.ddl-auto` — `create`(개발) / `validate`·`none`(운영). create는 재시작마다 테이블을 다시 만드니 주의.\n- `spring.jpa.properties.hibernate.format_sql=true` — SQL 로그 가독성.\n- 프로파일 분리 — 로컬은 `local`, 개발 서버는 다른 프로파일로 DB 접근을 분리.\n\n---\n\n\n### 03. JPA와 MyBatis 혼용\n\n> 한 프로젝트에서 JPA와 MyBatis를 함께 쓸 수 있다. 반복 CRUD는 JPA로 간결하게, 복잡한 통계·조인 쿼리는 MyBatis의 XML 매퍼로 처리하는 조합이 실무에서 흔하다.\n\n---\n\n\n### 마치며\n\n- Docker Compose로 MySQL을 띄우고 utf8mb4·포트 명시.\n- 비밀번호는 환경변수로, 절대 코드·공개 레포에 넣지 않기.\n- ddl-auto는 개발 create / 운영 validate. 프로파일로 환경 분리.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8155-b197-fb472c8cde0c",
+    "title": "팀 프로젝트 개발환경 세팅 — Git·Docker·STS로 처음 시작하기",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "Git",
+      "Docker",
+      "Backend"
+    ],
+    "date": "2024-05-11",
+    "published": true,
+    "content": "팀 프로젝트에 처음 합류할 때 해야 할 개발환경 세팅을 순서대로 정리했다. Git 클론부터 Docker DB, 서버 실행까지.\n\n\n---\n\n\n### 01. Git 설치와 프로젝트 받기\n\n\nGit 설치 후 `git`이 동작하는지 확인하고, 저장소를 클론한다.\n\n\n```bash\ngit clone https://github.com/<org>/<repo>.git\n```\n\n\n> 🔑 private 레포는 2021.8.13부터 비밀번호 인증이 막혔다. **Personal Access Token(PAT)**을 발급해 사용하거나, HTTPS 클론 시 로그인창 인증을 거친다.\n\n\n---\n\n\n### 02. Docker로 DB 설치\n\n\nPC마다 DB를 직접 깔아 설치하면 자원 낭비라, 프로젝트 루트의 `docker-compose.yml`로 DB를 띄운다.\n\n\n```bash\ndocker-compose up -d   # 포트 충돌 시 yml의 포트 변경\n```\n\n> 윈도우는 Hyper-V 가상화 설정이 별도로 필요할 수 있으니 설치 시 에러를 잘 본다.\n\n---\n\n\n### 03. STS에서 실행·프로파일\n\n\nSTS에서 `Import > Existing Project`로 열고, X 표시가 뜨면 `Gradle > Refresh Gradle Project`로 해결. **프로파일(local/dev)에 따라 DB 접근이 바뀌므로 잘 선택**한다. Boot Dashboard에서 start.\n\n\n프로세스가 안 죽을 때는 포트를 직접 정리한다.\n\n\n```bash\n# windows\nnetstat -ano\ntaskkill /pid <pid> /f\n\n# mac / linux\nlsof -i :8080\nkill -9 <pid>\n```\n\n> 재실행마다 로컬 DB 데이터가 초기화될 수 있으니 주의. (서버·DB 접속정보·계정 비밀번호는 보안상 이 글에서 제외했다.)\n\n---\n\n\n### 마치며\n\n- Git 클론(private는 PAT), Docker Compose로 DB, STS로 임포트·프로파일 선택.\n- 포트 충돌/좌비 프로세스는 netstat·lsof로 정리.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8179-8a00-f71028e94d36",
+    "title": "Spring Boot 배포 — JAR 빌드부터 Dockerfile까지",
+    "section": "tech",
+    "category": "BACKEND",
+    "tags": [
+      "deploy",
+      "Docker",
+      "devops",
+      "Spring"
+    ],
+    "date": "2024-03-20",
+    "published": true,
+    "content": "Spring Boot 프로젝트를 JAR로 빌드해 Docker 이미지로 만드는 기본 배포 절차를 정리했다.\n\n\n---\n\n\n### 01. JAR 바이너리 만들기\n\n\nGradle 빌드로 실행 가능한 JAR을 만든다. 생성된 파일은 `build/libs/`에 놓인다.\n\n\n> ⚙️ 프로젝트마다 자바 버전이 달라 Gradle 버전 문제가 생길 수 있다. `JAVA_HOME`을 맞춰준다.\n\n\n```bash\n# zsh 기준\ncd ~\nvi .zshrc        # JAVA_HOME 수정\nsource .zshrc\n```\n\n\n---\n\n\n### 02. Dockerfile로 이미지 만들기\n\n\nJAR을 복사해 `java -jar`로 실행하는 최소 구성. Dockerfile은 `build/libs`에 둔다.\n\n\n```docker\nFROM openjdk:11\nARG JAR_FILE=*.jar\nCOPY ${JAR_FILE} app.jar\nENTRYPOINT [\"java\", \"-jar\", \"/app.jar\"]\n```\n\n\n```bash\ndocker build -t springio/gs-spring-boot-docker .\n```\n\n> 이 글은 '어떻게 배포하는가'의 절차다. '왜 자동 배포까지 가야 하는가'는 [배포의 본질과 자동화 전략] 글을 참고. 이 글이 CD로 이어지는 기초다.\n\n---\n\n\n### 마치며\n\n- Gradle로 JAR 빌드(build/libs), JAVA_HOME 맞추기.\n- Dockerfile(FROM openjdk, COPY jar, ENTRYPOINT java -jar) → docker build.\n\n---"
+  },
+  {
+    "id": "399bdef7-22b6-8126-942b-cf2c80b543ca",
+    "title": "호버 박스가 여러 개 떴다 — 마우스 속도와 이벤트, 그리고 setTimeout 정리",
+    "section": "tech",
+    "category": "frontend",
+    "tags": [
+      "frontend"
+    ],
+    "date": "2022-10-27",
+    "published": true,
+    "content": "첫 팀 프로젝트(영화 추천 사이트 D.NEMA)에서 만난 호버 버그. 마우스를 빠르게 지나가면 호버 박스가 여러 개 뜨는 문제를 푸는 과정을 기록한다.\n\n\n---\n\n\n### 01. 왜 기록하는가\n\n\n당시에는 '뭐가 문제인지'도 명확히 설명 못한 채 급하게 넘어갔다. 같은 유형의 버그를 다음에 또 만났을 때 '아, 그때 그 문제'라고 바로 떠올리려고 남긴다.\n\n\n---\n\n\n### 02. 무슨 일이 있었나 — 처음엔 그런데 찾아보니\n\n\n**처음엔** 각 영화 이미지에 `mouseenter`가 들어오면 바로 호버 박스를 키우게 만들었다. **그런데** 마우스를 빠르게 여러 영화 위로 지나가면, 호버 박스가 지워지지 않고 **여러 개가 그대로 남는** 버그가 생겨다.\n\n\n> ⚠️ 이용자가 마우스를 이동하는 속도가, 자바스크립트가 이벤트를 인지하고 처리하는 속도보다 빠르면, enter만 연속으로 발생하고 상태가 제대로 정리되지 않았던 게 원인이었다.\n\n\n**찾아보니** 이건 이벤트가 너무 자주 터지는 전형적인 상황이었고, 해심은 '잠깐 머물렀을 때만 실행'하도록 지연을 거는 것이었다.\n\n\n---\n\n\n### 03. 결국 어떻게 풀었나\n\n\n`mouseenter`에서 바로 실행하지 않고 `setTimeout`으로 살짝 미뤄둠게 예약하고, `mouseleave` 때 `clearTimeout`으로 취소한다. 마우스가 그냥 스쳐 지나가면 예약이 취소되니 박스가 안 뜼다.\n\n\n```javascript\nlet setTime;\nfunction hoverEvent() {\n  setTime = setTimeout(hoverImg, 1000); // 잠깐 머물러야 실행\n}\nmovieImg[i].addEventListener(\"mouseenter\", hoverEvent);\nmovieImg[i].addEventListener(\"mouseleave\", function () {\n  clearTimeout(setTime); // 스쳐 지나가면 취소\n});\n```\n\n> 리뷰에서 나온 또 다른 아이디어: '하나가 hover될 때 나머지 요소의 hover를 막으면 어떨까?' — 상태를 하나만 유지하는 다른 접근도 있다.\n\n---\n\n\n### 04. 추가로 찾아본 것\n\n\n나중에 알고 보니 이게 바로 **디바운스(debounce)** 패턴이었다. '이벤트가 멈춘 뒤 일정 시간이 지나면 한 번만 실행'하는 기법. 비슷한 걸로 **쓰로틀(throttle)**은 '일정 간격으로만 실행'이다.\n\n- 디바운스: 검색창 자동완성, 리사이즈 이벤트, 호버 지연.\n- 쓰로틀: 스크롤 이벤트, 무한 스크롤.\n\n---\n\n\n### 05. 실무에서는?\n\n\n직접 setTimeout으로 구현하기보다 실무에선 lodash의 `debounce`·`throttle`을 많이 쓴다. 또 호버 같은 단순 상호작용은 **가능하면 CSS** **`:hover`****·****`transition`****으로** 처리하는 게 가장 안정적이다. JS 이벤트는 불가피할 때만.\n\n\n---\n\n\n### 06. 다음에 공부할 것\n\n- 디바운스/쓰로틀 직접 구현 vs lodash\n- 이벤트 위임(event delegation) — 반복 요소에 리스너를 하나만\n- `requestAnimationFrame`으로 부드러운 애니메이션\n\n---\n\n\n### 마치며\n\n- 원인: 마우스 속도 > 이벤트 처리 속도 → mouseenter 중복, 상태 미정리.\n- 해결: setTimeout+clearTimeout(=디바운스)로 '머물 때만 실행'.\n- 교훈: 단순 호버는 CSS 우선, JS 이벤트는 디바운스/쓰로틀과 같이.\n\n---"
   }
 ]
