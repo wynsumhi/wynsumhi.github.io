@@ -4,16 +4,16 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   CardMedia,
   Chip,
   Collapse,
-  Grid,
   IconButton,
   InputAdornment,
   TextField,
@@ -74,12 +74,8 @@ const YEAR_GROUP_COLUMNS = {
 
 const LIST_INITIAL_VISIBLE_COUNT = 20;
 const LIST_LOAD_MORE_COUNT = 20;
+const CARD_PAGE_SIZE = 9;
 const CARD_PAGE_WINDOW = 5;
-const CARD_PAGE_SIZE_BY_WIDTH = {
-  mobile: 1,
-  tablet: 2,
-  desktop: 3,
-};
 
 type BlogSection = "all" | PostSection;
 
@@ -425,70 +421,84 @@ const getCardPageNumbers = (currentPage: number, totalPages: number) => {
   return Array.from({ length: pageCount }, (_, index) => startPage + index);
 };
 
-// 카드형은 한 화면 안에 들어오는 개수만 페이지에 담아 내부 스크롤을 피함
-const getCardPageSize = () => {
-  if (typeof window === "undefined") return CARD_PAGE_SIZE_BY_WIDTH.desktop;
-  if (window.innerWidth < 600) return CARD_PAGE_SIZE_BY_WIDTH.mobile;
-  if (window.innerWidth < 1200) return CARD_PAGE_SIZE_BY_WIDTH.tablet;
-  return CARD_PAGE_SIZE_BY_WIDTH.desktop;
-};
-
-const useCardPageSize = () => {
-  const [pageSize, setPageSize] = useState(getCardPageSize);
-
-  useEffect(() => {
-    const updatePageSize = () => setPageSize(getCardPageSize());
-
-    updatePageSize();
-    window.addEventListener("resize", updatePageSize);
-
-    return () => window.removeEventListener("resize", updatePageSize);
-  }, []);
-
-  return pageSize;
-};
-
 // 미리보기 카드 뷰
 const CardView = ({ posts }: { posts: Post[] }) => {
   const navigate = useNavigate();
 
   return (
-    // Grid container: 내부 Grid item들을 격자 형태로 배치
-    <Grid container spacing={{ xs: 2.2, md: 2.6 }}>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+        gridTemplateRows: { md: "repeat(3, minmax(0, 1fr))" },
+        gridAutoRows: { xs: "auto", md: "minmax(0, 1fr)" },
+        gap: { xs: 2, md: 1.05 },
+        flex: { md: "1 1 auto" },
+        height: { md: "auto" },
+        minHeight: 0,
+        "@media (min-width: 900px) and (max-height: 760px)": {
+          gridTemplateRows: "repeat(3, minmax(0, 1fr))",
+          gridAutoRows: "minmax(0, 1fr)",
+          gap: 0.95,
+        },
+        "@media (min-width: 900px) and (min-height: 900px)": {
+          gridTemplateRows: "repeat(3, minmax(0, 1fr))",
+          gridAutoRows: "minmax(0, 1fr)",
+        },
+      }}
+    >
       {posts.map((post) => (
-        // size: xs=12(모바일 1열), sm=6(태블릿 2열), lg=4(데스크톱 3열)
-        <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={post.id}>
-          <Card
-            onClick={() => navigate(`/blog/${post.id}`)}
-            sx={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              cursor: "pointer",
-              p: { xs: 2.1, md: 2.4 },
-              bgcolor: "var(--blog-card-bg)",
-              boxShadow: "0 18px 50px var(--blog-card-shadow)",
-              borderRadius: 3.5,
-              transition: "transform 0.25s ease, box-shadow 0.25s ease",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                boxShadow: "0 24px 64px var(--blog-card-hover-shadow)",
-                "& .card-title": { color: "var(--blog-accent)" },
-                "& .card-thumbnail": {
-                  transform: "scale(1.03)",
-                },
+        <Card
+          key={post.id}
+          onClick={() => navigate(`/blog/${post.id}`)}
+          sx={{
+            minHeight: 0,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            cursor: "pointer",
+            p: { xs: 2, md: 1.35, lg: 1.45 },
+            bgcolor: "var(--blog-card-bg)",
+            boxShadow: "0 12px 34px var(--blog-card-shadow)",
+            border: "1px solid var(--blog-border)",
+            borderRadius: 2.4,
+            overflow: "hidden",
+            transition: "transform 0.25s ease, box-shadow 0.25s ease",
+            "&:hover": {
+              transform: "translateY(-3px)",
+              boxShadow: "0 18px 44px var(--blog-card-hover-shadow)",
+              "& .card-title": { color: "var(--blog-accent)" },
+              "& .card-thumbnail": {
+                transform: "scale(1.03)",
               },
-            }}
-          >
+            },
+            "@media (min-width: 900px) and (max-height: 760px)": {
+              p: 1.15,
+              borderRadius: 2,
+            },
+            "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+              p: 1,
+            },
+          }}
+        >
             {/* 썸네일 이미지 */}
             {post.thumbnail ? (
               <Box
                 sx={{
-                  mb: 2,
+                  mb: { xs: 1.6, md: 0.75 },
+                  flex: { md: "0 0 auto" },
                   overflow: "hidden",
-                  borderRadius: 2.4,
-                  aspectRatio: "16 / 9",
+                  borderRadius: 1.8,
+                  width: "100%",
+                  height: { xs: 148, sm: 138, md: "clamp(42px, 6dvh, 66px)" },
                   bgcolor: "var(--blog-card-soft-bg)",
+                  "@media (min-width: 900px) and (max-height: 780px)": {
+                    height: "clamp(34px, 5dvh, 48px)",
+                    mb: 0.6,
+                  },
+                  "@media (min-width: 900px) and (max-height: 760px)": {
+                    display: "none",
+                  },
                 }}
               >
                 <CardMedia
@@ -508,10 +518,11 @@ const CardView = ({ posts }: { posts: Post[] }) => {
 
             <CardContent
               sx={{
-                flexGrow: 1,
+                flex: "1 1 auto",
                 display: "flex",
                 flexDirection: "column",
                 p: 0,
+                minHeight: 0,
               }}
             >
               {/* 카드 메타 정보 */}
@@ -519,29 +530,69 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  mb: 1.4,
+                  justifyContent: "space-between",
+                  gap: 1.2,
+                  mb: { xs: 1.25, md: 0.78 },
+                  minHeight: { xs: 26, md: 22 },
+                  width: "100%",
+                  flexShrink: 0,
+                  "@media (min-width: 900px) and (max-height: 780px)": {
+                    mb: 0.52,
+                    minHeight: 21,
+                  },
+                  "@media (min-width: 900px) and (max-height: 760px)": {
+                    mb: 0.42,
+                    minHeight: 20,
+                  },
+                  "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+                    mb: 0.32,
+                    minHeight: 19,
+                  },
                 }}
               >
                 <Chip
                   label={post.category}
                   size="small"
                   sx={{
-                    height: 23,
-                    fontSize: "0.7rem",
-                    fontWeight: 800,
+                    ml: { xs: -0.75, md: -0.55 },
+                    height: { xs: 25, md: 22 },
+                    fontSize: { xs: "0.72rem", md: "0.68rem" },
+                    fontWeight: 850,
                     bgcolor: "var(--blog-chip-bg)",
                     color: "var(--blog-chip-text)",
                     borderRadius: 999,
+                    maxWidth: "64%",
+                    "& .MuiChip-label": {
+                      px: { xs: 1.05, md: 1.15 },
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    },
+                    "@media (min-width: 900px) and (max-height: 760px)": {
+                      height: 20,
+                      fontSize: "0.62rem",
+                    },
+                    "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+                      height: 18,
+                      fontSize: "0.58rem",
+                    },
                   }}
                 />
                 <Typography
                   variant="caption"
                   sx={{
                     color: "var(--blog-muted)",
-                    fontSize: "0.74rem",
-                    fontWeight: 800,
-                    ml: "auto",
+                    fontSize: { xs: "0.74rem", md: "0.7rem" },
+                    fontWeight: 850,
+                    lineHeight: 1,
+                    pt: 0.1,
+                    flexShrink: 0,
+                    fontVariantNumeric: "tabular-nums",
+                    "@media (min-width: 900px) and (max-height: 760px)": {
+                      fontSize: "0.66rem",
+                    },
+                    "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+                      fontSize: "0.62rem",
+                    },
                   }}
                 >
                   {formatCardDate(post.date)}
@@ -552,16 +603,30 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 className="card-title"
                 sx={{
-                  fontSize: { xs: "1.05rem", md: "1.12rem" },
-                  fontWeight: 850,
+                  fontSize: { xs: "1.05rem", md: "1rem", lg: "1.08rem" },
+                  fontWeight: 880,
                   color: "var(--blog-heading)",
-                  lineHeight: 1.45,
-                  mb: 1.2,
+                  lineHeight: { xs: 1.45, md: 1.2 },
+                  mb: { xs: 1.2, md: 0.48 },
                   transition: "color 0.2s",
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
+                  flexShrink: 0,
+                  overflowWrap: "anywhere",
+                  wordBreak: "keep-all",
+                  "@media (min-width: 900px) and (max-height: 780px)": {
+                    fontSize: "0.94rem",
+                    lineHeight: 1.18,
+                    mb: 0.4,
+                  },
+                  "@media (min-width: 900px) and (max-height: 760px)": {
+                    fontSize: "0.9rem",
+                    lineHeight: 1.16,
+                    mb: 0.36,
+                  },
+                  "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+                    fontSize: "0.82rem",
+                    lineHeight: 1.12,
+                    mb: 0.28,
+                  },
                 }}
               >
                 {post.title}
@@ -571,57 +636,102 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: "0.86rem",
+                  fontSize: { xs: "0.86rem", md: "0.82rem", lg: "0.87rem" },
                   color: "var(--blog-subtle)",
-                  lineHeight: 1.72,
-                  flexGrow: 1,
+                  lineHeight: { xs: 1.72, md: 1.38 },
+                  flex: "0 1 auto",
                   overflow: "hidden",
                   display: "-webkit-box",
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: { xs: 3, md: 3 },
                   WebkitBoxOrient: "vertical",
-                  mb: 2,
+                  mb: { xs: 2, md: 0.58 },
+                  "@media (min-width: 900px) and (max-height: 920px)": {
+                    WebkitLineClamp: 2,
+                  },
+                  "@media (min-width: 900px) and (max-height: 780px)": {
+                    fontSize: "0.78rem",
+                    lineHeight: 1.32,
+                    WebkitLineClamp: 2,
+                    mb: 0.44,
+                  },
+                  "@media (min-width: 900px) and (max-height: 760px)": {
+                    fontSize: "0.72rem",
+                    lineHeight: 1.25,
+                    WebkitLineClamp: 1,
+                    mb: 0.34,
+                  },
+                  "@media (min-width: 900px) and (max-height: 680px)": {
+                    display: "none",
+                  },
+                  "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
+                    display: "none",
+                  },
                 }}
               >
                 {post.excerpt || extractExcerpt(post.content, 120)}
               </Typography>
 
               {/* 태그 */}
-              <Box sx={{ display: "flex", gap: 0.6, flexWrap: "wrap" }}>
-                {post.tags.slice(0, 3).map((tag) => (
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 0.55,
+                  flexWrap: "wrap",
+                  pt: 0.25,
+                  mt: "auto",
+                  minHeight: { xs: 22, md: 20 },
+                  maxHeight: { md: 22 },
+                  overflow: "hidden",
+                  "@media (min-width: 900px) and (max-height: 760px)": {
+                    minHeight: 18,
+                    maxHeight: 18,
+                    pt: 0.1,
+                    gap: 0.4,
+                  },
+                }}
+              >
+                {post.tags.slice(0, 2).map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
                     size="small"
                     sx={{
-                      height: 22,
-                      fontSize: "0.7rem",
+                      height: { xs: 22, md: 20 },
+                      fontSize: { xs: "0.7rem", md: "0.64rem" },
                       bgcolor: "var(--blog-card-soft-bg)",
                       color: "var(--blog-subtle)",
                       fontWeight: 700,
                       borderRadius: 999,
+                      "@media (min-width: 900px) and (max-height: 760px)": {
+                        height: 18,
+                        fontSize: "0.58rem",
+                      },
                     }}
                   />
                 ))}
-                {post.tags.length > 3 && (
+                {post.tags.length > 2 && (
                   <Chip
-                    label={`+${post.tags.length - 3}`}
+                    label={`+${post.tags.length - 2}`}
                     size="small"
                     sx={{
-                      height: 22,
-                      fontSize: "0.7rem",
+                      height: { xs: 22, md: 20 },
+                      fontSize: { xs: "0.7rem", md: "0.64rem" },
                       bgcolor: "var(--blog-card-soft-bg)",
                       color: "var(--blog-muted)",
                       fontWeight: 800,
                       borderRadius: 999,
+                      "@media (min-width: 900px) and (max-height: 760px)": {
+                        height: 18,
+                        fontSize: "0.58rem",
+                      },
                     }}
                   />
                 )}
               </Box>
             </CardContent>
-          </Card>
-        </Grid>
+        </Card>
       ))}
-    </Grid>
+    </Box>
   );
 };
 
@@ -634,74 +744,79 @@ type PostCollectionProps = {
 const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
   const [visibleCount, setVisibleCount] = useState(LIST_INITIAL_VISIBLE_COUNT);
   const [cardPage, setCardPage] = useState(1);
-  const collectionTopRef = useRef<HTMLDivElement | null>(null);
-  const listLoaderRef = useRef<HTMLDivElement | null>(null);
-  const cardPageSize = useCardPageSize();
   const isListView = viewMode === "list";
   const visibleListPosts = posts.slice(0, visibleCount);
   const hasMoreListPosts = visibleCount < posts.length;
-  const totalCardPages = Math.ceil(posts.length / cardPageSize);
+  const nextListCount = Math.min(LIST_LOAD_MORE_COUNT, posts.length - visibleCount);
+  const totalCardPages = Math.ceil(posts.length / CARD_PAGE_SIZE);
   const cardPageNumbers = getCardPageNumbers(cardPage, totalCardPages);
   const cardPagePosts = posts.slice(
-    (cardPage - 1) * cardPageSize,
-    cardPage * cardPageSize,
+    (cardPage - 1) * CARD_PAGE_SIZE,
+    cardPage * CARD_PAGE_SIZE,
   );
-
-  useEffect(() => {
-    if (!isListView || !hasMoreListPosts) return;
-
-    const target = listLoaderRef.current;
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-
-        setVisibleCount((current) =>
-          Math.min(current + LIST_LOAD_MORE_COUNT, posts.length),
-        );
-      },
-      { rootMargin: "360px 0px" },
-    );
-
-    observer.observe(target);
-
-    return () => observer.disconnect();
-  }, [hasMoreListPosts, isListView, posts.length]);
 
   useEffect(() => {
     setCardPage((current) => Math.min(current, Math.max(totalCardPages, 1)));
   }, [totalCardPages]);
+
+  const handleLoadMoreList = () => {
+    setVisibleCount((current) =>
+      Math.min(current + LIST_LOAD_MORE_COUNT, posts.length),
+    );
+  };
 
   const handleCardPageChange = (page: number) => {
     setCardPage(page);
   };
 
   return (
-    <Box ref={collectionTopRef}>
+    <Box
+      sx={
+        isListView
+          ? undefined
+          : {
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+            }
+      }
+    >
       {isListView ? (
         <>
           <ListView posts={visibleListPosts} />
 
           {hasMoreListPosts && (
             <Box
-              ref={listLoaderRef}
               sx={{
-                mt: { xs: 2, md: 3 },
-                py: 2,
+                mt: { xs: 3.5, md: 5 },
                 display: "flex",
                 justifyContent: "center",
               }}
             >
-              <Typography
+              <Button
+                onClick={handleLoadMoreList}
+                variant="outlined"
                 sx={{
-                  color: "var(--blog-muted)",
-                  fontSize: "0.78rem",
-                  fontWeight: 800,
+                  minWidth: 168,
+                  px: 2.6,
+                  py: 1.05,
+                  borderRadius: 999,
+                  borderColor: "var(--blog-border)",
+                  color: "var(--blog-subtle)",
+                  bgcolor: "var(--blog-card-bg)",
+                  fontSize: "0.82rem",
+                  fontWeight: 850,
+                  boxShadow: "0 14px 36px var(--blog-card-shadow)",
+                  "&:hover": {
+                    borderColor: "var(--blog-accent)",
+                    bgcolor: "var(--blog-chip-bg)",
+                    color: "var(--blog-accent)",
+                  },
                 }}
               >
-                다음 글을 불러오는 중
-              </Typography>
+                더보기 {nextListCount}개 · {visibleListPosts.length}/{posts.length}
+              </Button>
             </Box>
           )}
         </>
@@ -712,24 +827,23 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
           {totalCardPages > 1 && (
             <Box
               sx={{
-                mt: { xs: 3.2, md: 4.6 },
+                mt: { xs: 1.4, md: 1.8 },
                 display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 1.3,
+                gap: { xs: 0.65, sm: 0.8 },
               }}
             >
               <Box
                 sx={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 0.45,
-                  p: 0.45,
-                  borderRadius: 999,
-                  bgcolor: "var(--blog-card-bg)",
-                  border: "1px solid var(--blog-border)",
-                  boxShadow: "0 14px 38px var(--blog-card-shadow)",
+                  gap: { xs: 0.08, sm: 0.12 },
+                  px: { xs: 0.35, md: 0.45 },
+                  py: 0.25,
+                  borderRadius: 2,
+                  bgcolor: "transparent",
                 }}
               >
                 <Tooltip title="첫 페이지" placement="top">
@@ -739,12 +853,13 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === 1}
                       onClick={() => handleCardPageChange(1)}
                       sx={{
-                        width: 34,
-                        height: 34,
-                        color: "var(--blog-subtle)",
+                        width: 26,
+                        height: 26,
+                        borderRadius: 1.25,
+                        color: "var(--blog-muted)",
                         "&:hover": {
-                          bgcolor: "var(--blog-chip-bg)",
-                          color: "var(--blog-accent)",
+                          bgcolor: "var(--blog-card-soft-bg)",
+                          color: "var(--blog-heading)",
                         },
                         "&.Mui-disabled": {
                           color: "var(--blog-muted)",
@@ -764,12 +879,13 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === 1}
                       onClick={() => handleCardPageChange(cardPage - 1)}
                       sx={{
-                        width: 34,
-                        height: 34,
-                        color: "var(--blog-subtle)",
+                        width: 26,
+                        height: 26,
+                        borderRadius: 1.25,
+                        color: "var(--blog-muted)",
                         "&:hover": {
-                          bgcolor: "var(--blog-chip-bg)",
-                          color: "var(--blog-accent)",
+                          bgcolor: "var(--blog-card-soft-bg)",
+                          color: "var(--blog-heading)",
                         },
                         "&.Mui-disabled": {
                           color: "var(--blog-muted)",
@@ -792,24 +908,21 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       aria-current={isCurrentPage ? "page" : undefined}
                       onClick={() => handleCardPageChange(page)}
                       sx={{
-                        width: { xs: 34, sm: 36 },
-                        height: { xs: 34, sm: 36 },
-                        borderRadius: 999,
-                        color: isCurrentPage
-                          ? "var(--blog-active-text)"
-                          : "var(--blog-subtle)",
-                        bgcolor: isCurrentPage ? "var(--blog-accent)" : "transparent",
-                        fontSize: "0.84rem",
-                        fontWeight: 900,
+                        minWidth: 28,
+                        height: 26,
+                        px: 0,
+                        borderRadius: 1.25,
+                        color: isCurrentPage ? "var(--blog-heading)" : "var(--blog-muted)",
+                        bgcolor: isCurrentPage ? "var(--blog-card-soft-bg)" : "transparent",
+                        border: isCurrentPage ? "1px solid var(--blog-border)" : "1px solid transparent",
+                        boxShadow: "none",
+                        fontSize: "0.8rem",
+                        fontWeight: isCurrentPage ? 900 : 760,
                         transition:
-                          "background-color 0.18s ease, color 0.18s ease, transform 0.18s ease",
+                          "background-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
                         "&:hover": {
-                          bgcolor: isCurrentPage
-                            ? "var(--blog-accent)"
-                            : "var(--blog-chip-bg)",
-                          color: isCurrentPage
-                            ? "var(--blog-active-text)"
-                            : "var(--blog-accent)",
+                          bgcolor: "var(--blog-card-soft-bg)",
+                          color: "var(--blog-heading)",
                           transform: "translateY(-1px)",
                         },
                       }}
@@ -826,12 +939,13 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === totalCardPages}
                       onClick={() => handleCardPageChange(cardPage + 1)}
                       sx={{
-                        width: 34,
-                        height: 34,
-                        color: "var(--blog-subtle)",
+                        width: 26,
+                        height: 26,
+                        borderRadius: 1.25,
+                        color: "var(--blog-muted)",
                         "&:hover": {
-                          bgcolor: "var(--blog-chip-bg)",
-                          color: "var(--blog-accent)",
+                          bgcolor: "var(--blog-card-soft-bg)",
+                          color: "var(--blog-heading)",
                         },
                         "&.Mui-disabled": {
                           color: "var(--blog-muted)",
@@ -851,12 +965,13 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === totalCardPages}
                       onClick={() => handleCardPageChange(totalCardPages)}
                       sx={{
-                        width: 34,
-                        height: 34,
-                        color: "var(--blog-subtle)",
+                        width: 26,
+                        height: 26,
+                        borderRadius: 1.25,
+                        color: "var(--blog-muted)",
                         "&:hover": {
-                          bgcolor: "var(--blog-chip-bg)",
-                          color: "var(--blog-accent)",
+                          bgcolor: "var(--blog-card-soft-bg)",
+                          color: "var(--blog-heading)",
                         },
                         "&.Mui-disabled": {
                           color: "var(--blog-muted)",
@@ -872,14 +987,18 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
 
               <Typography
                 sx={{
+                  px: 0,
+                  py: 0,
+                  borderRadius: 0,
+                  bgcolor: "transparent",
                   color: "var(--blog-muted)",
-                  fontSize: "0.76rem",
-                  fontWeight: 850,
+                  fontSize: "0.7rem",
+                  fontWeight: 760,
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                 }}
               >
-                {cardPage} / {totalCardPages}
+                {cardPage} / {totalCardPages} 페이지
               </Typography>
             </Box>
           )}
@@ -891,6 +1010,21 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
 
 // 긴 목록에서 상단으로 빠르게 돌아가기 위한 버튼
 const ScrollTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const updateVisibility = () => {
+      setIsVisible(window.scrollY > 420);
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateVisibility);
+  }, []);
+
+  if (!isVisible) return null;
+
   return (
     <Tooltip title="맨 위로" placement="left">
       <IconButton
@@ -932,6 +1066,14 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedTag, setSelectedTag] = useState("All");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.blogViewMode = viewMode;
+
+    return () => {
+      delete document.documentElement.dataset.blogViewMode;
+    };
+  }, [viewMode]);
 
   // 블로그 글 데이터 조회
   const { posts, loading, error } = usePosts();
@@ -1053,7 +1195,14 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
     );
 
   return (
-    <Box>
+    <Box
+      sx={{
+        height: "100%",
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* 목록 헤더 영역 */}
       <Box
         sx={{
@@ -1389,7 +1538,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         />
       )}
 
-      <ScrollTopButton />
+      {viewMode === "list" && <ScrollTopButton />}
     </Box>
   );
 };

@@ -192,6 +192,10 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
           borderColor: "var(--blog-border)",
           boxShadow: "0 18px 46px rgba(0, 0, 0, 0.22)",
         },
+        "html[data-blog-view-mode='card'] & .blog-footer": {
+          marginTop: "8px",
+          paddingTop: "10px",
+        },
         }}
       >
         {/* 왼쪽 고정 사이드바 */}
@@ -223,10 +227,11 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             }}
           >
             {/* 본문 높이 보정 */}
-            <Box sx={{ flex: 1 }}>{children}</Box>
+            <Box className="blog-body" sx={{ flex: 1 }}>{children}</Box>
 
             {/* 블로그 하단 정보 */}
             <Box
+              className="blog-footer"
               component="footer"
               sx={{
                 mt: { xs: 7, md: 9 },
