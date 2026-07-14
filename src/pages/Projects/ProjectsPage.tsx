@@ -208,9 +208,15 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
           outlineOffset: 3,
         },
         "&:hover": {
-          transform: "translateY(-6px)",
+          transform: "translateY(-2px)",
           borderColor: "rgba(217, 119, 6, 0.34)",
-          boxShadow: "0 22px 54px rgba(45, 36, 23, 0.12)",
+          boxShadow: "0 10px 24px rgba(45, 36, 23, 0.1)",
+          "& .project-card-title": {
+            color: "#7c4a03",
+          },
+          "& .project-card-image": {
+            transform: "scale(1.025)",
+          },
         },
       }}
     >
@@ -233,7 +239,9 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
             display: "block",
             objectFit: "cover",
             filter: "saturate(0.86)",
+            transition: "transform 0.35s ease",
           }}
+          className="project-card-image"
         />
         <Chip
           label={projectKindLabel[project.kind]}
@@ -252,22 +260,60 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
       </Box>
 
       {/* 프로젝트 정보 */}
-      <Stack spacing={2.2} sx={{ p: { xs: 2.4, md: 3 } }}>
+      <Stack spacing={1.55} sx={{ p: { xs: 2.2, md: 2.4 } }}>
         <Box>
-          <Typography sx={{ color: "#8a8175", fontSize: "0.88rem", fontWeight: 700 }}>
+          <Typography
+            sx={{
+              color: "#777167",
+              fontSize: { xs: "0.84rem", md: "0.88rem" },
+              fontWeight: 600,
+              lineHeight: 1.45,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
             {formatProjectPeriod(project.period.start, project.period.end)}
           </Typography>
-          <Typography variant="h5" fontWeight={800} sx={{ mt: 0.8, lineHeight: 1.35 }}>
+          <Typography
+            className="project-card-title"
+            variant="h6"
+            fontWeight={800}
+            sx={{
+              mt: 0.75,
+              color: "#171717",
+              fontSize: { xs: "1.05rem", md: "1.14rem" },
+              lineHeight: 1.38,
+              transition: "color 0.2s",
+              wordBreak: "keep-all",
+            }}
+          >
             {project.title}
           </Typography>
         </Box>
 
-        <Typography sx={{ color: "#625d54", lineHeight: 1.75 }}>
+        <Typography
+          sx={{
+            color: "#625d54",
+            fontSize: { xs: "0.92rem", md: "0.95rem" },
+            lineHeight: 1.7,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
           {project.description}
         </Typography>
 
         {/* 기술 태그 */}
-        <Stack direction="row" gap={0.75} flexWrap="wrap">
+        <Stack
+          direction="row"
+          gap={0.7}
+          flexWrap="wrap"
+          sx={{
+            pt: 0.1,
+            alignContent: "flex-start",
+          }}
+        >
           {project.tech.map((tech) => (
             <Chip
               key={tech}
@@ -278,6 +324,8 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
                 color: "#52525b",
                 border: "1px solid #e4e4e7",
                 borderRadius: "5px",
+                height: 24,
+                fontSize: "0.72rem",
                 fontWeight: 700,
                 "& .MuiChip-label": {
                   px: 1,
@@ -288,7 +336,7 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
         </Stack>
 
         {/* 외부 링크 */}
-        <Stack direction="row" gap={1} sx={{ pt: 0.4 }}>
+        <Stack direction="row" gap={1} sx={{ pt: 0.25 }}>
           {project.links.demo && (
             <Button
               href={project.links.demo}
@@ -398,7 +446,7 @@ const ProjectsPage = () => {
 
   return (
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717", minHeight: "100vh" }}>
-      <Container maxWidth="lg" sx={{ pt: { xs: 11, md: 12 }, pb: { xs: 10, md: 14 } }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 9.5, sm: 10.5, md: 12 }, pb: { xs: 9, md: 14 }, px: { xs: 2, sm: 3 } }}>
         {/* 포트폴리오 복귀 버튼 */}
         <Box sx={{ mb: { xs: 2, md: 2.4 } }}>
           <Button
@@ -426,8 +474,8 @@ const ProjectsPage = () => {
             position: { md: "sticky" },
             top: { md: 76 },
             zIndex: 4,
-            mb: { xs: 3, md: 3.5 },
-            p: { xs: 1.35, md: 1.5 },
+            mb: { xs: 2.6, md: 3.5 },
+            p: { xs: 1.15, sm: 1.35, md: 1.5 },
             bgcolor: "rgba(251, 251, 248, 0.94)",
             border: "1px solid rgba(232, 227, 216, 0.9)",
             borderRadius: 2,
@@ -442,9 +490,10 @@ const ProjectsPage = () => {
           }}
         >
           <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={1}
-            alignItems={{ xs: "stretch", md: "center" }}
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 0.85, sm: 1 }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            sx={{ flexWrap: { sm: "wrap", md: "nowrap" } }}
           >
             <ToggleButtonGroup
               exclusive
@@ -455,11 +504,12 @@ const ProjectsPage = () => {
               sx={{
                 flexShrink: 0,
                 height: FILTER_CONTROL_HEIGHT,
+                width: { xs: "100%", sm: "auto" },
                 "& .MuiToggleButtonGroup-grouped": {
-                  flex: { xs: 1, md: "0 0 auto" },
+                  flex: { xs: 1, sm: "0 0 auto" },
                 },
                 "& .MuiToggleButton-root": {
-                  minWidth: { xs: 0, md: 62 },
+                  minWidth: { xs: 0, sm: 62 },
                   height: FILTER_CONTROL_HEIGHT,
                   px: { xs: 1, md: 1.45 },
                   py: 0,
@@ -500,7 +550,8 @@ const ProjectsPage = () => {
                 },
               }}
               sx={{
-                flex: 1,
+                flex: "1 1 280px",
+                minWidth: { xs: 0, sm: 260 },
                 "& .MuiOutlinedInput-root": {
                   bgcolor: "#fff",
                   borderRadius: 1.5,
@@ -519,7 +570,7 @@ const ProjectsPage = () => {
               value={sortType}
               onChange={(event) => setSortType(event.target.value as ProjectSortType)}
               sx={{
-                width: { xs: "100%", md: 132 },
+                width: { xs: "100%", sm: 132 },
                 flexShrink: 0,
                 height: FILTER_CONTROL_HEIGHT,
                 bgcolor: "#fff",
@@ -544,9 +595,10 @@ const ProjectsPage = () => {
           {/* 기술 빠른 필터 */}
           <Stack
             direction="row"
-            gap={0.65}
+            gap={{ xs: 0.55, sm: 0.65 }}
             sx={{
               flexWrap: "wrap",
+              pt: { xs: 0.15, sm: 0 },
               "& .MuiChip-root": {
                 flexShrink: 0,
               },
@@ -557,12 +609,12 @@ const ProjectsPage = () => {
               clickable
               onClick={() => setSelectedTech("all")}
               sx={{
-                height: 28,
+                height: { xs: 26, sm: 28 },
                 bgcolor: selectedTech === "all" ? "#171717" : "#fff",
                 color: selectedTech === "all" ? "#fff" : "#625d54",
                 border: "1px solid #e8e3d8",
                 borderRadius: "5px",
-                fontSize: "0.76rem",
+                fontSize: { xs: "0.72rem", sm: "0.76rem" },
                 fontWeight: 800,
               }}
             />
@@ -573,12 +625,12 @@ const ProjectsPage = () => {
                 clickable
                 onClick={() => setSelectedTech(tech)}
                 sx={{
-                  height: 28,
+                  height: { xs: 26, sm: 28 },
                   bgcolor: selectedTech === tech ? "#171717" : "#fff",
                   color: selectedTech === tech ? "#fff" : "#625d54",
                   border: "1px solid #e8e3d8",
                   borderRadius: "5px",
-                  fontSize: "0.76rem",
+                  fontSize: { xs: "0.72rem", sm: "0.76rem" },
                   fontWeight: 800,
                 }}
               />
