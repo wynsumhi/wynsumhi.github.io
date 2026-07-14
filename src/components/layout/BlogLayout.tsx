@@ -124,6 +124,10 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             minHeight: "100%",
             backgroundColor: "var(--blog-content-bg)",
           },
+          "html[data-blog-view-mode='card'], html[data-blog-view-mode='card'] body, html[data-blog-view-mode='card'] #root": {
+            height: "100%",
+            overflow: "hidden",
+          },
           // 트랙패드 오버스크롤 배경
           body: {
             margin: 0,
@@ -192,9 +196,10 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
           borderColor: "var(--blog-border)",
           boxShadow: "0 18px 46px rgba(0, 0, 0, 0.22)",
         },
-        "html[data-blog-view-mode='card'] & .blog-footer": {
-          marginTop: "8px",
-          paddingTop: "10px",
+        "html[data-blog-view-mode='card'] &": {
+          height: "100dvh",
+          minHeight: "100dvh",
+          overflow: "hidden",
         },
         }}
       >
@@ -208,11 +213,18 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             ml: "260px",
             px: { xs: 2, md: 7 },
             py: { xs: 4, md: 7 },
+            boxSizing: "border-box",
             maxWidth: "calc(100vw - 260px)",
             minHeight: "100dvh",
             bgcolor: "var(--blog-content-bg)",
             display: "flex",
             flexDirection: "column",
+            "html[data-blog-view-mode='card'] &": {
+              height: "100dvh",
+              minHeight: 0,
+              overflow: "hidden",
+              py: { xs: 4, md: "clamp(1.4rem, 3.8dvh, 3.2rem)" },
+            },
           }}
         >
           {/* 본문 최대 너비 */}
@@ -224,10 +236,11 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
               flex: 1,
               display: "flex",
               flexDirection: "column",
+              minHeight: 0,
             }}
           >
             {/* 본문 높이 보정 */}
-            <Box className="blog-body" sx={{ flex: 1 }}>{children}</Box>
+            <Box className="blog-body" sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
 
             {/* 블로그 하단 정보 */}
             <Box
@@ -236,6 +249,10 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
               sx={{
                 mt: { xs: 7, md: 9 },
                 pt: { xs: 2.4, md: 3 },
+                "html[data-blog-view-mode='card'] &": {
+                  mt: "clamp(6px, 1dvh, 10px)",
+                  pt: "clamp(6px, 1dvh, 10px)",
+                },
                 borderTop: "1px solid var(--blog-divider)",
                 display: "flex",
                 alignItems: "center",

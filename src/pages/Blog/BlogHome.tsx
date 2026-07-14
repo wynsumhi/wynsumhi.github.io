@@ -433,14 +433,21 @@ const CardView = ({ posts }: { posts: Post[] }) => {
         gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
         gridTemplateRows: { md: "repeat(3, minmax(0, 1fr))" },
         gridAutoRows: { xs: "auto", md: "minmax(0, 1fr)" },
-        gap: { xs: 2, md: 1.05 },
-        flex: { md: "1 1 auto" },
+        gap: { xs: 2, md: 1.05, lg: 1.05 },
+        p: { md: "4px 5px 8px" },
+        boxSizing: "border-box",
+        flex: { md: "1 1 0" },
         height: { md: "auto" },
+        maxHeight: { md: "none" },
+        overflow: { md: "hidden" },
         minHeight: 0,
-        "@media (min-width: 900px) and (max-height: 760px)": {
+        "@media (min-width: 900px) and (max-height: 820px)": {
           gridTemplateRows: "repeat(3, minmax(0, 1fr))",
           gridAutoRows: "minmax(0, 1fr)",
-          gap: 0.95,
+          gap: 0.82,
+        },
+        "@media (min-width: 900px) and (max-height: 720px)": {
+          gap: 0.68,
         },
         "@media (min-width: 900px) and (min-height: 900px)": {
           gridTemplateRows: "repeat(3, minmax(0, 1fr))",
@@ -458,27 +465,38 @@ const CardView = ({ posts }: { posts: Post[] }) => {
             display: "flex",
             flexDirection: "column",
             cursor: "pointer",
-            p: { xs: 2, md: 1.35, lg: 1.45 },
+            p: { xs: 2, md: 1.5, lg: 1.65 },
+            pb: { xs: 1.05, md: 1.05, lg: 1.1 },
             bgcolor: "var(--blog-card-bg)",
-            boxShadow: "0 12px 34px var(--blog-card-shadow)",
+            boxShadow: "0 4px 12px rgba(15, 23, 42, 0.025)",
             border: "1px solid var(--blog-border)",
             borderRadius: 2.4,
             overflow: "hidden",
-            transition: "transform 0.25s ease, box-shadow 0.25s ease",
+            position: "relative",
+            zIndex: 0,
+            transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease",
             "&:hover": {
-              transform: "translateY(-3px)",
-              boxShadow: "0 18px 44px var(--blog-card-hover-shadow)",
+              transform: "translateY(-2px)",
+              zIndex: 2,
+              borderColor: "rgba(37, 99, 235, 0.3)",
+              boxShadow: "0 8px 20px rgba(37, 99, 235, 0.1)",
               "& .card-title": { color: "var(--blog-accent)" },
               "& .card-thumbnail": {
                 transform: "scale(1.03)",
               },
             },
-            "@media (min-width: 900px) and (max-height: 760px)": {
-              p: 1.15,
+            "@media (min-width: 900px) and (max-height: 820px)": {
+              p: 1.25,
+              pb: 0.72,
               borderRadius: 2,
             },
+            "@media (min-width: 900px) and (max-height: 720px)": {
+              p: 0.95,
+              pb: 0.44,
+            },
             "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
-              p: 1,
+              p: 0.82,
+              pb: 0.36,
             },
           }}
         >
@@ -533,20 +551,20 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 1,
-                  mb: { xs: 1.3, md: 0.9 },
+                  mb: { xs: 1.05, md: 1.05 },
                   minHeight: { xs: 26, md: 22 },
                   width: "100%",
                   flexShrink: 0,
-                  "@media (min-width: 900px) and (max-height: 780px)": {
-                    mb: 0.56,
+                  "@media (min-width: 900px) and (max-height: 820px)": {
+                    mb: 0.68,
                     minHeight: 21,
                   },
-                  "@media (min-width: 900px) and (max-height: 760px)": {
-                    mb: 0.42,
+                  "@media (min-width: 900px) and (max-height: 720px)": {
+                    mb: 0.4,
                     minHeight: 20,
                   },
                   "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
-                    mb: 0.32,
+                    mb: 0.28,
                     minHeight: 19,
                   },
                 }}
@@ -603,35 +621,50 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 className="card-title"
                 sx={{
-                  fontSize: { xs: "1.1rem", md: "1.07rem", lg: "1.15rem" },
-                  fontWeight: 880,
+                  fontSize: { xs: "1.08rem", md: "1.3rem", lg: "1.3rem" },
+                  fontWeight: 850,
                   color: "var(--blog-heading)",
-                  lineHeight: { xs: 1.42, md: 1.24 },
-                  mb: { xs: 1.05, md: 0.56 },
+                  lineHeight: { xs: 1.38, md: 1.16 },
+                  mb: { xs: 0.82, md: 0.95 },
                   pl: { xs: 0.45, md: 0.55 },
                   width: "100%",
                   boxSizing: "border-box",
                   transition: "color 0.2s",
                   flexShrink: 0,
-                  overflowWrap: "anywhere",
                   wordBreak: "keep-all",
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  minHeight: { xs: "4.55em", md: "3.48em" },
+                  maxHeight: { xs: "4.55em", md: "3.48em" },
                   "@media (min-width: 900px) and (max-height: 920px)": {
-                    mb: 0.42,
+                    fontSize: "1.2rem",
+                    lineHeight: 1.16,
+                    mb: 0.76,
+                    minHeight: "3.48em",
+                    maxHeight: "3.48em",
                   },
-                  "@media (min-width: 900px) and (max-height: 780px)": {
-                    fontSize: "0.99rem",
-                    lineHeight: 1.2,
-                    mb: 0.38,
+                  "@media (min-width: 900px) and (max-height: 820px)": {
+                    fontSize: "1.08rem",
+                    lineHeight: 1.14,
+                    mb: 0.5,
+                    minHeight: "3.42em",
+                    maxHeight: "3.42em",
                   },
-                  "@media (min-width: 900px) and (max-height: 760px)": {
-                    fontSize: "0.94rem",
-                    lineHeight: 1.17,
-                    mb: 0.32,
+                  "@media (min-width: 900px) and (max-height: 720px)": {
+                    fontSize: "0.96rem",
+                    lineHeight: 1.14,
+                    mb: 0.34,
+                    minHeight: "3.42em",
+                    maxHeight: "3.42em",
                   },
                   "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
-                    fontSize: "0.86rem",
+                    fontSize: "0.9rem",
                     lineHeight: 1.13,
-                    mb: 0.26,
+                    mb: 0.32,
+                    minHeight: "3.39em",
+                    maxHeight: "3.39em",
                   },
                 }}
               >
@@ -642,10 +675,11 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: { xs: "0.88rem", md: "0.84rem", lg: "0.89rem" },
+                  fontSize: { xs: "0.88rem", md: "0.95rem", lg: "1rem" },
                   color: "var(--blog-subtle)",
-                  lineHeight: { xs: 1.68, md: 1.44 },
-                  flex: "0 0 auto",
+                  lineHeight: { xs: 1.68, md: 1.5 },
+                  minHeight: 0,
+                  flexShrink: 0,
                   pl: { xs: 0.45, md: 0.55 },
                   width: "100%",
                   boxSizing: "border-box",
@@ -653,22 +687,32 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   display: "-webkit-box",
                   WebkitLineClamp: { xs: 3, md: 2 },
                   WebkitBoxOrient: "vertical",
-                  mb: { xs: 1.1, md: 0.72 },
+                  mb: { xs: 0.72, md: 0.95 },
                   "@media (min-width: 900px) and (max-height: 920px)": {
+                    fontSize: "0.88rem",
+                    lineHeight: 1.38,
                     WebkitLineClamp: 2,
-                    mb: 0.56,
+                    mb: 0.72,
                   },
-                  "@media (min-width: 900px) and (max-height: 780px)": {
+                  "@media (min-width: 900px) and (min-height: 980px)": {
+                    WebkitLineClamp: 3,
+                    mb: 1.15,
+                  },
+                  "@media (min-width: 900px) and (min-height: 1120px)": {
+                    WebkitLineClamp: 3,
+                    mb: 1.2,
+                  },
+                  "@media (min-width: 900px) and (max-height: 820px)": {
                     fontSize: "0.8rem",
-                    lineHeight: 1.34,
-                    WebkitLineClamp: 1,
+                    lineHeight: 1.3,
+                    WebkitLineClamp: 2,
                     mb: 0.42,
                   },
-                  "@media (min-width: 900px) and (max-height: 760px)": {
+                  "@media (min-width: 900px) and (max-height: 720px)": {
                     fontSize: "0.74rem",
-                    lineHeight: 1.26,
+                    lineHeight: 1.24,
                     WebkitLineClamp: 1,
-                    mb: 0.3,
+                    mb: 0.28,
                   },
                   "@media (min-width: 900px) and (max-height: 680px)": {
                     display: "none",
@@ -688,9 +732,9 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   gap: 0.55,
                   flexWrap: "wrap",
                   pt: 0,
-                  mt: { xs: 0.25, md: 0.15 },
-                  minHeight: { xs: 22, md: 20 },
-                  maxHeight: { md: 22 },
+                  mt: { xs: 0.05, md: 0 },
+                  minHeight: { xs: 22, md: 19 },
+                  maxHeight: { md: 19 },
                   overflow: "hidden",
                   "@media (min-width: 900px) and (max-height: 760px)": {
                     minHeight: 18,
@@ -706,8 +750,8 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     label={tag}
                     size="small"
                     sx={{
-                      height: { xs: 22, md: 20 },
-                      fontSize: { xs: "0.7rem", md: "0.64rem" },
+                      height: { xs: 22, md: 19 },
+                      fontSize: { xs: "0.7rem", md: "0.6rem" },
                       bgcolor: "var(--blog-card-soft-bg)",
                       color: "var(--blog-subtle)",
                       fontWeight: 700,
@@ -727,8 +771,8 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                     label={`+${post.tags.length - 2}`}
                     size="small"
                     sx={{
-                      height: { xs: 22, md: 20 },
-                      fontSize: { xs: "0.7rem", md: "0.64rem" },
+                      height: { xs: 22, md: 19 },
+                      fontSize: { xs: "0.7rem", md: "0.6rem" },
                       bgcolor: "var(--blog-card-soft-bg)",
                       color: "var(--blog-muted)",
                       fontWeight: 800,
@@ -795,6 +839,7 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
               minHeight: 0,
               display: "flex",
               flexDirection: "column",
+              overflow: "hidden",
             }
       }
     >
@@ -843,12 +888,12 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
           {totalCardPages > 1 && (
             <Box
               sx={{
-                mt: { xs: 1.4, md: 1.8 },
+                mt: { xs: 1.4, md: "clamp(0.45rem, 1.45dvh, 1.15rem)" },
                 display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: "center",
                 justifyContent: "center",
-                gap: { xs: 0.65, sm: 0.8 },
+                gap: { xs: 0.65, sm: "clamp(0.32rem, 0.7dvh, 0.55rem)" },
               }}
             >
               <Box
@@ -869,8 +914,8 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === 1}
                       onClick={() => handleCardPageChange(1)}
                       sx={{
-                        width: 26,
-                        height: 26,
+                        width: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
+                        height: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
                         borderRadius: 1.25,
                         color: "var(--blog-muted)",
                         "&:hover": {
@@ -895,8 +940,8 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === 1}
                       onClick={() => handleCardPageChange(cardPage - 1)}
                       sx={{
-                        width: 26,
-                        height: 26,
+                        width: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
+                        height: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
                         borderRadius: 1.25,
                         color: "var(--blog-muted)",
                         "&:hover": {
@@ -924,15 +969,15 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       aria-current={isCurrentPage ? "page" : undefined}
                       onClick={() => handleCardPageChange(page)}
                       sx={{
-                        minWidth: 28,
-                        height: 26,
+                        minWidth: { xs: 28, md: "clamp(23px, 3.3dvh, 28px)" },
+                        height: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
                         px: 0,
                         borderRadius: 1.25,
                         color: isCurrentPage ? "var(--blog-heading)" : "var(--blog-muted)",
                         bgcolor: isCurrentPage ? "var(--blog-card-soft-bg)" : "transparent",
                         border: isCurrentPage ? "1px solid var(--blog-border)" : "1px solid transparent",
                         boxShadow: "none",
-                        fontSize: "0.8rem",
+                        fontSize: { xs: "0.8rem", md: "clamp(0.72rem, 1.7dvh, 0.8rem)" },
                         fontWeight: isCurrentPage ? 900 : 760,
                         transition:
                           "background-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
@@ -955,8 +1000,8 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === totalCardPages}
                       onClick={() => handleCardPageChange(cardPage + 1)}
                       sx={{
-                        width: 26,
-                        height: 26,
+                        width: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
+                        height: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
                         borderRadius: 1.25,
                         color: "var(--blog-muted)",
                         "&:hover": {
@@ -981,8 +1026,8 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                       disabled={cardPage === totalCardPages}
                       onClick={() => handleCardPageChange(totalCardPages)}
                       sx={{
-                        width: 26,
-                        height: 26,
+                        width: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
+                        height: { xs: 26, md: "clamp(22px, 3.2dvh, 26px)" },
                         borderRadius: 1.25,
                         color: "var(--blog-muted)",
                         "&:hover": {
@@ -1242,14 +1287,15 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
+        overflow: viewMode === "card" ? "hidden" : "visible",
       }}
     >
       {/* 목록 헤더 영역 */}
       <Box
         ref={searchFilterRef}
         sx={{
-          pb: 2.2,
-          mb: 4,
+          pb: viewMode === "card" ? { xs: 2.2, md: "clamp(0.8rem, 1.8dvh, 1.35rem)" } : 2.2,
+          mb: viewMode === "card" ? { xs: 4, md: "clamp(0.9rem, 2.4dvh, 2.2rem)" } : 4,
           borderBottom: "1px solid var(--blog-divider)",
         }}
       >
