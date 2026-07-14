@@ -58,16 +58,16 @@ const navItems = [
     section: "study",
   },
   {
-    label: "LOG",
-    icon: <HistoryRounded fontSize="small" />,
-    path: `${ROUTES.BLOG}?section=log`,
-    section: "log",
-  },
-  {
     label: "PROJECT",
     icon: <WorkOutlineRounded fontSize="small" />,
     path: `${ROUTES.BLOG}?section=project`,
     section: "project",
+  },
+  {
+    label: "LOG",
+    icon: <HistoryRounded fontSize="small" />,
+    path: `${ROUTES.BLOG}?section=log`,
+    section: "log",
   },
 ];
 
