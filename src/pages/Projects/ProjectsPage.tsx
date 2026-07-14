@@ -28,7 +28,7 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SearchIcon from "@mui/icons-material/Search";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { useProjects } from "@/hooks/useProjects";
@@ -49,6 +49,20 @@ const projectKindLabel = {
 
 type ProjectKindFilter = "all" | Project["kind"];
 type ProjectSortType = "latest" | "oldest" | "title";
+
+// 빠른 필터는 자주 탐색할 대표 기술만 노출하고, 나머지는 검색으로 찾는다.
+const FEATURED_TECH_FILTERS = [
+  "TypeScript",
+  "React",
+  "Next.js",
+  "MUI",
+  "Vue.js",
+  "Flutter",
+  "Tailwind CSS",
+  "Figma",
+];
+
+const FILTER_CONTROL_HEIGHT = 44;
 
 // 검색 비교용 텍스트
 const normalizeText = (value: string) => value.toLowerCase().replace(/\s/g, "");
@@ -313,12 +327,40 @@ const ProjectsPage = () => {
   const [kindFilter, setKindFilter] = useState<ProjectKindFilter>("all");
   const [selectedTech, setSelectedTech] = useState("all");
   const [sortType, setSortType] = useState<ProjectSortType>("latest");
+  const [isFilterVisible, setIsFilterVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const lastScrollY = lastScrollYRef.current;
+
+      if (currentScrollY < 120) {
+        setIsFilterVisible(true);
+      } else if (currentScrollY > lastScrollY + 8) {
+        setIsFilterVisible(false);
+      } else if (currentScrollY < lastScrollY - 8) {
+        setIsFilterVisible(true);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    lastScrollYRef.current = window.scrollY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // 기술 필터 목록
   const techFilters = useMemo(() => {
     const techSet = new Set(projects.flatMap((project) => project.tech));
 
-    return Array.from(techSet).sort((a, b) => a.localeCompare(b));
+    return FEATURED_TECH_FILTERS.filter((tech) => techSet.has(tech));
   }, [projects]);
 
   // 화면 표시 프로젝트
@@ -356,15 +398,13 @@ const ProjectsPage = () => {
 
   return (
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717", minHeight: "100vh" }}>
-      <Container maxWidth="lg" sx={{ pt: { xs: 13, md: 16 }, pb: { xs: 12, md: 16 } }}>
-        {/* 페이지 제목 */}
-        <Box sx={{ mb: { xs: 6, md: 8 } }}>
-          {/* 포트폴리오 복귀 버튼 */}
+      <Container maxWidth="lg" sx={{ pt: { xs: 11, md: 12 }, pb: { xs: 10, md: 14 } }}>
+        {/* 포트폴리오 복귀 버튼 */}
+        <Box sx={{ mb: { xs: 2, md: 2.4 } }}>
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate(ROUTES.PORTFOLIO)}
             sx={{
-              mb: 3,
               px: 0,
               color: "#625d54",
               fontWeight: 800,
@@ -377,100 +417,34 @@ const ProjectsPage = () => {
           >
             포트폴리오로 돌아가기
           </Button>
-
-          <Typography
-            component="p"
-            sx={{
-              mb: 1.5,
-              color: "#d97706",
-              fontWeight: 900,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Projects
-          </Typography>
-          <Typography
-            component="h1"
-            sx={{
-              fontSize: { xs: "2.4rem", md: "4.2rem" },
-              fontWeight: 900,
-              lineHeight: 1.08,
-              letterSpacing: 0,
-            }}
-          >
-            구현 경험을 프로젝트 단위로 정리합니다.
-          </Typography>
-          <Typography sx={{ mt: 2.4, maxWidth: 680, color: "#625d54", lineHeight: 1.8 }}>
-            업무 프로젝트와 사이드 프로젝트를 나누어 문제 해결 방식, 구현 범위,
-            사용 기술을 한눈에 볼 수 있도록 구성했습니다.
-          </Typography>
         </Box>
 
         {/* 프로젝트 탐색 도구 */}
         <Stack
-          spacing={2.4}
+          spacing={1.2}
           sx={{
             position: { md: "sticky" },
-            top: { md: 86 },
+            top: { md: 76 },
             zIndex: 4,
-            mb: { xs: 4, md: 5 },
-            p: { xs: 2, md: 2.4 },
-            bgcolor: "rgba(251, 251, 248, 0.88)",
+            mb: { xs: 3, md: 3.5 },
+            p: { xs: 1.35, md: 1.5 },
+            bgcolor: "rgba(251, 251, 248, 0.94)",
             border: "1px solid rgba(232, 227, 216, 0.9)",
             borderRadius: 2,
             backdropFilter: "blur(18px)",
+            opacity: { xs: 1, md: isFilterVisible ? 1 : 0 },
+            pointerEvents: { xs: "auto", md: isFilterVisible ? "auto" : "none" },
+            transform: {
+              xs: "none",
+              md: isFilterVisible ? "translateY(0)" : "translateY(calc(-100% - 18px))",
+            },
+            transition: "transform 0.22s ease, opacity 0.18s ease",
           }}
         >
           <Stack
             direction={{ xs: "column", md: "row" }}
-            spacing={1.5}
+            spacing={1}
             alignItems={{ xs: "stretch", md: "center" }}
-          >
-            <TextField
-              value={searchKeyword}
-              onChange={(event) => setSearchKeyword(event.target.value)}
-              placeholder="프로젝트명, 기술, 문제 해결 키워드 검색"
-              fullWidth
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: "#8a8175" }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: "#fff",
-                  borderRadius: 1.5,
-                  fontWeight: 700,
-                },
-              }}
-            />
-
-            <Select
-              value={sortType}
-              onChange={(event) => setSortType(event.target.value as ProjectSortType)}
-              sx={{
-                minWidth: { xs: "100%", md: 150 },
-                bgcolor: "#fff",
-                borderRadius: 1.5,
-                fontWeight: 800,
-              }}
-            >
-              <MenuItem value="latest">최신순</MenuItem>
-              <MenuItem value="oldest">오래된순</MenuItem>
-              <MenuItem value="title">이름순</MenuItem>
-            </Select>
-          </Stack>
-
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={1.4}
-            alignItems={{ xs: "stretch", md: "center" }}
-            justifyContent="space-between"
           >
             <ToggleButtonGroup
               exclusive
@@ -479,13 +453,23 @@ const ProjectsPage = () => {
                 if (value) setKindFilter(value);
               }}
               sx={{
+                flexShrink: 0,
+                height: FILTER_CONTROL_HEIGHT,
+                "& .MuiToggleButtonGroup-grouped": {
+                  flex: { xs: 1, md: "0 0 auto" },
+                },
                 "& .MuiToggleButton-root": {
-                  px: 2,
-                  py: 0.9,
+                  minWidth: { xs: 0, md: 62 },
+                  height: FILTER_CONTROL_HEIGHT,
+                  px: { xs: 1, md: 1.45 },
+                  py: 0,
                   color: "#625d54",
                   borderColor: "#e8e3d8",
+                  fontSize: "0.84rem",
                   fontWeight: 900,
+                  lineHeight: 1,
                   textTransform: "none",
+                  whiteSpace: "nowrap",
                   "&.Mui-selected": {
                     color: "#171717",
                     bgcolor: "#fff2cc",
@@ -501,22 +485,84 @@ const ProjectsPage = () => {
               <ToggleButton value="side">사이드</ToggleButton>
             </ToggleButtonGroup>
 
-            <Typography sx={{ color: "#8a8175", fontWeight: 800 }}>
-              {filteredProjects.length}개의 프로젝트
-            </Typography>
+            <TextField
+              value={searchKeyword}
+              onChange={(event) => setSearchKeyword(event.target.value)}
+              placeholder="프로젝트명, 기술, 문제 해결 키워드 검색"
+              fullWidth
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "#8a8175" }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                flex: 1,
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "#fff",
+                  borderRadius: 1.5,
+                  fontWeight: 700,
+                  height: FILTER_CONTROL_HEIGHT,
+                },
+                "& .MuiInputBase-input": {
+                  height: FILTER_CONTROL_HEIGHT,
+                  boxSizing: "border-box",
+                  py: 0,
+                },
+              }}
+            />
+
+            <Select
+              value={sortType}
+              onChange={(event) => setSortType(event.target.value as ProjectSortType)}
+              sx={{
+                width: { xs: "100%", md: 132 },
+                flexShrink: 0,
+                height: FILTER_CONTROL_HEIGHT,
+                bgcolor: "#fff",
+                borderRadius: 1.5,
+                fontSize: "0.86rem",
+                fontWeight: 800,
+                "& .MuiSelect-select": {
+                  height: FILTER_CONTROL_HEIGHT,
+                  boxSizing: "border-box",
+                  display: "flex",
+                  alignItems: "center",
+                  py: 0,
+                },
+              }}
+            >
+              <MenuItem value="latest">최신순</MenuItem>
+              <MenuItem value="oldest">오래된순</MenuItem>
+              <MenuItem value="title">이름순</MenuItem>
+            </Select>
           </Stack>
 
           {/* 기술 빠른 필터 */}
-          <Stack direction="row" gap={0.8} flexWrap="wrap">
+          <Stack
+            direction="row"
+            gap={0.65}
+            sx={{
+              flexWrap: "wrap",
+              "& .MuiChip-root": {
+                flexShrink: 0,
+              },
+            }}
+          >
             <Chip
               label="All"
               clickable
               onClick={() => setSelectedTech("all")}
               sx={{
+                height: 28,
                 bgcolor: selectedTech === "all" ? "#171717" : "#fff",
                 color: selectedTech === "all" ? "#fff" : "#625d54",
                 border: "1px solid #e8e3d8",
                 borderRadius: "5px",
+                fontSize: "0.76rem",
                 fontWeight: 800,
               }}
             />
@@ -527,10 +573,12 @@ const ProjectsPage = () => {
                 clickable
                 onClick={() => setSelectedTech(tech)}
                 sx={{
+                  height: 28,
                   bgcolor: selectedTech === tech ? "#171717" : "#fff",
                   color: selectedTech === tech ? "#fff" : "#625d54",
                   border: "1px solid #e8e3d8",
                   borderRadius: "5px",
+                  fontSize: "0.76rem",
                   fontWeight: 800,
                 }}
               />
@@ -539,15 +587,15 @@ const ProjectsPage = () => {
         </Stack>
 
         {/* 프로젝트 검색 결과 */}
-        <Stack spacing={3.2}>
+        <Stack spacing={2.6}>
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={1.4}
             alignItems={{ xs: "flex-start", sm: "center" }}
             justifyContent="space-between"
           >
-            <Typography variant="h4" fontWeight={900}>
-              ✦ 프로젝트 목록
+            <Typography sx={{ color: "#8a8175", fontWeight: 850 }}>
+              {filteredProjects.length}개의 프로젝트
             </Typography>
             {hasActiveFilter && (
               <Button

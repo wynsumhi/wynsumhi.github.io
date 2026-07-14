@@ -27,6 +27,7 @@ import { CONFIG } from "@/constants/config";
 import { usePosts } from "@/hooks/usePosts";
 import { useProjects } from "@/hooks/useProjects";
 import { formatDate } from "@/utils/date";
+import { extractExcerpt } from "@/utils/markdown";
 
 const strengths = [
   {
@@ -135,9 +136,14 @@ const HomePage = () => {
     window.open(path, "_blank", "noopener,noreferrer");
   };
 
-  // 블로그 미리보기 열림 상태
-  const togglePostPreview = (postId: string) => {
-    setExpandedPostId((currentId) => (currentId === postId ? null : postId));
+  // 첫 클릭은 미리보기 액션을 열고, 같은 글을 한 번 더 누르면 상세로 이동
+  const handlePostPreviewClick = (postId: string) => {
+    if (expandedPostId === postId) {
+      openBlogRoute(`/blog/${postId}`);
+      return;
+    }
+
+    setExpandedPostId(postId);
   };
 
   useEffect(() => {
@@ -420,15 +426,15 @@ const HomePage = () => {
         {/* 섹션 목차 배경 도형 */}
         <Box
           sx={{
-            display: {
-              xs: "none",
-              lg: "block",
+            display: "none",
+            "@media (min-width: 1720px)": {
+              display: "block",
             },
             position: "absolute",
             top: "54%",
-            right: { lg: 58, xl: 86 },
+            right: 86,
             transform: "translateY(-50%)",
-            width: { lg: 560, xl: 650 },
+            width: 650,
             aspectRatio: "673 / 455",
             zIndex: 2,
             pointerEvents: "none",
@@ -453,16 +459,16 @@ const HomePage = () => {
         {/* 섹션 목차 버튼 */}
         <Stack
           component="nav"
-          spacing={{ lg: 0.72, xl: 1 }}
+          spacing={1}
           sx={{
-            display: {
-              xs: "none",
-              lg: isBlogPassed ? "none" : "flex",
+            display: "none",
+            "@media (min-width: 1720px)": {
+              display: isBlogPassed ? "none" : "flex",
             },
             position: isSectionNavPinned ? "fixed" : "absolute",
-            top: { lg: "calc(54vh - 62px)", xl: "calc(54vh - 78px)" },
-            right: { lg: 64, xl: 88 },
-            width: { lg: 118, xl: 137 },
+            top: "calc(54vh - 78px)",
+            right: 88,
+            width: 137,
             zIndex: 3,
             pointerEvents: "auto",
           }}
@@ -482,7 +488,7 @@ const HomePage = () => {
                   color: isActive ? "#171717" : "rgba(23,23,23,0.34)",
                   fontSize: "0.78rem",
                   fontWeight: isActive ? 800 : 700,
-                  lineHeight: { lg: 0.68, xl: 0.76 },
+                  lineHeight: 0.76,
                   "&:hover": {
                     bgcolor: "transparent",
                     color: "#171717",
@@ -789,16 +795,22 @@ const HomePage = () => {
         <Stack spacing={0}>
           {recentPosts.map((post) => {
             const isExpanded = expandedPostId === post.id;
+            const previewText = post.excerpt || extractExcerpt(post.content, 120);
 
             return (
               <Box
                 key={post.id}
-                onClick={() => togglePostPreview(post.id)}
+                onClick={() => handlePostPreviewClick(post.id)}
                 sx={{
                   py: 2.5,
+                  px: { xs: 0, md: 1.2 },
+                  mx: { xs: 0, md: -1.2 },
+                  borderRadius: 1.5,
                   borderTop: "1px solid #e8e3d8",
                   cursor: "pointer",
                   "&:last-of-type": { borderBottom: "1px solid #e8e3d8" },
+                  transition: "background-color 0.18s ease",
+                  "&:hover": { bgcolor: "rgba(245, 158, 11, 0.045)" },
                   "&:hover .post-title": { color: "#5f6f52" },
                 }}
               >
@@ -817,73 +829,70 @@ const HomePage = () => {
                     >
                       {post.title}
                     </Typography>
+                    {previewText && (
+                      <Typography
+                        sx={{
+                          mt: 0.9,
+                          color: "#625d54",
+                          fontSize: { xs: "0.92rem", md: "0.95rem" },
+                          lineHeight: 1.7,
+                          overflow: "hidden",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {previewText}
+                      </Typography>
+                    )}
                   </Grid>
                   <Grid size={{ xs: 12, md: 2 }}>
                     <Typography color="#777167">{post.category}</Typography>
                   </Grid>
                 </Grid>
 
-                {isExpanded && (
-                  <Box
-                    sx={{
-                      mt: 2.4,
-                      ml: { xs: 0, md: "25%" },
-                      pr: { xs: 0, md: 4 },
-                      color: "#625d54",
-                    }}
+                <Box
+                  aria-hidden={!isExpanded}
+                  sx={{
+                    mt: 1.35,
+                    ml: { xs: 0, md: "25%" },
+                    pr: { xs: 0, md: 4 },
+                    height: { xs: 54, sm: 28 },
+                    color: "#625d54",
+                    opacity: isExpanded ? 1 : 0,
+                    pointerEvents: isExpanded ? "auto" : "none",
+                    transition: "opacity 0.18s ease",
+                  }}
+                >
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1.2}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
                   >
-                    <Typography sx={{ lineHeight: 1.75 }}>
-                      {post.excerpt}
-                    </Typography>
-                    {post.tags.length > 0 && (
-                      <Stack direction="row" gap={0.75} flexWrap="wrap" sx={{ mt: 1.6 }}>
-                        {post.tags.slice(0, 4).map((tag) => (
-                          <Chip
-                            key={tag}
-                            label={tag}
-                            size="small"
-                            sx={{
-                              bgcolor: "#f4f4f5",
-                              color: "#52525b",
-                              border: "1px solid #e4e4e7",
-                              borderRadius: "5px",
-                              fontWeight: 700,
-                            }}
-                          />
-                        ))}
-                      </Stack>
-                    )}
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      spacing={1.2}
-                      alignItems={{ xs: "flex-start", sm: "center" }}
-                      sx={{ mt: 2 }}
+                    <Typography
+                      variant="caption"
+                      sx={{ color: "#8a8175", lineHeight: 1.6 }}
                     >
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "#8a8175", lineHeight: 1.6 }}
-                      >
-                        ※ 자세한 내용은 블로그에서 확인할 수 있습니다
-                      </Typography>
-                      <Button
-                        size="small"
-                        endIcon={<OpenInNewIcon />}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          openBlogRoute(`/blog/${post.id}`);
-                        }}
-                        sx={{
-                          minWidth: "auto",
-                          p: 0,
-                          color: "#171717",
-                          fontWeight: 800,
-                        }}
-                      >
-                        자세히 보기
-                      </Button>
-                    </Stack>
-                  </Box>
-                )}
+                      한 번 더 누르면 글 상세로 이동합니다
+                    </Typography>
+                    <Button
+                      size="small"
+                      endIcon={<OpenInNewIcon />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openBlogRoute(`/blog/${post.id}`);
+                      }}
+                      sx={{
+                        minWidth: "auto",
+                        p: 0,
+                        color: "#171717",
+                        fontWeight: 800,
+                      }}
+                    >
+                      자세히 보기
+                    </Button>
+                  </Stack>
+                </Box>
               </Box>
             );
           })}
