@@ -16,6 +16,7 @@ import {
   Collapse,
   IconButton,
   InputAdornment,
+  Skeleton,
   TextField,
   Tooltip,
   Typography,
@@ -145,6 +146,114 @@ const ListViewIcon = ({ active }: { active: boolean }) => (
           bgcolor: active ? "var(--blog-accent)" : "var(--blog-icon-muted)",
         }}
       />
+    ))}
+  </Box>
+);
+
+const SkeletonTone = {
+  bgcolor: "var(--blog-card-soft-bg)",
+} as const;
+
+// 카드 로딩 스켈레톤
+const CardSkeletonGrid = () => (
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+      gridTemplateRows: { md: "repeat(3, minmax(0, 1fr))" },
+      gridAutoRows: { xs: "auto", md: "minmax(0, 1fr)" },
+      gap: { xs: 2, md: 1.05, lg: 1.05 },
+      p: { md: "4px 5px 8px" },
+      boxSizing: "border-box",
+      flex: { md: "1 1 0" },
+      minHeight: 0,
+      overflow: { xs: "visible", md: "hidden" },
+    }}
+  >
+    {Array.from({ length: CARD_PAGE_SIZE }).map((_, index) => (
+      <Card
+        key={index}
+        sx={{
+          height: { xs: "auto", md: "100%" },
+          minHeight: 0,
+          p: { xs: 2, md: 1.5, lg: 1.65 },
+          pb: { xs: 1.05, md: 1.05, lg: 1.1 },
+          border: "1px solid var(--blog-border)",
+          borderRadius: 2.4,
+          bgcolor: "var(--blog-card-bg)",
+          boxShadow: "0 4px 12px rgba(15, 23, 42, 0.025)",
+          overflow: "hidden",
+          "@media (min-width: 900px) and (max-height: 820px)": {
+            p: 1.25,
+            pb: 0.72,
+            borderRadius: 2,
+          },
+          "@media (min-width: 900px) and (max-height: 720px)": {
+            p: 0.95,
+            pb: 0.44,
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: { xs: 1.05, md: 1.05 } }}>
+          <Skeleton animation="wave" variant="rounded" width={92} height={24} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="text" width={46} height={20} sx={SkeletonTone} />
+        </Box>
+
+        <Box sx={{ minHeight: { xs: "3.2em", md: "3.48em" }, mb: { xs: 0.82, md: 0.95 } }}>
+          <Skeleton animation="wave" variant="text" width="94%" height={30} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="text" width="88%" height={30} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="text" width="62%" height={30} sx={SkeletonTone} />
+        </Box>
+
+        <Box sx={{ mb: { xs: 0.72, md: 0.95 } }}>
+          <Skeleton animation="wave" variant="text" width="96%" height={24} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="text" width="78%" height={24} sx={SkeletonTone} />
+        </Box>
+
+        <Box sx={{ display: "flex", gap: 0.55 }}>
+          <Skeleton animation="wave" variant="rounded" width={58} height={19} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="rounded" width={70} height={19} sx={SkeletonTone} />
+        </Box>
+      </Card>
+    ))}
+  </Box>
+);
+
+// 리스트 로딩 스켈레톤
+const ListSkeleton = () => (
+  <Box>
+    {Array.from({ length: 7 }).map((_, index) => (
+      <Box
+        key={index}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: TIMELINE_COLUMNS,
+          gap: TIMELINE_GAP,
+          minHeight: { xs: 136, md: 148 },
+          mb: 2.4,
+        }}
+      >
+        <Skeleton animation="wave" variant="text" width={48} height={28} sx={{ ...SkeletonTone, justifySelf: "end" }} />
+        <Box sx={{ display: "flex", justifyContent: "center", pt: { xs: "10.5px", md: "12.5px" } }}>
+          <Skeleton animation="wave" variant="circular" width={11} height={11} sx={SkeletonTone} />
+        </Box>
+        <Box
+          sx={{
+            mx: { xs: -0.6, md: -0.8 },
+            px: { xs: 2.4, md: 3.6 },
+            pt: { xs: 0.9, md: 1.05 },
+            pb: { xs: 1.65, md: 2.05 },
+          }}
+        >
+          <Skeleton animation="wave" variant="text" width="72%" height={34} sx={SkeletonTone} />
+          <Skeleton animation="wave" variant="text" width="94%" height={24} sx={{ ...SkeletonTone, mt: 1.2 }} />
+          <Skeleton animation="wave" variant="text" width="62%" height={24} sx={SkeletonTone} />
+          <Box sx={{ display: "flex", gap: 0.6, mt: 1.2 }}>
+            <Skeleton animation="wave" variant="rounded" width={64} height={22} sx={SkeletonTone} />
+            <Skeleton animation="wave" variant="rounded" width={72} height={22} sx={SkeletonTone} />
+          </Box>
+        </Box>
+      </Box>
     ))}
   </Box>
 );
@@ -433,13 +542,13 @@ const CardView = ({ posts }: { posts: Post[] }) => {
         gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
         gridTemplateRows: { md: "repeat(3, minmax(0, 1fr))" },
         gridAutoRows: { xs: "auto", md: "minmax(0, 1fr)" },
-        gap: { xs: 2, md: 1.05, lg: 1.05 },
+        gap: { xs: 1.6, sm: 1.8, md: 1.05, lg: 1.05 },
         p: { md: "4px 5px 8px" },
         boxSizing: "border-box",
         flex: { md: "1 1 0" },
         height: { md: "auto" },
         maxHeight: { md: "none" },
-        overflow: { md: "hidden" },
+        overflow: { xs: "visible", md: "hidden" },
         minHeight: 0,
         "@media (min-width: 900px) and (max-height: 820px)": {
           gridTemplateRows: "repeat(3, minmax(0, 1fr))",
@@ -461,12 +570,12 @@ const CardView = ({ posts }: { posts: Post[] }) => {
           onClick={() => navigate(`/blog/${post.id}`)}
           sx={{
             minHeight: 0,
-            height: "100%",
+            height: { xs: "auto", md: "100%" },
             display: "flex",
             flexDirection: "column",
             cursor: "pointer",
-            p: { xs: 2, md: 1.5, lg: 1.65 },
-            pb: { xs: 1.05, md: 1.05, lg: 1.1 },
+            p: { xs: 1.85, sm: 2, md: 1.5, lg: 1.65 },
+            pb: { xs: 1.55, sm: 1.7, md: 1.05, lg: 1.1 },
             bgcolor: "var(--blog-card-bg)",
             boxShadow: "0 4px 12px rgba(15, 23, 42, 0.025)",
             border: "1px solid var(--blog-border)",
@@ -504,12 +613,12 @@ const CardView = ({ posts }: { posts: Post[] }) => {
             {post.thumbnail ? (
               <Box
                 sx={{
-                  mb: { xs: 1.6, md: 0.75 },
+                mb: { xs: 1.15, md: 0.75 },
                   flex: { md: "0 0 auto" },
                   overflow: "hidden",
                   borderRadius: 1.8,
                   width: "100%",
-                  height: { xs: 148, sm: 138, md: "clamp(42px, 6dvh, 66px)" },
+                  height: { xs: 132, sm: 128, md: "clamp(42px, 6dvh, 66px)" },
                   bgcolor: "var(--blog-card-soft-bg)",
                   "@media (min-width: 900px) and (max-height: 780px)": {
                     height: "clamp(34px, 5dvh, 48px)",
@@ -551,7 +660,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 1,
-                  mb: { xs: 1.05, md: 1.05 },
+                  mb: { xs: 0.9, md: 1.05 },
                   minHeight: { xs: 26, md: 22 },
                   width: "100%",
                   flexShrink: 0,
@@ -621,11 +730,11 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 className="card-title"
                 sx={{
-                  fontSize: { xs: "1.08rem", md: "1.3rem", lg: "1.3rem" },
+                  fontSize: { xs: "1.02rem", sm: "1.08rem", md: "1.3rem", lg: "1.3rem" },
                   fontWeight: 850,
                   color: "var(--blog-heading)",
-                  lineHeight: { xs: 1.38, md: 1.16 },
-                  mb: { xs: 0.82, md: 0.95 },
+                  lineHeight: { xs: 1.34, md: 1.16 },
+                  mb: { xs: 0.72, md: 0.95 },
                   pl: { xs: 0.45, md: 0.55 },
                   width: "100%",
                   boxSizing: "border-box",
@@ -636,8 +745,8 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   display: "-webkit-box",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  minHeight: { xs: "4.55em", md: "3.48em" },
-                  maxHeight: { xs: "4.55em", md: "3.48em" },
+                  minHeight: { xs: "2.68em", sm: "4.02em", md: "3.48em" },
+                  maxHeight: { xs: "4.02em", md: "3.48em" },
                   "@media (min-width: 900px) and (max-height: 920px)": {
                     fontSize: "1.2rem",
                     lineHeight: 1.16,
@@ -675,9 +784,9 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: { xs: "0.88rem", md: "0.95rem", lg: "1rem" },
+                  fontSize: { xs: "0.84rem", sm: "0.88rem", md: "0.95rem", lg: "1rem" },
                   color: "var(--blog-subtle)",
-                  lineHeight: { xs: 1.68, md: 1.5 },
+                  lineHeight: { xs: 1.58, md: 1.5 },
                   minHeight: 0,
                   flexShrink: 0,
                   pl: { xs: 0.45, md: 0.55 },
@@ -685,9 +794,9 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   boxSizing: "border-box",
                   overflow: "hidden",
                   display: "-webkit-box",
-                  WebkitLineClamp: { xs: 3, md: 2 },
+                  WebkitLineClamp: { xs: 2, sm: 3, md: 2 },
                   WebkitBoxOrient: "vertical",
-                  mb: { xs: 0.72, md: 0.95 },
+                  mb: { xs: 0.85, md: 0.95 },
                   "@media (min-width: 900px) and (max-height: 920px)": {
                     fontSize: "0.88rem",
                     lineHeight: 1.38,
@@ -835,11 +944,11 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
         isListView
           ? undefined
           : {
-              flex: 1,
+              flex: { xs: "0 0 auto", md: 1 },
               minHeight: 0,
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
+              overflow: { xs: "visible", md: "hidden" },
             }
       }
     >
@@ -888,7 +997,7 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
           {totalCardPages > 1 && (
             <Box
               sx={{
-                mt: { xs: 1.4, md: "clamp(0.45rem, 1.45dvh, 1.15rem)" },
+                mt: { xs: 1.8, md: "clamp(0.45rem, 1.45dvh, 1.15rem)" },
                 display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: "center",
@@ -900,7 +1009,7 @@ const PostCollection = ({ posts, viewMode }: PostCollectionProps) => {
                 sx={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: { xs: 0.08, sm: 0.12 },
+                  gap: { xs: 0.02, sm: 0.12 },
                   px: { xs: 0.35, md: 0.45 },
                   py: 0.25,
                   borderRadius: 2,
@@ -1257,8 +1366,16 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   // 로딩 상태 화면
   if (loading)
     return (
-      <Box sx={{ py: 8 }}>
-        <Typography color="text.secondary">로딩 중...</Typography>
+      <Box
+        sx={{
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: { xs: "visible", md: viewMode === "card" ? "hidden" : "visible" },
+        }}
+      >
+        {viewMode === "card" ? <CardSkeletonGrid /> : <ListSkeleton />}
       </Box>
     );
 
@@ -1283,19 +1400,19 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   return (
     <Box
       sx={{
-        height: "100%",
+        height: { xs: "auto", md: "100%" },
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        overflow: viewMode === "card" ? "hidden" : "visible",
+        overflow: { xs: "visible", md: viewMode === "card" ? "hidden" : "visible" },
       }}
     >
       {/* 목록 헤더 영역 */}
       <Box
         ref={searchFilterRef}
         sx={{
-          pb: viewMode === "card" ? { xs: 2.2, md: "clamp(0.8rem, 1.8dvh, 1.35rem)" } : 2.2,
-          mb: viewMode === "card" ? { xs: 4, md: "clamp(0.9rem, 2.4dvh, 2.2rem)" } : 4,
+          pb: viewMode === "card" ? { xs: 1.6, sm: 1.9, md: "clamp(0.8rem, 1.8dvh, 1.35rem)" } : 2.2,
+          mb: viewMode === "card" ? { xs: 2.2, sm: 2.7, md: "clamp(0.9rem, 2.4dvh, 2.2rem)" } : 4,
           borderBottom: "1px solid var(--blog-divider)",
         }}
       >
@@ -1413,10 +1530,11 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "space-between",
-                gap: 2,
+                gap: { xs: 1, sm: 2 },
                 mb: 2,
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "stretch", sm: "center" },
               }}
             >
               <TextField
@@ -1448,7 +1566,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
                   },
                 }}
                 sx={{
-                  maxWidth: { md: 380 },
+                  maxWidth: { sm: 380 },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "var(--blog-card-bg)",
                     borderRadius: 999,

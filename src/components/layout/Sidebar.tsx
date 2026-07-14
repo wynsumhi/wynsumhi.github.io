@@ -157,24 +157,26 @@ const Sidebar = () => {
         key={item.label}
         onClick={() => navigate(item.path)}
         sx={{
-          borderRadius: isChild ? 1.7 : 2,
-          mb: isChild ? 0.35 : 0.5,
-          py: isChild ? 0.95 : 1.2,
-          px: isChild ? 1.35 : 2,
-          minHeight: isChild ? 40 : 44,
+          borderRadius: { xs: 1.5, md: isChild ? 1.7 : 2 },
+          mb: { xs: 0, md: isChild ? 0.35 : 0.5 },
+          py: { xs: 0.75, md: isChild ? 0.95 : 1.2 },
+          px: { xs: 1.05, md: isChild ? 1.35 : 2 },
+          minHeight: { xs: 36, md: isChild ? 40 : 44 },
+          minWidth: { xs: isChild ? 88 : 104, md: 0 },
           position: "relative",
           bgcolor: isActive ? "var(--blog-active-bg)" : "transparent",
           "&::before": isActive
             ? {
                 content: '""',
                 position: "absolute",
-                left: isChild ? -13 : 0,
-                top: isChild ? "50%" : "20%",
-                width: isChild ? 7 : 3,
-                height: isChild ? 7 : "60%",
+                left: { xs: "50%", md: isChild ? -13 : 0 },
+                top: { xs: "auto", md: isChild ? "50%" : "20%" },
+                bottom: { xs: 3, md: "auto" },
+                width: { xs: 18, md: isChild ? 7 : 3 },
+                height: { xs: 2, md: isChild ? 7 : "60%" },
                 bgcolor: "var(--blog-accent)",
-                borderRadius: isChild ? "50%" : "0 2px 2px 0",
-                transform: isChild ? "translate(-50%, -50%)" : "none",
+                borderRadius: { xs: 999, md: isChild ? "50%" : "0 2px 2px 0" },
+                transform: { xs: "translateX(-50%)", md: isChild ? "translate(-50%, -50%)" : "none" },
               }
             : {},
           "&:hover": {
@@ -189,9 +191,12 @@ const Sidebar = () => {
         <ListItemIcon
           className="nav-icon"
           sx={{
-            minWidth: isChild ? 28 : 32,
+            minWidth: { xs: 24, md: isChild ? 28 : 32 },
             color: isActive ? "var(--blog-accent)" : "var(--blog-muted)",
             transition: "color 0.2s",
+            "& svg": {
+              fontSize: { xs: 17, md: "inherit" },
+            },
           }}
         >
           {item.icon}
@@ -202,11 +207,14 @@ const Sidebar = () => {
           primary={item.label}
           className="nav-label"
           primaryTypographyProps={{
-            fontSize: isChild ? "0.74rem" : "0.78rem",
+            fontSize: { xs: "0.68rem", md: isChild ? "0.74rem" : "0.78rem" },
             fontWeight: isActive ? 760 : 560,
-            letterSpacing: isChild ? "0.07em" : "0.08em",
+            letterSpacing: { xs: "0.02em", md: isChild ? "0.07em" : "0.08em" },
             color: isActive ? "var(--blog-accent)" : "var(--blog-subtle)",
-            sx: { transition: "color 0.2s" },
+            sx: {
+              transition: "color 0.2s",
+              whiteSpace: "nowrap",
+            },
           }}
         />
       </ListItemButton>
@@ -217,23 +225,31 @@ const Sidebar = () => {
     <Box
       component="aside"
       sx={{
-        width: 260,
-        height: "100vh",
-        position: "fixed",
+        width: { xs: "100%", md: 260 },
+        height: { xs: "auto", md: "100vh" },
+        position: { xs: "sticky", md: "fixed" },
         top: 0,
         left: 0,
         bgcolor: "var(--blog-sidebar-bg)",
-        borderRight: "1px solid var(--blog-border)",
+        borderRight: { xs: 0, md: "1px solid var(--blog-border)" },
+        borderBottom: { xs: "1px solid var(--blog-border)", md: 0 },
         display: "flex",
-        flexDirection: "column",
+        flexDirection: { xs: "row", md: "column" },
         alignItems: "center",
-        py: 5,
+        py: { xs: 0.75, md: 5 },
+        px: { xs: 1, md: 0 },
         zIndex: 100,
-        boxShadow: "2px 0 22px var(--blog-sidebar-shadow)",
+        boxShadow: {
+          xs: "0 8px 24px var(--blog-sidebar-shadow)",
+          md: "2px 0 22px var(--blog-sidebar-shadow)",
+        },
+        overflowX: { xs: "auto", md: "visible" },
+        overflowY: "hidden",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {/* 프로필 영역 */}
-      <Box sx={{ textAlign: "center", mb: 4, px: 3 }}>
+      <Box sx={{ textAlign: "center", mb: 4, px: 3, display: { xs: "none", md: "block" } }}>
         <Tooltip title={isDarkMode ? "라이트 모드" : "다크 모드"} placement="right">
           <Avatar
             component="button"
@@ -326,19 +342,31 @@ const Sidebar = () => {
         </Typography>
       </Box>
 
-      <Divider sx={{ width: "80%", mb: 3, borderColor: "var(--blog-border)" }} />
+      <Divider sx={{ width: "80%", mb: 3, borderColor: "var(--blog-border)", display: { xs: "none", md: "block" } }} />
 
       {/* 사이드 메뉴 목록 */}
-      <List sx={{ width: "100%", px: 2 }}>
+      <List
+        sx={{
+          width: { xs: "max-content", md: "100%" },
+          px: { xs: 0, md: 2 },
+          py: { xs: 0, md: 1 },
+          display: { xs: "flex", md: "block" },
+          alignItems: "center",
+          gap: { xs: 0.45, md: 0 },
+        }}
+      >
         {navItems.slice(0, 1).map((item) => renderNavButton(item))}
 
         {/* 섹션 하위 메뉴 */}
         <Box
           sx={{
-            mt: 0.85,
-            ml: 2.15,
-            pl: 1.5,
-            borderLeft: "1px solid var(--blog-border)",
+            mt: { xs: 0, md: 0.85 },
+            ml: { xs: 0, md: 2.15 },
+            pl: { xs: 0, md: 1.5 },
+            borderLeft: { xs: 0, md: "1px solid var(--blog-border)" },
+            display: { xs: "flex", md: "block" },
+            alignItems: "center",
+            gap: { xs: 0.45, md: 0 },
           }}
         >
           {navItems.slice(1).map((item) => renderNavButton(item, "child"))}
@@ -346,7 +374,7 @@ const Sidebar = () => {
       </List>
 
       {/* 포트폴리오 자료 영역 */}
-      <Box sx={{ width: "100%", px: 2, mt: "auto", pb: 1.25 }}>
+      <Box sx={{ width: "100%", px: 2, mt: "auto", pb: 1.25, display: { xs: "none", md: "block" } }}>
         {/* 메뉴 구분선 */}
         <Box
           sx={{
@@ -475,7 +503,7 @@ const Sidebar = () => {
       </Box>
 
       {/* 하단 링크 영역 */}
-      <Box sx={{ display: "flex", gap: 0.75, mt: 2.4, alignItems: "center" }}>
+      <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.75, mt: 2.4, alignItems: "center" }}>
         <Tooltip title="GitHub" placement="top">
           <IconButton
             size="small"

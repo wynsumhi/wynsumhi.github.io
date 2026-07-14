@@ -124,9 +124,11 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
             minHeight: "100%",
             backgroundColor: "var(--blog-content-bg)",
           },
-          "html[data-blog-view-mode='card'], html[data-blog-view-mode='card'] body, html[data-blog-view-mode='card'] #root": {
-            height: "100%",
-            overflow: "hidden",
+          "@media (min-width: 900px)": {
+            "html[data-blog-view-mode='card'], html[data-blog-view-mode='card'] body, html[data-blog-view-mode='card'] #root": {
+              height: "100%",
+              overflow: "hidden",
+            },
           },
           // 트랙패드 오버스크롤 배경
           body: {
@@ -141,6 +143,7 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
         minHeight: "100dvh",
         bgcolor: "var(--blog-page-bg)",
         display: "flex",
+        flexDirection: { xs: "column", md: "row" },
         color: "var(--blog-text)",
         transition: "background-color 0.25s ease, color 0.25s ease",
         "& *": {
@@ -196,10 +199,12 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
           borderColor: "var(--blog-border)",
           boxShadow: "0 18px 46px rgba(0, 0, 0, 0.22)",
         },
-        "html[data-blog-view-mode='card'] &": {
-          height: "100dvh",
-          minHeight: "100dvh",
-          overflow: "hidden",
+        "@media (min-width: 900px)": {
+          "html[data-blog-view-mode='card'] &": {
+            height: "100dvh",
+            minHeight: "100dvh",
+            overflow: "hidden",
+          },
         },
         }}
       >
@@ -210,20 +215,22 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
         <Box
           sx={{
             flex: 1,
-            ml: "260px",
-            px: { xs: 2, md: 7 },
-            py: { xs: 4, md: 7 },
+            ml: { xs: 0, md: "260px" },
+            px: { xs: 2, sm: 3, md: 7 },
+            py: { xs: 3, sm: 4, md: 7 },
             boxSizing: "border-box",
-            maxWidth: "calc(100vw - 260px)",
+            maxWidth: { xs: "100vw", md: "calc(100vw - 260px)" },
             minHeight: "100dvh",
             bgcolor: "var(--blog-content-bg)",
             display: "flex",
             flexDirection: "column",
-            "html[data-blog-view-mode='card'] &": {
-              height: "100dvh",
-              minHeight: 0,
-              overflow: "hidden",
-              py: { xs: 4, md: "clamp(1.4rem, 3.8dvh, 3.2rem)" },
+            "@media (min-width: 900px)": {
+              "html[data-blog-view-mode='card'] &": {
+                height: "100dvh",
+                minHeight: 0,
+                overflow: "hidden",
+                py: "clamp(1.4rem, 3.8dvh, 3.2rem)",
+              },
             },
           }}
         >
@@ -249,9 +256,11 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
               sx={{
                 mt: { xs: 7, md: 9 },
                 pt: { xs: 2.4, md: 3 },
-                "html[data-blog-view-mode='card'] &": {
-                  mt: "clamp(6px, 1dvh, 10px)",
-                  pt: "clamp(6px, 1dvh, 10px)",
+                "@media (min-width: 900px)": {
+                  "html[data-blog-view-mode='card'] &": {
+                    mt: "clamp(6px, 1dvh, 10px)",
+                    pt: "clamp(6px, 1dvh, 10px)",
+                  },
                 },
                 borderTop: "1px solid var(--blog-divider)",
                 display: "flex",
