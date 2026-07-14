@@ -698,29 +698,77 @@ const HomePage = () => {
                   <Box
                     key={project.id}
                     sx={{
-                      py: 3,
+                      py: 2.5,
+                      px: { xs: 0, md: 1.2 },
+                      mx: { xs: 0, md: -1.2 },
+                      borderRadius: 1.5,
                       borderTop: "1px solid rgba(217, 119, 6, 0.18)",
+                      cursor: "default",
                       "&:last-of-type": {
                         borderBottom: "1px solid rgba(217, 119, 6, 0.18)",
                       },
+                      transition: "background-color 0.18s ease",
+                      "&:hover": { bgcolor: "rgba(245, 158, 11, 0.045)" },
+                      "&:hover .project-title": { color: "#5f6f52" },
                     }}
                   >
-                    <Grid container spacing={3} alignItems="center">
+                    <Grid
+                      container
+                      rowSpacing={2}
+                      columnSpacing={{ xs: 2, md: 6 }}
+                      alignItems="flex-start"
+                    >
                       <Grid size={{ xs: 12, md: 3 }}>
-                        <Typography color="#777167">
+                        <Typography
+                          sx={{
+                            color: "#777167",
+                            fontSize: { xs: "0.92rem", md: "0.95rem" },
+                            fontWeight: 500,
+                            lineHeight: 1.5,
+                          }}
+                        >
                           {formatProjectPeriod(project.period.start, project.period.end)}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, md: 5 }}>
-                        <Typography variant="h5" fontWeight={700}>
+                        <Typography
+                          className="project-title"
+                          variant="h6"
+                          fontWeight={700}
+                          sx={{
+                            lineHeight: 1.4,
+                            transition: "color 0.2s",
+                            wordBreak: "keep-all",
+                          }}
+                        >
                           {project.title}
                         </Typography>
-                        <Typography sx={{ mt: 1, color: "#625d54", lineHeight: 1.7 }}>
+                        <Typography
+                          sx={{
+                            mt: 0.9,
+                            color: "#625d54",
+                            fontSize: { xs: "0.92rem", md: "0.95rem" },
+                            lineHeight: 1.7,
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitLineClamp: { xs: 3, md: 3 },
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
                           {project.description}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, md: 4 }}>
-                        <Stack direction="row" gap={0.75} flexWrap="wrap">
+                        <Stack
+                          direction="row"
+                          gap={0.75}
+                          flexWrap="wrap"
+                          sx={{
+                            pt: { xs: 0.25, md: 0.2 },
+                            alignContent: "flex-start",
+                            justifyContent: { xs: "flex-start", md: "flex-end" },
+                          }}
+                        >
                           {project.tech.slice(0, 5).map((tech) => (
                             <Chip
                               key={tech}
@@ -731,6 +779,8 @@ const HomePage = () => {
                                 color: "#52525b",
                                 border: "1px solid #e4e4e7",
                                 borderRadius: "5px",
+                                height: 24,
+                                fontSize: "0.72rem",
                                 fontWeight: 700,
                                 "& .MuiChip-label": {
                                   px: 1,
@@ -816,7 +866,14 @@ const HomePage = () => {
               >
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 3 }}>
-                    <Typography color="#777167">
+                    <Typography
+                      sx={{
+                        color: "#777167",
+                        fontSize: { xs: "0.92rem", md: "0.95rem" },
+                        fontWeight: 500,
+                        lineHeight: 1.5,
+                      }}
+                    >
                       {formatDate(post.date)}
                     </Typography>
                   </Grid>
@@ -847,7 +904,52 @@ const HomePage = () => {
                     )}
                   </Grid>
                   <Grid size={{ xs: 12, md: 2 }}>
-                    <Typography color="#777167">{post.category}</Typography>
+                    <Stack
+                      direction="row"
+                      gap={0.65}
+                      flexWrap="wrap"
+                      sx={{
+                        pt: { xs: 0.15, md: 0.05 },
+                        justifyContent: { xs: "flex-start", md: "flex-end" },
+                        alignContent: "flex-start",
+                      }}
+                    >
+                      <Chip
+                        label={post.category}
+                        size="small"
+                        sx={{
+                          bgcolor: "#f8f3e8",
+                          color: "#7c4a03",
+                          border: "1px solid rgba(217, 119, 6, 0.2)",
+                          borderRadius: "5px",
+                          height: 24,
+                          fontSize: "0.72rem",
+                          fontWeight: 800,
+                          "& .MuiChip-label": {
+                            px: 1,
+                          },
+                        }}
+                      />
+                      {post.tags.slice(0, 2).map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          sx={{
+                            bgcolor: "#f4f4f5",
+                            color: "#52525b",
+                            border: "1px solid #e4e4e7",
+                            borderRadius: "5px",
+                            height: 24,
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            "& .MuiChip-label": {
+                              px: 1,
+                            },
+                          }}
+                        />
+                      ))}
+                    </Stack>
                   </Grid>
                 </Grid>
 
