@@ -13,7 +13,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN!;
 
-type BlogSection = "tech" | "study" | "log";
+type BlogSection = "tech" | "study" | "log" | "project";
 type ProjectKind = "work" | "side";
 
 // Notion 데이터베이스 설정
@@ -32,6 +32,10 @@ const DATABASES: Array<{
   {
     section: "log",
     databaseId: process.env.NOTION_LOG_DATABASE_ID,
+  },
+  {
+    section: "project",
+    databaseId: process.env.NOTION_PROJECT_DATABASE_ID,
   },
 ];
 
@@ -476,7 +480,7 @@ async function fetchPosts() {
     console.log(`${posts.length}개의 글을 가져왔습니다.`);
     console.log("저장 위치:", outputPath);
 
-    if (process.env.NOTION_PROJECT_DATABASE_ID) {
+    if (process.env.SYNC_NOTION_PROJECTS === "true" && process.env.NOTION_PROJECT_DATABASE_ID) {
       const projectPages = await fetchDatabasePages(process.env.NOTION_PROJECT_DATABASE_ID);
       if (projectPages.length === 0) {
         console.log("프로젝트 데이터베이스에 페이지가 없어 기존 프로젝트 파일을 유지합니다.");

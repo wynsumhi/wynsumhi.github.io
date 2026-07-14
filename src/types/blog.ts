@@ -30,7 +30,7 @@ export type PostCategory = string;
  * 블로그 상위 섹션 타입
  * Notion 데이터베이스 단위와 매칭
  */
-export type BlogSection = "tech" | "study" | "log";
+export type BlogSection = "tech" | "study" | "log" | "project";
 
 /**
  * 포스트 미리보기 타입

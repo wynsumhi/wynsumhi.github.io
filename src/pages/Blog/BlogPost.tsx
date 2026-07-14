@@ -45,6 +45,7 @@ const SECTION_LABELS: Record<BlogSection, string> = {
   tech: "Tech",
   study: "Study",
   log: "Log",
+  project: "Project",
 };
 
 // 이전 데이터 기본 섹션

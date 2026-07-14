@@ -27,6 +27,7 @@ import {
   MenuBookRounded,
   OpenInNew,
   PersonOutline,
+  WorkOutlineRounded,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CONFIG } from "@/constants/config";
@@ -62,6 +63,12 @@ const navItems = [
     path: `${ROUTES.BLOG}?section=log`,
     section: "log",
   },
+  {
+    label: "PROJECT",
+    icon: <WorkOutlineRounded fontSize="small" />,
+    path: `${ROUTES.BLOG}?section=project`,
+    section: "project",
+  },
 ];
 
 // 프로필 이미지 경로
@@ -82,7 +89,7 @@ const Sidebar = () => {
   // 목록 URL 섹션 값
   const currentSection: SidebarSection = (() => {
     const section = new URLSearchParams(location.search).get("section");
-    if (section === "tech" || section === "study" || section === "log") return section;
+    if (section === "tech" || section === "study" || section === "log" || section === "project") return section;
     return "all";
   })();
 

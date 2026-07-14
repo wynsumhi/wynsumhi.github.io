@@ -4,7 +4,7 @@
  * Notion에서 가져온 블로그 글을 리스트 또는 카드 형태로 보여주는 화면입니다
  * 사용자가 선택한 보기 방식은 localStorage에 저장됩니다
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -85,11 +85,12 @@ const SECTION_LABELS: Record<BlogSection, string> = {
   tech: "기술 기록",
   study: "학습 노트",
   log: "회고",
+  project: "프로젝트",
 };
 
 // URL 섹션 값 변환
 const getBlogSection = (section: string | null): BlogSection => {
-  if (section === "tech" || section === "study" || section === "log") return section;
+  if (section === "tech" || section === "study" || section === "log" || section === "project") return section;
   return "all";
 };
 
@@ -531,13 +532,13 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: 1.2,
-                  mb: { xs: 1.25, md: 0.78 },
+                  gap: 1,
+                  mb: { xs: 1.3, md: 0.9 },
                   minHeight: { xs: 26, md: 22 },
                   width: "100%",
                   flexShrink: 0,
                   "@media (min-width: 900px) and (max-height: 780px)": {
-                    mb: 0.52,
+                    mb: 0.56,
                     minHeight: 21,
                   },
                   "@media (min-width: 900px) and (max-height: 760px)": {
@@ -554,7 +555,6 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   label={post.category}
                   size="small"
                   sx={{
-                    ml: { xs: -0.75, md: -0.55 },
                     height: { xs: 25, md: 22 },
                     fontSize: { xs: "0.72rem", md: "0.68rem" },
                     fontWeight: 850,
@@ -603,29 +603,35 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 className="card-title"
                 sx={{
-                  fontSize: { xs: "1.05rem", md: "1rem", lg: "1.08rem" },
+                  fontSize: { xs: "1.1rem", md: "1.07rem", lg: "1.15rem" },
                   fontWeight: 880,
                   color: "var(--blog-heading)",
-                  lineHeight: { xs: 1.45, md: 1.2 },
-                  mb: { xs: 1.2, md: 0.48 },
+                  lineHeight: { xs: 1.42, md: 1.24 },
+                  mb: { xs: 1.05, md: 0.56 },
+                  pl: { xs: 0.45, md: 0.55 },
+                  width: "100%",
+                  boxSizing: "border-box",
                   transition: "color 0.2s",
                   flexShrink: 0,
                   overflowWrap: "anywhere",
                   wordBreak: "keep-all",
+                  "@media (min-width: 900px) and (max-height: 920px)": {
+                    mb: 0.42,
+                  },
                   "@media (min-width: 900px) and (max-height: 780px)": {
-                    fontSize: "0.94rem",
-                    lineHeight: 1.18,
-                    mb: 0.4,
+                    fontSize: "0.99rem",
+                    lineHeight: 1.2,
+                    mb: 0.38,
                   },
                   "@media (min-width: 900px) and (max-height: 760px)": {
-                    fontSize: "0.9rem",
-                    lineHeight: 1.16,
-                    mb: 0.36,
+                    fontSize: "0.94rem",
+                    lineHeight: 1.17,
+                    mb: 0.32,
                   },
                   "@media (min-width: 900px) and (max-width: 1100px) and (max-height: 760px)": {
-                    fontSize: "0.82rem",
-                    lineHeight: 1.12,
-                    mb: 0.28,
+                    fontSize: "0.86rem",
+                    lineHeight: 1.13,
+                    mb: 0.26,
                   },
                 }}
               >
@@ -636,29 +642,33 @@ const CardView = ({ posts }: { posts: Post[] }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: { xs: "0.86rem", md: "0.82rem", lg: "0.87rem" },
+                  fontSize: { xs: "0.88rem", md: "0.84rem", lg: "0.89rem" },
                   color: "var(--blog-subtle)",
-                  lineHeight: { xs: 1.72, md: 1.38 },
+                  lineHeight: { xs: 1.68, md: 1.44 },
                   flex: "0 1 auto",
+                  pl: { xs: 0.45, md: 0.55 },
+                  width: "100%",
+                  boxSizing: "border-box",
                   overflow: "hidden",
                   display: "-webkit-box",
                   WebkitLineClamp: { xs: 3, md: 3 },
                   WebkitBoxOrient: "vertical",
-                  mb: { xs: 2, md: 0.58 },
+                  mb: { xs: 1.8, md: 0.52 },
                   "@media (min-width: 900px) and (max-height: 920px)": {
-                    WebkitLineClamp: 2,
+                    WebkitLineClamp: 1,
+                    mb: 0.32,
                   },
                   "@media (min-width: 900px) and (max-height: 780px)": {
-                    fontSize: "0.78rem",
-                    lineHeight: 1.32,
+                    fontSize: "0.8rem",
+                    lineHeight: 1.34,
                     WebkitLineClamp: 2,
-                    mb: 0.44,
+                    mb: 0.38,
                   },
                   "@media (min-width: 900px) and (max-height: 760px)": {
-                    fontSize: "0.72rem",
-                    lineHeight: 1.25,
+                    fontSize: "0.74rem",
+                    lineHeight: 1.26,
                     WebkitLineClamp: 1,
-                    mb: 0.34,
+                    mb: 0.3,
                   },
                   "@media (min-width: 900px) and (max-height: 680px)": {
                     display: "none",
@@ -677,7 +687,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   display: "flex",
                   gap: 0.55,
                   flexWrap: "wrap",
-                  pt: 0.25,
+                  pt: 0,
                   mt: "auto",
                   minHeight: { xs: 22, md: 20 },
                   maxHeight: { md: 22 },
@@ -685,7 +695,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   "@media (min-width: 900px) and (max-height: 760px)": {
                     minHeight: 18,
                     maxHeight: 18,
-                    pt: 0.1,
+                    pt: 0,
                     gap: 0.4,
                   },
                 }}
@@ -702,6 +712,9 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                       color: "var(--blog-subtle)",
                       fontWeight: 700,
                       borderRadius: 999,
+                      "& .MuiChip-label": {
+                        px: { xs: 1.05, md: 1.15 },
+                      },
                       "@media (min-width: 900px) and (max-height: 760px)": {
                         height: 18,
                         fontSize: "0.58rem",
@@ -720,6 +733,9 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                       color: "var(--blog-muted)",
                       fontWeight: 800,
                       borderRadius: 999,
+                      "& .MuiChip-label": {
+                        px: { xs: 1.05, md: 1.15 },
+                      },
                       "@media (min-width: 900px) and (max-height: 760px)": {
                         height: 18,
                         fontSize: "0.58rem",
@@ -1058,6 +1074,8 @@ type BlogHomeContentProps = {
 
 // 블로그 목록 본문
 const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
+  const searchFilterRef = useRef<HTMLDivElement | null>(null);
+
   // 저장된 보기 방식 초기값
   const [viewMode, setViewMode] = useState<"list" | "card">(
     () => (localStorage.getItem("blogViewMode") as "list" | "card") || "list",
@@ -1074,6 +1092,29 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
       delete document.documentElement.dataset.blogViewMode;
     };
   }, [viewMode]);
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const closeSearchOnOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (
+        target instanceof Node &&
+        searchFilterRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setIsSearchOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeSearchOnOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeSearchOnOutsideClick);
+    };
+  }, [isSearchOpen]);
 
   // 블로그 글 데이터 조회
   const { posts, loading, error } = usePosts();
@@ -1205,6 +1246,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
     >
       {/* 목록 헤더 영역 */}
       <Box
+        ref={searchFilterRef}
         sx={{
           pb: 2.2,
           mb: 4,
@@ -1311,7 +1353,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         </Box>
 
         {/* 접이식 검색/필터 패널 */}
-        <Collapse in={isSearchOpen || hasActiveCondition} timeout="auto" unmountOnExit>
+        <Collapse in={isSearchOpen} timeout="auto" unmountOnExit>
           <Box
             sx={{
               mt: 1.8,
