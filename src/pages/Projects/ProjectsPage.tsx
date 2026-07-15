@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import Grid from "@mui/material/Grid";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -215,7 +216,10 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
             color: "#7c4a03",
           },
           "& .project-card-image": {
-            transform: "scale(1.025)",
+            filter: "saturate(0.96) brightness(0.98)",
+          },
+          "& .project-card-gradient": {
+            opacity: 0.86,
           },
         },
       }}
@@ -238,19 +242,35 @@ const ProjectCard = ({ project, onOpen }: ProjectCardProps) => {
             height: "100%",
             display: "block",
             objectFit: "cover",
-            filter: "saturate(0.86)",
-            transition: "transform 0.35s ease",
+            objectPosition: "center center",
+            filter: "saturate(0.9)",
+            transition: "filter 0.24s ease",
           }}
           className="project-card-image"
+        />
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            pointerEvents: "none",
+            background:
+              "linear-gradient(180deg, rgba(23, 23, 23, 0.26) 0%, rgba(23, 23, 23, 0.1) 26%, rgba(23, 23, 23, 0) 58%)",
+            opacity: 1,
+            transition: "opacity 0.24s ease",
+          }}
+          className="project-card-gradient"
         />
         <Chip
           label={projectKindLabel[project.kind]}
           size="small"
           sx={{
             position: "absolute",
+            zIndex: 2,
             top: 14,
             left: 14,
-            bgcolor: "rgba(255, 255, 255, 0.86)",
+            bgcolor: "rgba(255, 255, 255, 0.9)",
             color: "#7c4a03",
             border: "1px solid rgba(217, 119, 6, 0.22)",
             fontWeight: 800,
@@ -448,7 +468,13 @@ const ProjectsPage = () => {
     <Box sx={{ bgcolor: "#fbfbf8", color: "#171717", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ pt: { xs: 9.5, sm: 10.5, md: 12 }, pb: { xs: 9, md: 14 }, px: { xs: 2, sm: 3 } }}>
         {/* 포트폴리오 복귀 버튼 */}
-        <Box sx={{ mb: { xs: 2, md: 2.4 } }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.2}
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          justifyContent="space-between"
+          sx={{ mb: { xs: 2, md: 2.4 } }}
+        >
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate(ROUTES.PORTFOLIO)}
@@ -463,9 +489,33 @@ const ProjectsPage = () => {
               },
             }}
           >
-            포트폴리오로 돌아가기
+            메인으로 돌아가기
           </Button>
-        </Box>
+          <Button
+            href="/portfolio_kimhyuna.pdf"
+            download="kimhyuna_portfolio_2026.pdf"
+            startIcon={<DownloadIcon />}
+            sx={{
+              px: 1.8,
+              py: 0.85,
+              color: "#171717",
+              bgcolor: "#fff",
+              border: "1px solid #e8e3d8",
+              borderRadius: 999,
+              fontSize: "0.84rem",
+              fontWeight: 900,
+              textTransform: "none",
+              boxShadow: "0 8px 20px rgba(45, 36, 23, 0.06)",
+              "&:hover": {
+                bgcolor: "#fff7ed",
+                borderColor: "rgba(217, 119, 6, 0.28)",
+                boxShadow: "0 10px 24px rgba(45, 36, 23, 0.09)",
+              },
+            }}
+          >
+            포트폴리오 PDF
+          </Button>
+        </Stack>
 
         {/* 프로젝트 탐색 도구 */}
         <Stack
@@ -732,7 +782,19 @@ const ProjectsPage = () => {
                   height: { xs: 220, md: 340 },
                   display: "block",
                   objectFit: "cover",
+                  objectPosition: "center center",
                   filter: "saturate(0.9)",
+                }}
+              />
+              <Box
+                aria-hidden="true"
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 1,
+                  pointerEvents: "none",
+                  background:
+                    "linear-gradient(180deg, rgba(23, 23, 23, 0.24) 0%, rgba(23, 23, 23, 0.08) 28%, rgba(23, 23, 23, 0) 60%)",
                 }}
               />
               <IconButton
@@ -740,6 +802,7 @@ const ProjectsPage = () => {
                 onClick={closeProjectDetail}
                 sx={{
                   position: "absolute",
+                  zIndex: 2,
                   top: 14,
                   right: 14,
                   bgcolor: "rgba(255, 255, 255, 0.88)",
