@@ -15,15 +15,9 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ApiIcon from "@mui/icons-material/Api";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import BoltIcon from "@mui/icons-material/Bolt";
-import CachedIcon from "@mui/icons-material/Cached";
-import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import DownloadIcon from "@mui/icons-material/Download";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import HttpIcon from "@mui/icons-material/Http";
-import HubIcon from "@mui/icons-material/Hub";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -39,19 +33,22 @@ import { extractExcerpt } from "@/utils/markdown";
 
 const strengths = [
   {
-    title: "UX/UI Implementation",
+    title: "사용자 경험 개선과 접근성 고려",
     description:
-      "사용자가 정보를 읽고 행동으로 이어가기까지의 흐름을 고려해 화면을 설계합니다.",
+      "정보 구조와 CTA 흐름을 기준으로 화면을 설계하고, SEO와 접근성을 함께 개선합니다.",
+    image: "/assets/focus/focus-ui-flow-transparent.png",
   },
   {
-    title: "Scalable Structure",
+    title: "확장 가능한 화면 구조 설계",
     description:
-      "컴포넌트 재사용성, 상태 흐름, 데이터 구조를 고려해 변경에 대응하기 쉬운 구조를 지향합니다.",
+      "컴포넌트 재사용성, 상태 관리, API 연동 책임을 나누어 변경에 강한 구조를 만듭니다.",
+    image: "/assets/focus/focus-structure-transparent.png",
   },
   {
-    title: "Product Thinking",
+    title: "프로덕트 관점의 협업과 조율",
     description:
-      "디자인, 기획, 백엔드와의 협업 과정에서 요구사항을 조율하고 제품 관점에서 화면의 우선순위를 판단합니다.",
+      "기획, 디자인, 개발 사이에서 요구사항을 조율하고 사용자 가치 기준으로 우선순위를 판단합니다.",
+    image: "/assets/focus/focus-collaboration-transparent.png",
   },
 ];
 
@@ -79,16 +76,24 @@ const skillLogoMap: Record<string, string> = {
   "Next.js": "/assets/skills/nextjs-original.svg",
   "Vue.js": "/assets/skills/vuejs-original.svg",
   "Tailwind CSS": "/assets/skills/tailwindcss-plain.svg",
+  Vite: "/assets/skills/vite-logo.png",
+  MUI: "/assets/skills/mui-logo.png",
+  Zustand: "/assets/skills/zustand-logo.png",
+  "TanStack Query": "/assets/skills/tanstack-query-logo.png",
+  Axios: "/assets/skills/axios-logo.png",
+  GSAP: "/assets/skills/gsap-logo.png",
 };
 
 const skillMuiIconMap: Record<string, typeof TipsAndUpdatesIcon> = {
-  Vite: BoltIcon,
-  MUI: DashboardCustomizeIcon,
-  Zustand: HubIcon,
-  "TanStack Query": CachedIcon,
-  Axios: HttpIcon,
   "REST API": ApiIcon,
-  GSAP: AutoFixHighIcon,
+};
+
+const skillLogoSxMap: Record<string, { width: number; height: number }> = {
+  MUI: { width: 23, height: 23 },
+  Zustand: { width: 22, height: 22 },
+  "TanStack Query": { width: 23, height: 23 },
+  Axios: { width: 24, height: 24 },
+  GSAP: { width: 25, height: 18 },
 };
 
 const skillCapabilityMap: Record<string, string> = {
@@ -526,7 +531,7 @@ const HomePage = () => {
                   fontWeight: isActive ? 800 : 700,
                   lineHeight: 0.76,
                   "&:hover": {
-                    bgcolor: "transparent",
+                    bgcolor: "#f7f3ec",
                     color: "#171717",
                   },
                 }}
@@ -556,40 +561,95 @@ const HomePage = () => {
         component="section"
         sx={{ py: { xs: 12, md: 20 } }}
       >
-        <Grid container spacing={{ xs: 3, md: 5 }}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h3" fontWeight={800}>
-              핵심 역량
-            </Typography>
-            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              사용자 흐름, 확장 가능한 구조, 협업 관점을 바탕으로 화면을 설계합니다.
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Grid container spacing={2}>
-              {strengths.map((item) => (
-                <Grid size={{ xs: 12, md: 4 }} key={item.title}>
+        <Box sx={{ mb: { xs: 4.5, md: 6.5 }, textAlign: "center" }}>
+          <Typography variant="h3" fontWeight={800}>
+            핵심 역량
+          </Typography>
+          <Typography
+            sx={{
+              maxWidth: 640,
+              mx: "auto",
+              mt: 1.6,
+              color: "#625d54",
+              lineHeight: 1.8,
+            }}
+          >
+            사용자 흐름과 확장 가능한 구조, 협업 관점을 바탕으로 화면을 설계하고
+            구현합니다.
+          </Typography>
+        </Box>
+
+        <Grid container spacing={{ xs: 2.2, md: 3 }}>
+          {strengths.map((item) => (
+            <Grid size={{ xs: 12, md: 4 }} key={item.title}>
+              <Box
+                sx={{
+                  height: "100%",
+                  minHeight: { xs: 420, sm: 450, md: 468 },
+                  p: { xs: 3, sm: 3.4, md: 3.2 },
+                  bgcolor: "#ffffff",
+                  border: "1px solid #ebe6dc",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: "0 18px 44px rgba(23, 23, 23, 0.04)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    borderColor: "rgba(217, 119, 6, 0.24)",
+                    boxShadow: "0 24px 54px rgba(23, 23, 23, 0.07)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: { xs: 190, sm: 210, md: 196, lg: 224 },
+                    mb: { xs: 3.1, md: 3.4 },
+                    borderRadius: 1.5,
+                    bgcolor: "transparent",
+                  }}
+                >
                   <Box
+                    component="img"
+                    src={item.image}
+                    alt=""
+                    aria-hidden="true"
                     sx={{
+                      display: "block",
+                      width: "92%",
                       height: "100%",
-                      p: 3,
-                      bgcolor: "#ffffff",
-                      border: "1px solid #ebe6dc",
-                      borderRadius: 2,
+                      objectFit: "contain",
                     }}
-                  >
-                    <Typography fontWeight={700}>{item.title}</Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.75 }}
-                    >
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
+                  />
+                </Box>
+                <Typography
+                  fontWeight={850}
+                  sx={{
+                    color: "#171717",
+                    fontSize: { xs: "1.28rem", md: "1.18rem", lg: "1.34rem" },
+                    lineHeight: 1.35,
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {item.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mt: { xs: 1.6, md: 1.7 },
+                    color: "#625d54",
+                    fontSize: { xs: "0.96rem", md: "0.9rem", lg: "0.96rem" },
+                    lineHeight: 1.9,
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {item.description}
+                </Typography>
+              </Box>
             </Grid>
-          </Grid>
+          ))}
         </Grid>
       </Container>
 
@@ -615,6 +675,7 @@ const HomePage = () => {
               {skills.flatMap((skill) => skill.items).slice(0, 15).map((skill, index) => {
                 const logoSrc = skillLogoMap[skill.name];
                 const SkillIcon = skillMuiIconMap[skill.name] ?? TipsAndUpdatesIcon;
+                const logoSize = skillLogoSxMap[skill.name] ?? { width: 21, height: 21 };
                 const fallbackColor = skillIconColors[index % skillIconColors.length];
 
                 return (
@@ -623,6 +684,26 @@ const HomePage = () => {
                     title={skillCapabilityMap[skill.name] ?? "프로젝트 요구사항에 맞춰 활용할 수 있습니다."}
                     arrow
                     placement="top"
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          px: 1.35,
+                          py: 0.9,
+                          bgcolor: "#171717",
+                          color: "#ffffff",
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          lineHeight: 1.55,
+                          borderRadius: "8px",
+                          boxShadow: "0 16px 34px rgba(23, 23, 23, 0.18)",
+                        },
+                      },
+                      arrow: {
+                        sx: {
+                          color: "#171717",
+                        },
+                      },
+                    }}
                   >
                     <Box
                       sx={{
@@ -632,14 +713,21 @@ const HomePage = () => {
                         minHeight: 48,
                         px: 1.75,
                         py: 0.8,
-                        bgcolor: "#fffaf0",
-                        border: "1px solid rgba(245, 158, 11, 0.24)",
+                        bgcolor: "#ffffff",
+                        border: "1px solid rgba(217, 119, 6, 0.16)",
                         borderRadius: 999,
-                        boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
+                        boxShadow: "0 10px 24px rgba(23, 23, 23, 0.04)",
                         color: "#3f3425",
                         fontWeight: 800,
                         fontSize: "0.95rem",
                         cursor: "default",
+                        transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease",
+                        "&:hover": {
+                          transform: "translateY(-2px)",
+                          bgcolor: "#fffaf0",
+                          borderColor: "rgba(245, 158, 11, 0.32)",
+                          boxShadow: "0 16px 34px rgba(217, 119, 6, 0.13)",
+                        },
                       }}
                     >
                       <Box
@@ -647,12 +735,10 @@ const HomePage = () => {
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          width: 30,
-                          height: 30,
-                          borderRadius: "10px",
-                          bgcolor: "#ffffff",
-                          border: "1px solid rgba(245, 158, 11, 0.16)",
-                          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.55)",
+                          width: 28,
+                          height: 28,
+                          borderRadius: "50%",
+                          bgcolor: logoSrc ? "transparent" : "rgba(245, 158, 11, 0.1)",
                           color: fallbackColor,
                           flexShrink: 0,
                         }}
@@ -665,8 +751,8 @@ const HomePage = () => {
                             aria-hidden="true"
                             sx={{
                               display: "block",
-                              width: 21,
-                              height: 21,
+                              width: logoSize.width,
+                              height: logoSize.height,
                               objectFit: "contain",
                             }}
                           />
@@ -703,10 +789,11 @@ const HomePage = () => {
         >
           <Box>
             <Typography variant="h3" fontWeight={800}>
-              프로젝트
+              주요 프로젝트
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
-              약 20여 개의 프로젝트를 구현하며 쌓은 프론트엔드 경험을 정리합니다.
+              전체 작업 중 주요 프로젝트를 선별해 역할과 구현 과정, 기술적 고민을
+              정리했습니다.
             </Typography>
           </Box>
           <Button
@@ -843,7 +930,7 @@ const HomePage = () => {
         </Stack>
       </Container>
 
-      {/* 최신 블로그 글 */}
+      {/* 최신 학습 기록 */}
       <Container
         id="home-blog"
         maxWidth="lg"
@@ -865,7 +952,7 @@ const HomePage = () => {
         >
           <Box>
             <Typography variant="h3" fontWeight={800}>
-              Tech Blog
+              학습 기록
             </Typography>
             <Typography sx={{ mt: 1, color: "#625d54" }}>
               IT 지식을 습득하고 기록하며 문제 해결 과정을 정리합니다.
@@ -876,7 +963,7 @@ const HomePage = () => {
             onClick={() => openBlogRoute(ROUTES.BLOG)}
             sx={{ color: "#171717", fontWeight: 700 }}
           >
-            블로그로 이동
+            블로그 바로가기
           </Button>
         </Box>
 
@@ -974,25 +1061,6 @@ const HomePage = () => {
                           },
                         }}
                       />
-                      {post.tags.slice(0, 2).map((tag) => (
-                        <Chip
-                          key={tag}
-                          label={tag}
-                          size="small"
-                          sx={{
-                            bgcolor: "#f4f4f5",
-                            color: "#52525b",
-                            border: "1px solid #e4e4e7",
-                            borderRadius: "5px",
-                            height: 24,
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            "& .MuiChip-label": {
-                              px: 1,
-                            },
-                          }}
-                        />
-                      ))}
                     </Stack>
                   </Grid>
                 </Grid>
