@@ -2,7 +2,7 @@
  * PostCard 컴포넌트
  *
  * 블로그 포스트 하나를 카드 형태로 표시합니다.
- * 썸네일, 카테고리, 제목, 요약, 날짜, 태그를 보여주며
+ * 썸네일, 카테고리, 제목, 요약, 날짜를 보여주며
  * 클릭하면 해당 포스트의 상세 페이지(/blog/:id)로 이동합니다.
  */
 import {
@@ -113,7 +113,7 @@ const PostCard = ({ post }: PostCardProps) => {
           {post.excerpt || extractExcerpt(post.content)}
         </Typography>
 
-        {/* 하단 영역: 날짜 + 태그 */}
+        {/* 하단 영역: 날짜 */}
         <Box>
           {/* 작성일과 상대 시간 (예: "2026년 2월 10일 · 1일 전") */}
           <Typography
@@ -124,27 +124,6 @@ const PostCard = ({ post }: PostCardProps) => {
             {formatDate(post.date)} · {getRelativeTime(post.date)}
           </Typography>
 
-          {/* 태그 목록 - 최대 3개만 표시, 나머지는 +N으로 표시 */}
-          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-            {post.tags.slice(0, 3).map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: "0.7rem" }}
-              />
-            ))}
-            {/* 태그가 3개 초과일 때 남은 개수 표시 */}
-            {post.tags.length > 3 && (
-              <Chip
-                label={`+${post.tags.length - 3}`}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: "0.7rem" }}
-              />
-            )}
-          </Box>
         </Box>
       </CardContent>
     </Card>

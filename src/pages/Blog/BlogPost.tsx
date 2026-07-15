@@ -15,7 +15,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Typography,
   Box,
-  Chip,
   Button,
   Breadcrumbs,
   Divider,
@@ -26,7 +25,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import MarkdownRenderer from "@/components/blog/MarkdownRenderer";
 import GitHubComments from "@/components/blog/GitHubComments";
 import { ROUTES } from "@/constants/routes";
@@ -351,46 +349,6 @@ const BlogPost = () => {
 
           {/* 마크다운 본문 */}
           <MarkdownRenderer content={post.content ?? ""} />
-
-          {/* 하단 태그 목록 */}
-          {post.tags.length > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 1.2,
-                mt: { xs: 5.5, md: 7 },
-                pt: { xs: 2.5, md: 3 },
-                borderTop: "1px solid var(--blog-divider)",
-              }}
-            >
-              <LocalOfferOutlinedIcon
-                sx={{
-                  mt: 0.25,
-                  fontSize: 22,
-                  color: "var(--blog-muted)",
-                }}
-              />
-              <Box sx={{ display: "flex", gap: 0.8, flexWrap: "wrap" }}>
-                {post.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    sx={{
-                      height: 26,
-                      bgcolor: "var(--blog-card-soft-bg)",
-                      color: "var(--blog-subtle)",
-                      border: "1px solid var(--blog-divider)",
-                      fontSize: "0.72rem",
-                      fontWeight: 720,
-                      borderRadius: 999,
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          )}
 
           {/* 이전/다음 글 이동 */}
           <Box

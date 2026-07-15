@@ -476,21 +476,6 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                         fontWeight: 800,
                       }}
                     />
-                    {post.tags.slice(0, 5).map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          height: 22,
-                          color: "var(--blog-subtle)",
-                          borderColor: "var(--blog-border)",
-                          fontSize: "0.68rem",
-                          fontWeight: 700,
-                        }}
-                      />
-                    ))}
                   </Box>
                 </Box>
                 </Box>
@@ -834,69 +819,6 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                 {post.excerpt || extractExcerpt(post.content, 120)}
               </Typography>
 
-              {/* 태그 */}
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 0.55,
-                  flexWrap: "wrap",
-                  pt: 0,
-                  mt: { xs: 0.05, md: 0 },
-                  minHeight: { xs: 22, md: 19 },
-                  maxHeight: { md: 19 },
-                  overflow: "hidden",
-                  "@media (min-width: 900px) and (max-height: 760px)": {
-                    minHeight: 18,
-                    maxHeight: 18,
-                    pt: 0,
-                    gap: 0.4,
-                  },
-                }}
-              >
-                {post.tags.slice(0, 2).map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    sx={{
-                      height: { xs: 22, md: 19 },
-                      fontSize: { xs: "0.7rem", md: "0.6rem" },
-                      bgcolor: "var(--blog-card-soft-bg)",
-                      color: "var(--blog-subtle)",
-                      fontWeight: 700,
-                      borderRadius: 999,
-                      "& .MuiChip-label": {
-                        px: { xs: 1.05, md: 1.15 },
-                      },
-                      "@media (min-width: 900px) and (max-height: 760px)": {
-                        height: 18,
-                        fontSize: "0.58rem",
-                      },
-                    }}
-                  />
-                ))}
-                {post.tags.length > 2 && (
-                  <Chip
-                    label={`+${post.tags.length - 2}`}
-                    size="small"
-                    sx={{
-                      height: { xs: 22, md: 19 },
-                      fontSize: { xs: "0.7rem", md: "0.6rem" },
-                      bgcolor: "var(--blog-card-soft-bg)",
-                      color: "var(--blog-muted)",
-                      fontWeight: 800,
-                      borderRadius: 999,
-                      "& .MuiChip-label": {
-                        px: { xs: 1.05, md: 1.15 },
-                      },
-                      "@media (min-width: 900px) and (max-height: 760px)": {
-                        height: 18,
-                        fontSize: "0.58rem",
-                      },
-                    }}
-                  />
-                )}
-              </Box>
             </CardContent>
         </Card>
       ))}
@@ -1236,7 +1158,6 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   );
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedTag, setSelectedTag] = useState("All");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -1291,11 +1212,6 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
     ];
   }, [sectionPosts]);
 
-  // 태그 필터 목록
-  const tags = useMemo(() => {
-    return ["All", ...Array.from(new Set(sectionPosts.flatMap((post) => post.tags))).sort()];
-  }, [sectionPosts]);
-
   // 화면 표시 포스트
   const filteredPosts = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
@@ -1305,24 +1221,22 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         const visibleContent = removeFullTextDetails(post.content);
         const matchesCategory =
           selectedCategory === "All" || post.category === selectedCategory;
-        const matchesTag = selectedTag === "All" || post.tags.includes(selectedTag);
         const searchableText = [
           SECTION_LABELS[getPostSection(post)],
           post.title,
           post.excerpt,
           visibleContent,
           post.category,
-          ...post.tags,
         ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
         const matchesKeyword = keyword.length === 0 || searchableText.includes(keyword);
 
-        return matchesCategory && matchesTag && matchesKeyword;
+        return matchesCategory && matchesKeyword;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [sectionPosts, searchKeyword, selectedCategory, selectedTag]);
+  }, [sectionPosts, searchKeyword, selectedCategory]);
 
   // 보기 방식 저장
   const handleViewChange = (mode: "list" | "card") => {
@@ -1334,7 +1248,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   const hasActiveSearch = searchKeyword.trim().length > 0;
 
   // 필터 적용 상태
-  const hasActiveFilter = selectedCategory !== "All" || selectedTag !== "All";
+  const hasActiveFilter = selectedCategory !== "All";
 
   // 검색 또는 필터 적용 상태
   const hasActiveCondition = hasActiveSearch || hasActiveFilter;
@@ -1345,13 +1259,11 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
     viewMode,
     searchKeyword.trim().toLowerCase(),
     selectedCategory,
-    selectedTag,
   ].join("|");
 
   // 목록 제목
   const listTitle = (() => {
     if (selectedCategory !== "All") return `${selectedCategory} (${filteredPosts.length})`;
-    if (selectedTag !== "All") return `#${selectedTag} (${filteredPosts.length})`;
     if (hasActiveSearch) return `검색 결과 (${filteredPosts.length})`;
     return `${SECTION_LABELS[activeSection]} (${filteredPosts.length})`;
   })();
@@ -1360,7 +1272,6 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   const resetFilters = () => {
     setSearchKeyword("");
     setSelectedCategory("All");
-    setSelectedTag("All");
   };
 
   // 로딩 상태 화면
@@ -1540,7 +1451,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
               <TextField
                 value={searchKeyword}
                 onChange={(event) => setSearchKeyword(event.target.value)}
-                placeholder="제목, 본문, 태그 검색"
+                placeholder="제목, 본문, 카테고리 검색"
                 size="small"
                 fullWidth
                 slotProps={{
@@ -1628,35 +1539,6 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
               </Box>
             </Box>
 
-            {/* 태그 필터 */}
-            <Box>
-              <Typography sx={{ mb: 1, color: "var(--blog-muted)", fontSize: "0.72rem", fontWeight: 900 }}>
-                TAG
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.7, flexWrap: "wrap" }}>
-                {tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag === "All" ? "All" : `#${tag}`}
-                    clickable
-                    variant="outlined"
-                    onClick={() => setSelectedTag(tag)}
-                    sx={{
-                      height: 26,
-                      bgcolor: selectedTag === tag ? "var(--blog-chip-bg)" : "transparent",
-                      color: selectedTag === tag ? "var(--blog-chip-text)" : "var(--blog-subtle)",
-                      borderColor: selectedTag === tag ? "var(--blog-accent)" : "var(--blog-border)",
-                      fontSize: "0.72rem",
-                      fontWeight: 700,
-                      "&:hover": {
-                        borderColor: "var(--blog-accent)",
-                        bgcolor: "var(--blog-chip-bg)",
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
           </Box>
         </Collapse>
       </Box>
@@ -1714,7 +1596,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
                 lineHeight: 1.65,
               }}
             >
-              검색어를 줄이거나 카테고리와 태그 조건을 다시 조정해보세요
+              검색어를 줄이거나 카테고리 조건을 다시 조정해보세요
             </Typography>
           </Box>
 

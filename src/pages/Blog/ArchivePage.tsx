@@ -1,13 +1,12 @@
 /**
  * 아카이브 페이지
  *
- * 블로그 글을 연도, 카테고리, 태그 기준으로 모아보는 화면입니다
+ * 블로그 글을 연도, 카테고리 기준으로 모아보는 화면입니다
  */
 import { useMemo, useState } from "react";
 import {
   Alert,
   Box,
-  Chip,
   Container,
   FormControl,
   InputLabel,
@@ -29,7 +28,6 @@ const ArchivePage = () => {
   const { posts, loading, error } = usePosts();
   const [year, setYear] = useState(ALL);
   const [category, setCategory] = useState(ALL);
-  const [tag, setTag] = useState(ALL);
   const [keyword, setKeyword] = useState("");
 
   const publishedPosts = useMemo(
@@ -55,12 +53,6 @@ const ArchivePage = () => {
     [publishedPosts],
   );
 
-  const tags = useMemo(
-    () =>
-      Array.from(new Set(publishedPosts.flatMap((post) => post.tags))).sort(),
-    [publishedPosts],
-  );
-
   const filteredPosts = useMemo(() => {
     const lowerKeyword = keyword.trim().toLowerCase();
 
@@ -70,16 +62,15 @@ const ArchivePage = () => {
         const postYear = new Date(post.date).getFullYear().toString();
         const matchesYear = year === ALL || postYear === year;
         const matchesCategory = category === ALL || post.category === category;
-        const matchesTag = tag === ALL || post.tags.includes(tag);
         const matchesKeyword =
           lowerKeyword.length === 0 ||
           post.title.toLowerCase().includes(lowerKeyword) ||
           visibleContent.toLowerCase().includes(lowerKeyword);
 
-        return matchesYear && matchesCategory && matchesTag && matchesKeyword;
+        return matchesYear && matchesCategory && matchesKeyword;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [category, keyword, publishedPosts, tag, year]);
+  }, [category, keyword, publishedPosts, year]);
 
   if (loading) {
     return (
@@ -104,7 +95,7 @@ const ArchivePage = () => {
           Archives
         </Typography>
         <Typography color="text.secondary">
-          작성한 글을 연도, 카테고리, 태그로 찾아봅니다.
+          작성한 글을 연도와 카테고리로 찾아봅니다.
         </Typography>
       </Box>
 
@@ -149,21 +140,6 @@ const ArchivePage = () => {
             ))}
           </Select>
         </FormControl>
-        <FormControl fullWidth>
-          <InputLabel>태그</InputLabel>
-          <Select
-            label="태그"
-            value={tag}
-            onChange={(event) => setTag(event.target.value)}
-          >
-            <MenuItem value={ALL}>전체</MenuItem>
-            {tags.map((item) => (
-              <MenuItem key={item} value={item}>
-                {item}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
       </Stack>
 
       <Stack spacing={1.5}>
@@ -186,11 +162,6 @@ const ArchivePage = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {formatDate(post.date)} · {post.category}
             </Typography>
-            <Stack direction="row" gap={0.5} flexWrap="wrap">
-              {post.tags.map((item) => (
-                <Chip key={item} label={item} size="small" variant="outlined" />
-              ))}
-            </Stack>
           </Box>
         ))}
       </Stack>
