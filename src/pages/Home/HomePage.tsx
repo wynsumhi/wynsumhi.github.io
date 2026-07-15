@@ -10,16 +10,24 @@ import {
   Chip,
   Container,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import ApiIcon from "@mui/icons-material/Api";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import BoltIcon from "@mui/icons-material/Bolt";
+import CachedIcon from "@mui/icons-material/Cached";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import DownloadIcon from "@mui/icons-material/Download";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import HttpIcon from "@mui/icons-material/Http";
+import HubIcon from "@mui/icons-material/Hub";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import { createElement, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
@@ -31,19 +39,19 @@ import { extractExcerpt } from "@/utils/markdown";
 
 const strengths = [
   {
-    title: "UI/UX를 고려한 화면 구현",
+    title: "UX/UI Implementation",
     description:
-      "사용자 경험을 기술로 구현한다는 관점으로 화면 흐름과 인터랙션을 설계합니다.",
+      "사용자가 정보를 읽고 행동으로 이어가기까지의 흐름을 고려해 화면을 설계합니다.",
   },
   {
-    title: "웹 표준 기반 마크업",
+    title: "Scalable Structure",
     description:
-      "HTML, CSS, SCSS, JavaScript로 반응형 웹 페이지와 동적 UI를 안정적으로 만듭니다.",
+      "컴포넌트 재사용성, 상태 흐름, 데이터 구조를 고려해 변경에 대응하기 쉬운 구조를 지향합니다.",
   },
   {
-    title: "기록하며 성장하는 개발",
+    title: "Product Thinking",
     description:
-      "Notion 기반 Tech Blog에 학습 과정과 문제 해결 과정을 남기며 성장합니다.",
+      "디자인, 기획, 백엔드와의 협업 과정에서 요구사항을 조율하고 제품 관점에서 화면의 우선순위를 판단합니다.",
   },
 ];
 
@@ -71,6 +79,34 @@ const skillLogoMap: Record<string, string> = {
   "Next.js": "/assets/skills/nextjs-original.svg",
   "Vue.js": "/assets/skills/vuejs-original.svg",
   "Tailwind CSS": "/assets/skills/tailwindcss-plain.svg",
+};
+
+const skillMuiIconMap: Record<string, typeof TipsAndUpdatesIcon> = {
+  Vite: BoltIcon,
+  MUI: DashboardCustomizeIcon,
+  Zustand: HubIcon,
+  "TanStack Query": CachedIcon,
+  Axios: HttpIcon,
+  "REST API": ApiIcon,
+  GSAP: AutoFixHighIcon,
+};
+
+const skillCapabilityMap: Record<string, string> = {
+  React: "컴포넌트 기반 UI와 페이지 상태 흐름을 구현할 수 있습니다.",
+  TypeScript: "props, API 응답, 공통 타입을 정의해 안정적인 코드를 작성할 수 있습니다.",
+  "JavaScript(ES6+)": "DOM 제어, 비동기 처리, 인터랙션 로직을 구현할 수 있습니다.",
+  "Next.js": "라우팅, 페이지 구성, SSR/CSR 흐름을 고려한 화면을 만들 수 있습니다.",
+  Vite: "빠른 개발 환경과 정적 빌드 기반의 프론트엔드 프로젝트를 구성할 수 있습니다.",
+  MUI: "디자인 시스템 기반의 반응형 UI와 커스텀 컴포넌트를 만들 수 있습니다.",
+  Zustand: "가벼운 전역 상태와 화면 간 공유 상태를 설계할 수 있습니다.",
+  "TanStack Query": "서버 데이터 캐싱, 로딩, 재요청 흐름을 관리할 수 있습니다.",
+  Axios: "공통 API 클라이언트, 에러 처리, 인증 흐름을 구성할 수 있습니다.",
+  HTML5: "시맨틱 구조와 접근성을 고려한 마크업을 작성할 수 있습니다.",
+  "CSS3·SCSS": "반응형 레이아웃, 상태별 스타일, 유지보수 가능한 스타일 구조를 만들 수 있습니다.",
+  "REST API": "API 요청, 응답 가공, 에러/로딩 상태를 화면과 연결할 수 있습니다.",
+  "Tailwind CSS": "유틸리티 클래스 기반으로 빠르게 반응형 UI를 구성할 수 있습니다.",
+  "Vue.js": "Composition API 기반 화면과 상태 흐름을 구성할 수 있습니다.",
+  GSAP: "스크롤, 전환, 시각적 인터랙션 애니메이션을 구현할 수 있습니다.",
 };
 
 // 프로젝트 기간 표시
@@ -513,7 +549,7 @@ const HomePage = () => {
         </Stack>
       </Box>
 
-      {/* 현재 집중하는 것 */}
+      {/* 핵심 역량 */}
       <Container
         id="home-focus"
         maxWidth="lg"
@@ -523,10 +559,10 @@ const HomePage = () => {
         <Grid container spacing={{ xs: 3, md: 5 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h3" fontWeight={800}>
-              현재 집중하는 것
+              핵심 역량
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              지금의 학습 방향과 실무에서 더 깊게 다듬고 있는 기준입니다.
+              사용자 흐름, 확장 가능한 구조, 협업 관점을 바탕으로 화면을 설계합니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
@@ -557,7 +593,7 @@ const HomePage = () => {
         </Grid>
       </Container>
 
-      {/* 핵심 역량 */}
+      {/* 기술 스택 */}
       <Container
         id="home-skills"
         maxWidth="lg"
@@ -567,72 +603,80 @@ const HomePage = () => {
         <Grid container spacing={{ xs: 4, md: 8 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h3" fontWeight={800}>
-              핵심 역량
+              기술 스택
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              실무 프로젝트에서 쌓은 웹 구현 경험과 Notion에 정리한 학습 기록을
-              바탕으로 프론트엔드 역량을 확장하고 있습니다.
+              UI 구현, 상태 흐름, API 연동, 반응형 대응까지 프로젝트 요구사항에
+              맞춰 기술을 조합하고 확장합니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
             <Stack direction="row" gap={1.2} flexWrap="wrap">
-              {skills.flatMap((skill) => skill.items).slice(0, 10).map((skill, index) => {
+              {skills.flatMap((skill) => skill.items).slice(0, 15).map((skill, index) => {
                 const logoSrc = skillLogoMap[skill.name];
+                const SkillIcon = skillMuiIconMap[skill.name] ?? TipsAndUpdatesIcon;
                 const fallbackColor = skillIconColors[index % skillIconColors.length];
 
                 return (
-                  <Box
+                  <Tooltip
                     key={skill.name}
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 1.05,
-                      minHeight: 48,
-                      px: 1.75,
-                      py: 0.8,
-                      bgcolor: "#fffaf0",
-                      border: "1px solid rgba(245, 158, 11, 0.24)",
-                      borderRadius: 999,
-                      boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
-                      color: "#3f3425",
-                      fontWeight: 800,
-                      fontSize: "0.95rem",
-                    }}
+                    title={skillCapabilityMap[skill.name] ?? "프로젝트 요구사항에 맞춰 활용할 수 있습니다."}
+                    arrow
+                    placement="top"
                   >
                     <Box
                       sx={{
                         display: "inline-flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        width: 30,
-                        height: 30,
-                        borderRadius: "10px",
-                        bgcolor: "#ffffff",
-                        border: "1px solid rgba(245, 158, 11, 0.16)",
-                        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.55)",
-                        color: fallbackColor,
-                        flexShrink: 0,
+                        gap: 1.05,
+                        minHeight: 48,
+                        px: 1.75,
+                        py: 0.8,
+                        bgcolor: "#fffaf0",
+                        border: "1px solid rgba(245, 158, 11, 0.24)",
+                        borderRadius: 999,
+                        boxShadow: "0 12px 28px rgba(217, 119, 6, 0.08)",
+                        color: "#3f3425",
+                        fontWeight: 800,
+                        fontSize: "0.95rem",
+                        cursor: "default",
                       }}
                     >
-                      {logoSrc ? (
-                        <Box
-                          component="img"
-                          src={logoSrc}
-                          alt=""
-                          aria-hidden="true"
-                          sx={{
-                            display: "block",
-                            width: 21,
-                            height: 21,
-                            objectFit: "contain",
-                          }}
-                        />
-                      ) : (
-                        <AutoAwesomeIcon sx={{ fontSize: 15 }} />
-                      )}
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 30,
+                          height: 30,
+                          borderRadius: "10px",
+                          bgcolor: "#ffffff",
+                          border: "1px solid rgba(245, 158, 11, 0.16)",
+                          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.55)",
+                          color: fallbackColor,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {logoSrc ? (
+                          <Box
+                            component="img"
+                            src={logoSrc}
+                            alt=""
+                            aria-hidden="true"
+                            sx={{
+                              display: "block",
+                              width: 21,
+                              height: 21,
+                              objectFit: "contain",
+                            }}
+                          />
+                        ) : (
+                          createElement(SkillIcon, { sx: { fontSize: 16 } })
+                        )}
+                      </Box>
+                      {skill.name}
                     </Box>
-                    {skill.name}
-                  </Box>
+                  </Tooltip>
                 );
               })}
             </Stack>
