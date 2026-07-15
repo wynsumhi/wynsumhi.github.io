@@ -22,3 +22,13 @@ export const extractExcerpt = (
 
   return plain.length > length ? plain.substring(0, length) + "..." : plain;
 };
+
+// 미리보기 문장 앞에 남는 Markdown 인용 표시를 제거
+export const cleanExcerpt = (text: string): string => {
+  if (!text) return "";
+
+  return text
+    .replace(/(^|\n)\s*>\s?/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+};

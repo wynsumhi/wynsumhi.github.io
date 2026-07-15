@@ -16,7 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import type { Post } from "@/types/blog";
 import { formatDate, getRelativeTime } from "@/utils/date";
-import { extractExcerpt } from "@/utils/markdown";
+import { cleanExcerpt, extractExcerpt } from "@/utils/markdown";
 
 /** PostCard의 props 타입 - 표시할 포스트 데이터를 받음 */
 interface PostCardProps {
@@ -110,7 +110,7 @@ const PostCard = ({ post }: PostCardProps) => {
           }}
         >
           {/* excerpt가 있으면 사용, 없으면 content에서 마크다운 제거 후 추출 */}
-          {post.excerpt || extractExcerpt(post.content)}
+          {cleanExcerpt(post.excerpt || extractExcerpt(post.content))}
         </Typography>
 
         {/* 하단 영역: 날짜 */}

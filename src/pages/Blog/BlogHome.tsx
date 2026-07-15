@@ -34,7 +34,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { getRelativeTime } from "@/utils/date";
-import { extractExcerpt, removeFullTextDetails } from "@/utils/markdown";
+import { cleanExcerpt, extractExcerpt, removeFullTextDetails } from "@/utils/markdown";
 import type { BlogSection as PostSection, Post } from "@/types/blog";
 
 // 날짜 표시에 사용하는 월 이름 약자 배열
@@ -461,7 +461,7 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                       WebkitBoxOrient: "vertical",
                     }}
                   >
-                    {post.excerpt || extractExcerpt(post.content, 150)}
+                    {cleanExcerpt(post.excerpt || extractExcerpt(post.content, 150))}
                   </Typography>
 
                   <Box sx={{ display: "flex", gap: 0.6, flexWrap: "wrap" }}>
@@ -816,7 +816,7 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   },
                 }}
               >
-                {post.excerpt || extractExcerpt(post.content, 120)}
+                {cleanExcerpt(post.excerpt || extractExcerpt(post.content, 120))}
               </Typography>
 
             </CardContent>
