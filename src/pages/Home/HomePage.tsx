@@ -660,18 +660,31 @@ const HomePage = () => {
         component="section"
         sx={{ py: { xs: 12, md: 20 } }}
       >
-        <Grid container spacing={{ xs: 4, md: 8 }}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h3" fontWeight={800}>
-              기술 스택
-            </Typography>
-            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              UI 구현, 상태 흐름, API 연동, 반응형 대응까지 프로젝트 요구사항에
-              맞춰 기술을 조합하고 확장합니다.
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Stack direction="row" gap={1.2} flexWrap="wrap">
+        <Box sx={{ mb: { xs: 4.5, md: 6.5 }, textAlign: "center" }}>
+          <Typography variant="h3" fontWeight={800}>
+            기술 스택
+          </Typography>
+          <Typography
+            sx={{
+              maxWidth: 640,
+              mx: "auto",
+              mt: 1.6,
+              color: "#625d54",
+              lineHeight: 1.8,
+            }}
+          >
+            UI 구현, 상태 흐름, API 연동, 반응형 대응까지 프로젝트 요구사항에 맞춰
+            기술을 조합하고 확장합니다.
+          </Typography>
+        </Box>
+
+        <Stack
+          direction="row"
+          gap={1.2}
+          flexWrap="wrap"
+          justifyContent="center"
+          sx={{ maxWidth: 900, mx: "auto" }}
+        >
               {skills.flatMap((skill) => skill.items).slice(0, 15).map((skill, index) => {
                 const logoSrc = skillLogoMap[skill.name];
                 const SkillIcon = skillMuiIconMap[skill.name] ?? TipsAndUpdatesIcon;
@@ -765,9 +778,7 @@ const HomePage = () => {
                   </Tooltip>
                 );
               })}
-            </Stack>
-          </Grid>
-        </Grid>
+        </Stack>
       </Container>
 
       {/* 대표 프로젝트 */}
@@ -780,29 +791,22 @@ const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "space-between",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 2,
-            mb: 4,
+            alignItems: "center",
+            flexDirection: "column",
+            gap: 2.2,
+            mb: { xs: 4.5, md: 6 },
+            textAlign: "center",
           }}
         >
-          <Box>
+          <Box sx={{ maxWidth: 680 }}>
             <Typography variant="h3" fontWeight={800}>
               주요 프로젝트
             </Typography>
-            <Typography sx={{ mt: 1, color: "#625d54" }}>
+            <Typography sx={{ mt: 1.6, color: "#625d54", lineHeight: 1.8 }}>
               전체 작업 중 주요 프로젝트를 선별해 역할과 구현 과정, 기술적 고민을
               정리했습니다.
             </Typography>
           </Box>
-          <Button
-            endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate(ROUTES.PROJECTS)}
-            sx={{ color: "#171717", fontWeight: 700 }}
-          >
-            전체 보기
-          </Button>
         </Box>
 
         <Stack spacing={{ xs: 5, md: 7 }}>
@@ -928,6 +932,16 @@ const HomePage = () => {
             </Box>
           ))}
         </Stack>
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: { xs: 4.5, md: 5.5 } }}>
+          <Button
+            endIcon={<ArrowForwardIcon />}
+            onClick={() => navigate(ROUTES.PROJECTS)}
+            sx={{ color: "#171717", fontWeight: 800 }}
+          >
+            전체 프로젝트 보기
+          </Button>
+        </Box>
       </Container>
 
       {/* 최신 학습 기록 */}
@@ -943,28 +957,21 @@ const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "space-between",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 2,
-            mb: 4,
+            alignItems: "center",
+            flexDirection: "column",
+            gap: 2.2,
+            mb: { xs: 4.5, md: 6 },
+            textAlign: "center",
           }}
         >
-          <Box>
+          <Box sx={{ maxWidth: 640 }}>
             <Typography variant="h3" fontWeight={800}>
               학습 기록
             </Typography>
-            <Typography sx={{ mt: 1, color: "#625d54" }}>
+            <Typography sx={{ mt: 1.6, color: "#625d54", lineHeight: 1.8 }}>
               IT 지식을 습득하고 기록하며 문제 해결 과정을 정리합니다.
             </Typography>
           </Box>
-          <Button
-            endIcon={<OpenInNewIcon />}
-            onClick={() => openBlogRoute(ROUTES.BLOG)}
-            sx={{ color: "#171717", fontWeight: 700 }}
-          >
-            블로그 바로가기
-          </Button>
         </Box>
 
         {loading && <Typography>로딩 중...</Typography>}
@@ -1111,6 +1118,16 @@ const HomePage = () => {
             );
           })}
         </Stack>
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: { xs: 4.5, md: 5.5 } }}>
+          <Button
+            endIcon={<OpenInNewIcon />}
+            onClick={() => openBlogRoute(ROUTES.BLOG)}
+            sx={{ color: "#171717", fontWeight: 800 }}
+          >
+            블로그 바로가기
+          </Button>
+        </Box>
       </Container>
 
       {/* 연락 섹션 */}
