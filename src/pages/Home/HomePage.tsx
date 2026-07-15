@@ -9,6 +9,8 @@ import {
   Button,
   Chip,
   Container,
+  Collapse,
+  IconButton,
   Stack,
   Tooltip,
   Typography,
@@ -29,23 +31,29 @@ import { CONFIG } from "@/constants/config";
 import { usePosts } from "@/hooks/usePosts";
 import { useProjects } from "@/hooks/useProjects";
 import { formatDate } from "@/utils/date";
-import { extractExcerpt } from "@/utils/markdown";
+import { cleanExcerpt, extractExcerpt } from "@/utils/markdown";
 
 const strengths = [
   {
-    title: "사용자 경험 개선과 접근성 고려",
+    number: "01",
+    point: "Experience",
+    title: "사용자 경험과 접근성 고려",
     description:
       "정보 구조와 CTA 흐름을 기준으로 화면을 설계하고, SEO와 접근성을 함께 개선합니다.",
     image: "/assets/focus/focus-ui-flow-transparent.png",
   },
   {
+    number: "02",
+    point: "Structure",
     title: "확장 가능한 화면 구조 설계",
     description:
       "컴포넌트 재사용성, 상태 관리, API 연동 책임을 나누어 변경에 강한 구조를 만듭니다.",
     image: "/assets/focus/focus-structure-transparent.png",
   },
   {
-    title: "프로덕트 관점의 협업과 조율",
+    number: "03",
+    point: "Product Thinking",
+    title: "프로덕트 관점에서의 협업",
     description:
       "기획, 디자인, 개발 사이에서 요구사항을 조율하고 사용자 가치 기준으로 우선순위를 판단합니다.",
     image: "/assets/focus/focus-collaboration-transparent.png",
@@ -98,18 +106,24 @@ const skillLogoSxMap: Record<string, { width: number; height: number }> = {
 
 const skillCapabilityMap: Record<string, string> = {
   React: "컴포넌트 기반 UI와 페이지 상태 흐름을 구현할 수 있습니다.",
-  TypeScript: "props, API 응답, 공통 타입을 정의해 안정적인 코드를 작성할 수 있습니다.",
-  "JavaScript(ES6+)": "DOM 제어, 비동기 처리, 인터랙션 로직을 구현할 수 있습니다.",
-  "Next.js": "라우팅, 페이지 구성, SSR/CSR 흐름을 고려한 화면을 만들 수 있습니다.",
+  TypeScript:
+    "props, API 응답, 공통 타입을 정의해 안정적인 코드를 작성할 수 있습니다.",
+  "JavaScript(ES6+)":
+    "DOM 제어, 비동기 처리, 인터랙션 로직을 구현할 수 있습니다.",
+  "Next.js":
+    "라우팅, 페이지 구성, SSR/CSR 흐름을 고려한 화면을 만들 수 있습니다.",
   Vite: "빠른 개발 환경과 정적 빌드 기반의 프론트엔드 프로젝트를 구성할 수 있습니다.",
   MUI: "디자인 시스템 기반의 반응형 UI와 커스텀 컴포넌트를 만들 수 있습니다.",
   Zustand: "가벼운 전역 상태와 화면 간 공유 상태를 설계할 수 있습니다.",
   "TanStack Query": "서버 데이터 캐싱, 로딩, 재요청 흐름을 관리할 수 있습니다.",
   Axios: "공통 API 클라이언트, 에러 처리, 인증 흐름을 구성할 수 있습니다.",
   HTML5: "시맨틱 구조와 접근성을 고려한 마크업을 작성할 수 있습니다.",
-  "CSS3·SCSS": "반응형 레이아웃, 상태별 스타일, 유지보수 가능한 스타일 구조를 만들 수 있습니다.",
-  "REST API": "API 요청, 응답 가공, 에러/로딩 상태를 화면과 연결할 수 있습니다.",
-  "Tailwind CSS": "유틸리티 클래스 기반으로 빠르게 반응형 UI를 구성할 수 있습니다.",
+  "CSS3·SCSS":
+    "반응형 레이아웃, 상태별 스타일, 유지보수 가능한 스타일 구조를 만들 수 있습니다.",
+  "REST API":
+    "API 요청, 응답 가공, 에러/로딩 상태를 화면과 연결할 수 있습니다.",
+  "Tailwind CSS":
+    "유틸리티 클래스 기반으로 빠르게 반응형 UI를 구성할 수 있습니다.",
   "Vue.js": "Composition API 기반 화면과 상태 흐름을 구성할 수 있습니다.",
   GSAP: "스크롤, 전환, 시각적 인터랙션 애니메이션을 구현할 수 있습니다.",
 };
@@ -120,6 +134,13 @@ const formatProjectPeriod = (start: string, end?: string) => {
 
   return `${formatMonth(start)} - ${end ? formatMonth(end) : "진행 중"}`;
 };
+
+// 긴 설명을 문장 단위로 나눠 빠르게 훑을 수 있게 표시
+const splitSemanticSentences = (text: string) =>
+  text
+    .split(/(?<=\.)\s+/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
 
 // 형광펜 강조 스타일
 const highlightTextSx = {
@@ -155,17 +176,25 @@ const highlightTextSx = {
 const HomePage = () => {
   const navigate = useNavigate();
   const splineWrapperRef = useRef<HTMLDivElement | null>(null);
-  const [activeSectionId, setActiveSectionId] = useState(sectionNavItems[0].sectionId);
+  const [activeSectionId, setActiveSectionId] = useState(
+    sectionNavItems[0].sectionId,
+  );
   const [isBlogPassed, setIsBlogPassed] = useState(false);
   const [isSectionNavPinned, setIsSectionNavPinned] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(
+    null,
+  );
   const { getRecentPosts, loading, error } = usePosts();
   const { projects, skills } = useProjects();
 
   // 홈 노출 데이터
   const recentPosts = getRecentPosts(3);
-  const workProjects = projects.filter((project) => project.kind === "work").slice(0, 2);
-  const sideProjects = projects.filter((project) => project.kind === "side").slice(0, 1);
+  const workProjects = projects
+    .filter((project) => project.kind === "work")
+    .slice(0, 2);
+  const sideProjects = projects
+    .filter((project) => project.kind === "side")
+    .slice(0, 1);
 
   // 섹션 스크롤 이동
   const scrollToSection = (sectionId: string) => {
@@ -177,14 +206,10 @@ const HomePage = () => {
     window.open(path, "_blank", "noopener,noreferrer");
   };
 
-  // 첫 클릭은 미리보기 액션을 열고, 같은 글을 한 번 더 누르면 상세로 이동
-  const handlePostPreviewClick = (postId: string) => {
-    if (expandedPostId === postId) {
-      openBlogRoute(`/blog/${postId}`);
-      return;
-    }
-
-    setExpandedPostId(postId);
+  const handleProjectPreviewClick = (projectId: string) => {
+    setExpandedProjectId((currentId) =>
+      currentId === projectId ? null : projectId,
+    );
   };
 
   useEffect(() => {
@@ -312,7 +337,12 @@ const HomePage = () => {
               <Typography
                 component="h1"
                 sx={{
-                  fontSize: { xs: "1.55rem", sm: "2.4rem", md: "3.35rem", lg: "3.8rem" },
+                  fontSize: {
+                    xs: "1.55rem",
+                    sm: "2.4rem",
+                    md: "3.35rem",
+                    lg: "3.8rem",
+                  },
                   fontWeight: 800,
                   lineHeight: 1.28,
                   letterSpacing: 0,
@@ -329,10 +359,7 @@ const HomePage = () => {
                   component="span"
                   sx={{ display: "block", whiteSpace: "nowrap" }}
                 >
-                  <Box
-                    component="span"
-                    sx={highlightTextSx}
-                  >
+                  <Box component="span" sx={highlightTextSx}>
                     사용자 경험
                   </Box>
                   을 기술로 구현하는
@@ -342,10 +369,7 @@ const HomePage = () => {
                   sx={{ display: "block", whiteSpace: "nowrap" }}
                 >
                   개발자{" "}
-                  <Box
-                    component="span"
-                    sx={highlightTextSx}
-                  >
+                  <Box component="span" sx={highlightTextSx}>
                     김현아
                   </Box>
                   입니다.
@@ -561,95 +585,158 @@ const HomePage = () => {
         component="section"
         sx={{ py: { xs: 12, md: 20 } }}
       >
-        <Box sx={{ mb: { xs: 4.5, md: 6.5 }, textAlign: "center" }}>
-          <Typography variant="h3" fontWeight={800}>
-            핵심 역량
-          </Typography>
-          <Typography
-            sx={{
-              maxWidth: 640,
-              mx: "auto",
-              mt: 1.6,
-              color: "#625d54",
-              lineHeight: 1.8,
-            }}
-          >
-            사용자 흐름과 확장 가능한 구조, 협업 관점을 바탕으로 화면을 설계하고
-            구현합니다.
-          </Typography>
-        </Box>
-
-        <Grid container spacing={{ xs: 2.2, md: 3 }}>
-          {strengths.map((item) => (
-            <Grid size={{ xs: 12, md: 4 }} key={item.title}>
-              <Box
-                sx={{
-                  height: "100%",
-                  minHeight: { xs: 420, sm: 450, md: 468 },
-                  p: { xs: 3, sm: 3.4, md: 3.2 },
-                  bgcolor: "#ffffff",
-                  border: "1px solid #ebe6dc",
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  boxShadow: "0 18px 44px rgba(23, 23, 23, 0.04)",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
-                  "&:hover": {
-                    transform: "translateY(-3px)",
-                    borderColor: "rgba(217, 119, 6, 0.24)",
-                    boxShadow: "0 24px 54px rgba(23, 23, 23, 0.07)",
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: { xs: 190, sm: 210, md: 196, lg: 224 },
-                    mb: { xs: 3.1, md: 3.4 },
-                    borderRadius: 1.5,
-                    bgcolor: "transparent",
-                  }}
-                >
+        <Grid container spacing={{ xs: 4, md: 8 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h3" fontWeight={800}>
+              핵심 역량
+            </Typography>
+            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              사용자 흐름과 확장 가능한 구조, 협업 관점을 바탕으로 화면을
+              설계하고 구현합니다.
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Grid container spacing={{ xs: 2.2, md: 2.4 }}>
+              {strengths.map((item) => (
+                <Grid size={{ xs: 12, sm: 4 }} key={item.title}>
                   <Box
-                    component="img"
-                    src={item.image}
-                    alt=""
-                    aria-hidden="true"
                     sx={{
-                      display: "block",
-                      width: "92%",
                       height: "100%",
-                      objectFit: "contain",
+                      minHeight: { xs: 0, sm: 380, md: 400 },
+                      p: { xs: 2.2, sm: 2.4, md: 2.5 },
+                      display: "flex",
+                      flexDirection: { xs: "row", sm: "column" },
+                      alignItems: { xs: "flex-start", sm: "stretch" },
+                      gap: { xs: 2, sm: 0 },
+                      bgcolor: "#ffffff",
+                      border: "1px solid #ebe6dc",
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      boxShadow: "0 18px 44px rgba(23, 23, 23, 0.04)",
+                      transition:
+                        "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+                      "&:hover": {
+                        transform: "translateY(-3px)",
+                        borderColor: "rgba(217, 119, 6, 0.24)",
+                        boxShadow: "0 24px 54px rgba(23, 23, 23, 0.07)",
+                      },
                     }}
-                  />
-                </Box>
-                <Typography
-                  fontWeight={850}
-                  sx={{
-                    color: "#171717",
-                    fontSize: { xs: "1.28rem", md: "1.18rem", lg: "1.34rem" },
-                    lineHeight: 1.35,
-                    wordBreak: "keep-all",
-                  }}
-                >
-                  {item.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mt: { xs: 1.6, md: 1.7 },
-                    color: "#625d54",
-                    fontSize: { xs: "0.96rem", md: "0.9rem", lg: "0.96rem" },
-                    lineHeight: 1.9,
-                    wordBreak: "keep-all",
-                  }}
-                >
-                  {item.description}
-                </Typography>
-              </Box>
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: { xs: 86, sm: "100%" },
+                        height: { xs: 86, sm: 142, md: 150, lg: 164 },
+                        flex: { xs: "0 0 86px", sm: "initial" },
+                        mb: { xs: 0, sm: 2.05, md: 2.2 },
+                        pb: { xs: 0, sm: 1.9, md: 2 },
+                        pr: { xs: 1.9, sm: 0 },
+                        borderRight: {
+                          xs: "1px solid rgba(138, 129, 117, 0.14)",
+                          sm: "none",
+                        },
+                        borderBottom: {
+                          xs: "none",
+                          sm: "1px solid rgba(138, 129, 117, 0.14)",
+                        },
+                        borderRadius: 1.5,
+                        bgcolor: "transparent",
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt=""
+                        aria-hidden="true"
+                        sx={{
+                          display: "block",
+                          width: { xs: "100%", sm: "92%" },
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Stack
+                        direction="row"
+                        spacing={0.9}
+                        alignItems="center"
+                        sx={{ mb: 1.05 }}
+                      >
+                        <Typography
+                          component="span"
+                          sx={{
+                            color: "#d97706",
+                            fontSize: {
+                              xs: "0.74rem",
+                              sm: "0.66rem",
+                              lg: "0.7rem",
+                            },
+                            fontWeight: 900,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {item.number}
+                        </Typography>
+                        <Typography
+                          component="span"
+                          sx={{
+                            color: "#9a8f7d",
+                            fontSize: {
+                              xs: "0.72rem",
+                              sm: "0.64rem",
+                              lg: "0.68rem",
+                            },
+                            fontWeight: 800,
+                            letterSpacing: 0,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {item.point}
+                        </Typography>
+                      </Stack>
+                      <Typography
+                        fontWeight={850}
+                        sx={{
+                          color: "#171717",
+                          fontSize: {
+                            xs: "1.04rem",
+                            sm: "1.05rem",
+                            lg: "1.16rem",
+                          },
+                          lineHeight: 1.35,
+                          wordBreak: "keep-all",
+                          minHeight: { xs: 0, sm: "1.45em", lg: "1.55em" },
+                          display: "flex",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mt: { xs: 1.15, sm: 1.25, md: 1.3 },
+                          color: "#625d54",
+                          fontSize: {
+                            xs: "0.88rem",
+                            sm: "0.84rem",
+                            lg: "0.91rem",
+                          },
+                          lineHeight: { xs: 1.72, sm: 1.85 },
+                          wordBreak: "keep-all",
+                        }}
+                      >
+                        {item.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
             </Grid>
-          ))}
+          </Grid>
         </Grid>
       </Container>
 
@@ -660,86 +747,75 @@ const HomePage = () => {
         component="section"
         sx={{ py: { xs: 12, md: 20 } }}
       >
-        <Box sx={{ mb: { xs: 4.5, md: 6.5 }, textAlign: "center" }}>
-          <Typography variant="h3" fontWeight={800}>
-            기술 스택
-          </Typography>
-          <Typography
-            sx={{
-              maxWidth: 640,
-              mx: "auto",
-              mt: 1.6,
-              color: "#625d54",
-              lineHeight: 1.8,
-            }}
-          >
-            UI 구현, 상태 흐름, API 연동, 반응형 대응까지 프로젝트 요구사항에 맞춰
-            기술을 조합하고 확장합니다.
-          </Typography>
-        </Box>
+        <Grid container spacing={{ xs: 4, md: 8 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h3" fontWeight={800}>
+              기술 스택
+            </Typography>
+            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+              <Box
+                component="span"
+                sx={{ display: { xs: "inline", md: "block" } }}
+              >
+                UI 구현, 상태 흐름, API 연동,{" "}
+              </Box>
+              <Box
+                component="span"
+                sx={{ display: { xs: "inline", md: "block" } }}
+              >
+                반응형 대응까지 프로젝트 요구사항에 맞춰{" "}
+              </Box>
+              <Box
+                component="span"
+                sx={{ display: { xs: "inline", md: "block" } }}
+              >
+                기술을 조합하고 확장합니다.
+              </Box>
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Stack direction="row" gap={1.2} flexWrap="wrap">
+              {skills
+                .flatMap((skill) => skill.items)
+                .slice(0, 15)
+                .map((skill, index) => {
+                  const logoSrc = skillLogoMap[skill.name];
+                  const SkillIcon =
+                    skillMuiIconMap[skill.name] ?? TipsAndUpdatesIcon;
+                  const logoSize = skillLogoSxMap[skill.name] ?? {
+                    width: 21,
+                    height: 21,
+                  };
+                  const fallbackColor =
+                    skillIconColors[index % skillIconColors.length];
 
-        <Stack
-          direction="row"
-          gap={1.2}
-          flexWrap="wrap"
-          justifyContent="center"
-          sx={{ maxWidth: 900, mx: "auto" }}
-        >
-              {skills.flatMap((skill) => skill.items).slice(0, 15).map((skill, index) => {
-                const logoSrc = skillLogoMap[skill.name];
-                const SkillIcon = skillMuiIconMap[skill.name] ?? TipsAndUpdatesIcon;
-                const logoSize = skillLogoSxMap[skill.name] ?? { width: 21, height: 21 };
-                const fallbackColor = skillIconColors[index % skillIconColors.length];
-
-                return (
-                  <Tooltip
-                    key={skill.name}
-                    title={skillCapabilityMap[skill.name] ?? "프로젝트 요구사항에 맞춰 활용할 수 있습니다."}
-                    arrow
-                    placement="top"
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          px: 1.35,
-                          py: 0.9,
-                          bgcolor: "#171717",
-                          color: "#ffffff",
-                          fontSize: "0.82rem",
-                          fontWeight: 700,
-                          lineHeight: 1.55,
-                          borderRadius: "8px",
-                          boxShadow: "0 16px 34px rgba(23, 23, 23, 0.18)",
+                  return (
+                    <Tooltip
+                      key={skill.name}
+                      title={
+                        skillCapabilityMap[skill.name] ??
+                        "프로젝트 요구사항에 맞춰 활용할 수 있습니다."
+                      }
+                      arrow
+                      placement="top"
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            px: 1.35,
+                            py: 0.9,
+                            bgcolor: "#171717",
+                            color: "#ffffff",
+                            fontSize: "0.82rem",
+                            fontWeight: 700,
+                            lineHeight: 1.55,
+                            borderRadius: "8px",
+                            boxShadow: "0 16px 34px rgba(23, 23, 23, 0.18)",
+                          },
                         },
-                      },
-                      arrow: {
-                        sx: {
-                          color: "#171717",
-                        },
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 1.05,
-                        minHeight: 48,
-                        px: 1.75,
-                        py: 0.8,
-                        bgcolor: "#ffffff",
-                        border: "1px solid rgba(217, 119, 6, 0.16)",
-                        borderRadius: 999,
-                        boxShadow: "0 10px 24px rgba(23, 23, 23, 0.04)",
-                        color: "#3f3425",
-                        fontWeight: 800,
-                        fontSize: "0.95rem",
-                        cursor: "default",
-                        transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          bgcolor: "#fffaf0",
-                          borderColor: "rgba(245, 158, 11, 0.32)",
-                          boxShadow: "0 16px 34px rgba(217, 119, 6, 0.13)",
+                        arrow: {
+                          sx: {
+                            color: "#171717",
+                          },
                         },
                       }}
                     >
@@ -747,38 +823,68 @@ const HomePage = () => {
                         sx={{
                           display: "inline-flex",
                           alignItems: "center",
-                          justifyContent: "center",
-                          width: 28,
-                          height: 28,
-                          borderRadius: "50%",
-                          bgcolor: logoSrc ? "transparent" : "rgba(245, 158, 11, 0.1)",
-                          color: fallbackColor,
-                          flexShrink: 0,
+                          gap: 1.05,
+                          minHeight: 48,
+                          px: 1.75,
+                          py: 0.8,
+                          bgcolor: "#ffffff",
+                          border: "1px solid rgba(217, 119, 6, 0.16)",
+                          borderRadius: 999,
+                          boxShadow: "0 10px 24px rgba(23, 23, 23, 0.04)",
+                          color: "#3f3425",
+                          fontWeight: 800,
+                          fontSize: "0.95rem",
+                          cursor: "default",
+                          transition:
+                            "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease",
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            bgcolor: "#fffaf0",
+                            borderColor: "rgba(245, 158, 11, 0.32)",
+                            boxShadow: "0 16px 34px rgba(217, 119, 6, 0.13)",
+                          },
                         }}
                       >
-                        {logoSrc ? (
-                          <Box
-                            component="img"
-                            src={logoSrc}
-                            alt=""
-                            aria-hidden="true"
-                            sx={{
-                              display: "block",
-                              width: logoSize.width,
-                              height: logoSize.height,
-                              objectFit: "contain",
-                            }}
-                          />
-                        ) : (
-                          createElement(SkillIcon, { sx: { fontSize: 16 } })
-                        )}
+                        <Box
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            bgcolor: logoSrc
+                              ? "transparent"
+                              : "rgba(245, 158, 11, 0.1)",
+                            color: fallbackColor,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {logoSrc ? (
+                            <Box
+                              component="img"
+                              src={logoSrc}
+                              alt=""
+                              aria-hidden="true"
+                              sx={{
+                                display: "block",
+                                width: logoSize.width,
+                                height: logoSize.height,
+                                objectFit: "contain",
+                              }}
+                            />
+                          ) : (
+                            createElement(SkillIcon, { sx: { fontSize: 16 } })
+                          )}
+                        </Box>
+                        {skill.name}
                       </Box>
-                      {skill.name}
-                    </Box>
-                  </Tooltip>
-                );
-              })}
-        </Stack>
+                    </Tooltip>
+                  );
+                })}
+            </Stack>
+          </Grid>
+        </Grid>
       </Container>
 
       {/* 대표 프로젝트 */}
@@ -791,22 +897,56 @@ const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-            gap: 2.2,
-            mb: { xs: 4.5, md: 6 },
-            textAlign: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            mb: 4,
           }}
         >
-          <Box sx={{ maxWidth: 680 }}>
-            <Typography variant="h3" fontWeight={800}>
-              주요 프로젝트
-            </Typography>
-            <Typography sx={{ mt: 1.6, color: "#625d54", lineHeight: 1.8 }}>
-              전체 작업 중 주요 프로젝트를 선별해 역할과 구현 과정, 기술적 고민을
-              정리했습니다.
+          <Box>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={1.5}
+            >
+              <Typography variant="h3" fontWeight={800}>
+                주요 프로젝트
+              </Typography>
+              <IconButton
+                aria-label="프로젝트 전체 보기"
+                onClick={() => navigate(ROUTES.PROJECTS)}
+                sx={{
+                  display: { xs: "inline-flex", sm: "none" },
+                  width: 42,
+                  height: 42,
+                  color: "#171717",
+                  bgcolor: "#f4f4f5",
+                  "&:hover": {
+                    bgcolor: "#ededee",
+                  },
+                }}
+              >
+                <ArrowForwardIcon />
+              </IconButton>
+            </Stack>
+            <Typography sx={{ mt: 1, color: "#625d54" }}>
+              전체 작업 중 주요 프로젝트를 선별해 역할과 구현 과정, 기술적
+              고민을 정리했습니다.
             </Typography>
           </Box>
+          <Button
+            endIcon={<ArrowForwardIcon />}
+            onClick={() => navigate(ROUTES.PROJECTS)}
+            sx={{
+              display: { xs: "none", sm: "inline-flex" },
+              color: "#171717",
+              fontWeight: 700,
+            }}
+          >
+            전체 보기
+          </Button>
         </Box>
 
         <Stack spacing={{ xs: 5, md: 7 }}>
@@ -829,119 +969,279 @@ const HomePage = () => {
               </Typography>
 
               <Stack spacing={0}>
-                {group.items.map((project) => (
-                  <Box
-                    key={project.id}
-                    sx={{
-                      py: 2.5,
-                      px: { xs: 0, md: 1.2 },
-                      mx: { xs: 0, md: -1.2 },
-                      borderRadius: 1.5,
-                      borderTop: "1px solid rgba(217, 119, 6, 0.18)",
-                      cursor: "default",
-                      "&:last-of-type": {
-                        borderBottom: "1px solid rgba(217, 119, 6, 0.18)",
-                      },
-                      transition: "background-color 0.18s ease",
-                      "&:hover": { bgcolor: "rgba(245, 158, 11, 0.045)" },
-                      "&:hover .project-title": { color: "#5f6f52" },
-                    }}
-                  >
-                    <Grid
-                      container
-                      rowSpacing={2}
-                      columnSpacing={{ xs: 2, md: 6 }}
-                      alignItems="flex-start"
+                {group.items.map((project) => {
+                  const isExpanded = expandedProjectId === project.id;
+                  const teamText = project.detail?.info?.team
+                    ?.replace(/^개발\s*/, "")
+                    .replace(/명$/, "인");
+                  const projectMetaText = [teamText, project.detail?.info?.role]
+                    .filter(Boolean)
+                    .join(" · ");
+                  const resultPoints = (project.detail?.results ?? []).slice(
+                    0,
+                    3,
+                  );
+                  const implementationPoints = (
+                    project.detail?.challenges ?? []
+                  ).slice(0, 3);
+
+                  return (
+                    <Box
+                      key={project.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      onClick={() => handleProjectPreviewClick(project.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleProjectPreviewClick(project.id);
+                        }
+                      }}
+                      sx={{
+                        py: 2.5,
+                        px: { xs: 0, md: 1.2 },
+                        mx: { xs: 0, md: -1.2 },
+                        borderRadius: 1.5,
+                        borderTop: "1px solid rgba(217, 119, 6, 0.18)",
+                        cursor: "pointer",
+                        bgcolor: isExpanded
+                          ? "rgba(245, 158, 11, 0.045)"
+                          : "transparent",
+                        "&:last-of-type": {
+                          borderBottom: "1px solid rgba(217, 119, 6, 0.18)",
+                        },
+                        transition: "background-color 0.18s ease",
+                        "&:focus-visible": {
+                          outline: "3px solid rgba(217, 119, 6, 0.22)",
+                          outlineOffset: 3,
+                        },
+                        "&:hover": { bgcolor: "rgba(245, 158, 11, 0.045)" },
+                        "&:hover .project-title": { color: "#5f6f52" },
+                      }}
                     >
-                      <Grid size={{ xs: 12, md: 3 }}>
-                        <Typography
-                          sx={{
-                            color: "#777167",
-                            fontSize: { xs: "0.92rem", md: "0.95rem" },
-                            fontWeight: 500,
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {formatProjectPeriod(project.period.start, project.period.end)}
-                        </Typography>
+                      <Grid
+                        container
+                        rowSpacing={2}
+                        columnSpacing={{ xs: 2, md: 6 }}
+                        alignItems="flex-start"
+                      >
+                        <Grid size={{ xs: 12, md: 2.7 }}>
+                          <Typography
+                            sx={{
+                              color: "#777167",
+                              fontSize: { xs: "0.92rem", md: "0.95rem" },
+                              fontWeight: 500,
+                              lineHeight: 1.5,
+                            }}
+                          >
+                            {formatProjectPeriod(
+                              project.period.start,
+                              project.period.end,
+                            )}
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6.9 }}>
+                          <Typography
+                            className="project-title"
+                            variant="h6"
+                            fontWeight={700}
+                            sx={{
+                              color: isExpanded ? "#5f6f52" : "#171717",
+                              lineHeight: 1.4,
+                              transition: "color 0.2s",
+                              wordBreak: "keep-all",
+                            }}
+                          >
+                            {project.title}
+                            {projectMetaText && (
+                              <Typography
+                                component="span"
+                                sx={{
+                                  ml: 0.85,
+                                  color: "#8a8175",
+                                  fontSize: { xs: "0.8rem", md: "0.8rem" },
+                                  fontWeight: 700,
+                                  whiteSpace: "nowrap",
+                                  verticalAlign: "baseline",
+                                }}
+                              >
+                                ({projectMetaText})
+                              </Typography>
+                            )}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              mt: 0.95,
+                              color: "#625d54",
+                              fontSize: { xs: "0.92rem", md: "0.95rem" },
+                              lineHeight: 1.7,
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitLineClamp: { xs: 2, md: 2 },
+                              WebkitBoxOrient: "vertical",
+                            }}
+                          >
+                            {project.description}
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 2.4 }}>
+                          <Stack
+                            direction="row"
+                            gap={0.75}
+                            flexWrap="wrap"
+                            sx={{
+                              pt: { xs: 0.25, md: 0.2 },
+                              alignContent: "flex-start",
+                              justifyContent: {
+                                xs: "flex-start",
+                                md: "flex-end",
+                              },
+                            }}
+                          >
+                            {project.tech.slice(0, 5).map((tech) => (
+                              <Chip
+                                key={tech}
+                                label={tech}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#f4f4f5",
+                                  color: "#52525b",
+                                  border: "1px solid #e4e4e7",
+                                  borderRadius: "5px",
+                                  height: 24,
+                                  fontSize: "0.72rem",
+                                  fontWeight: 700,
+                                  "& .MuiChip-label": {
+                                    px: 1,
+                                  },
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Grid>
                       </Grid>
-                      <Grid size={{ xs: 12, md: 5 }}>
-                        <Typography
-                          className="project-title"
-                          variant="h6"
-                          fontWeight={700}
-                          sx={{
-                            lineHeight: 1.4,
-                            transition: "color 0.2s",
-                            wordBreak: "keep-all",
-                          }}
+
+                      <Collapse in={isExpanded} timeout={220} unmountOnExit>
+                        <Grid
+                          container
+                          rowSpacing={2}
+                          columnSpacing={{ xs: 2, md: 6 }}
+                          sx={{ mt: 2.2 }}
                         >
-                          {project.title}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            mt: 0.9,
-                            color: "#625d54",
-                            fontSize: { xs: "0.92rem", md: "0.95rem" },
-                            lineHeight: 1.7,
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            WebkitLineClamp: { xs: 3, md: 3 },
-                            WebkitBoxOrient: "vertical",
-                          }}
-                        >
-                          {project.description}
-                        </Typography>
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <Stack
-                          direction="row"
-                          gap={0.75}
-                          flexWrap="wrap"
-                          sx={{
-                            pt: { xs: 0.25, md: 0.2 },
-                            alignContent: "flex-start",
-                            justifyContent: { xs: "flex-start", md: "flex-end" },
-                          }}
-                        >
-                          {project.tech.slice(0, 5).map((tech) => (
-                            <Chip
-                              key={tech}
-                              label={tech}
-                              size="small"
+                          <Grid
+                            size={{ xs: 12, md: 2.7 }}
+                            sx={{ display: { xs: "none", md: "block" } }}
+                          />
+                          <Grid size={{ xs: 12, md: 9.3 }}>
+                            <Box
                               sx={{
-                                bgcolor: "#f4f4f5",
-                                color: "#52525b",
-                                border: "1px solid #e4e4e7",
-                                borderRadius: "5px",
-                                height: 24,
-                                fontSize: "0.72rem",
-                                fontWeight: 700,
-                                "& .MuiChip-label": {
-                                  px: 1,
-                                },
+                                p: { xs: 2.2, md: 2.4 },
+                                border: "1px solid rgba(217, 119, 6, 0.16)",
+                                borderRadius: 1.5,
+                                bgcolor: "#ffffff",
                               }}
-                            />
-                          ))}
-                        </Stack>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                ))}
+                            >
+                              <Grid container spacing={{ xs: 2.2, md: 3.2 }}>
+                                {project.detail?.solution && (
+                                  <Grid size={{ xs: 12, md: 5 }}>
+                                    <Typography
+                                      sx={{
+                                        mb: 0.85,
+                                        color: "#7c4a03",
+                                        fontSize: "0.78rem",
+                                        fontWeight: 900,
+                                        letterSpacing: 0,
+                                      }}
+                                    >
+                                      담당 범위
+                                    </Typography>
+                                    <Typography
+                                      sx={{
+                                        color: "#625d54",
+                                        fontSize: { xs: "0.92rem", md: "0.94rem" },
+                                        lineHeight: 1.78,
+                                        wordBreak: "keep-all",
+                                      }}
+                                    >
+                                      {splitSemanticSentences(project.detail.solution).map(
+                                        (sentence) => (
+                                          <Box
+                                            component="span"
+                                            key={sentence}
+                                            sx={{ display: "block" }}
+                                          >
+                                            {sentence}
+                                          </Box>
+                                        ),
+                                      )}
+                                    </Typography>
+                                  </Grid>
+                                )}
+                                {(resultPoints.length > 0 ||
+                                  implementationPoints.length > 0) && (
+                                  <Grid size={{ xs: 12, md: 7 }}>
+                                    <Typography
+                                      sx={{
+                                        mb: 0.85,
+                                        color: "#7c4a03",
+                                        fontSize: "0.78rem",
+                                        fontWeight: 900,
+                                        letterSpacing: 0,
+                                      }}
+                                    >
+                                      구현·성과
+                                    </Typography>
+                                    <Stack
+                                      component="ul"
+                                      spacing={0.72}
+                                      sx={{ p: 0, m: 0, listStyle: "none" }}
+                                    >
+                                      {[
+                                        ...resultPoints,
+                                        ...implementationPoints,
+                                      ].map((item) => (
+                                        <Box
+                                          component="li"
+                                          key={item}
+                                          sx={{
+                                            display: "flex",
+                                            gap: 1,
+                                            color: "#625d54",
+                                            fontSize: {
+                                              xs: "0.9rem",
+                                              md: "0.92rem",
+                                            },
+                                            lineHeight: 1.66,
+                                            "&::before": {
+                                              content: '""',
+                                              width: 4,
+                                              height: 4,
+                                              mt: "0.72em",
+                                              flex: "0 0 auto",
+                                              borderRadius: "50%",
+                                              bgcolor: "#d97706",
+                                            },
+                                          }}
+                                        >
+                                          {item}
+                                        </Box>
+                                      ))}
+                                    </Stack>
+                                  </Grid>
+                                )}
+                              </Grid>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Collapse>
+                    </Box>
+                  );
+                })}
               </Stack>
             </Box>
           ))}
         </Stack>
-
-        <Box sx={{ display: "flex", justifyContent: "center", mt: { xs: 4.5, md: 5.5 } }}>
-          <Button
-            endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate(ROUTES.PROJECTS)}
-            sx={{ color: "#171717", fontWeight: 800 }}
-          >
-            전체 프로젝트 보기
-          </Button>
-        </Box>
       </Container>
 
       {/* 최신 학습 기록 */}
@@ -957,21 +1257,55 @@ const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-            gap: 2.2,
-            mb: { xs: 4.5, md: 6 },
-            textAlign: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            mb: 4,
           }}
         >
-          <Box sx={{ maxWidth: 640 }}>
-            <Typography variant="h3" fontWeight={800}>
-              학습 기록
-            </Typography>
-            <Typography sx={{ mt: 1.6, color: "#625d54", lineHeight: 1.8 }}>
+          <Box>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={1.5}
+            >
+              <Typography variant="h3" fontWeight={800}>
+                학습 기록
+              </Typography>
+              <IconButton
+                aria-label="블로그 바로가기"
+                onClick={() => openBlogRoute(ROUTES.BLOG)}
+                sx={{
+                  display: { xs: "inline-flex", sm: "none" },
+                  width: 42,
+                  height: 42,
+                  color: "#171717",
+                  bgcolor: "#f4f4f5",
+                  "&:hover": {
+                    bgcolor: "#ededee",
+                  },
+                }}
+              >
+                <OpenInNewIcon />
+              </IconButton>
+            </Stack>
+            <Typography sx={{ mt: 1, color: "#625d54" }}>
               IT 지식을 습득하고 기록하며 문제 해결 과정을 정리합니다.
             </Typography>
           </Box>
+          <Button
+            endIcon={<OpenInNewIcon />}
+            onClick={() => openBlogRoute(ROUTES.BLOG)}
+            sx={{
+              display: { xs: "none", sm: "inline-flex" },
+              color: "#171717",
+              fontWeight: 700,
+            }}
+          >
+            블로그 바로가기
+          </Button>
         </Box>
 
         {loading && <Typography>로딩 중...</Typography>}
@@ -982,13 +1316,14 @@ const HomePage = () => {
 
         <Stack spacing={0}>
           {recentPosts.map((post) => {
-            const isExpanded = expandedPostId === post.id;
-            const previewText = post.excerpt || extractExcerpt(post.content, 120);
+            const previewText = cleanExcerpt(
+              post.excerpt || extractExcerpt(post.content, 120),
+            );
 
             return (
               <Box
                 key={post.id}
-                onClick={() => handlePostPreviewClick(post.id)}
+                onClick={() => openBlogRoute(`/blog/${post.id}`)}
                 sx={{
                   py: 2.5,
                   px: { xs: 0, md: 1.2 },
@@ -1000,6 +1335,15 @@ const HomePage = () => {
                   transition: "background-color 0.18s ease",
                   "&:hover": { bgcolor: "rgba(245, 158, 11, 0.045)" },
                   "&:hover .post-title": { color: "#5f6f52" },
+                  "&:hover .post-description": {
+                    opacity: 0.28,
+                    filter: "blur(1.2px)",
+                  },
+                  "&:hover .post-action": {
+                    opacity: 1,
+                    transform: "translateY(-50%)",
+                    pointerEvents: "auto",
+                  },
                 }}
               >
                 <Grid container spacing={2}>
@@ -1020,26 +1364,56 @@ const HomePage = () => {
                       className="post-title"
                       variant="h6"
                       fontWeight={700}
-                      sx={{ transition: "color 0.2s" }}
+                      sx={{
+                        transition: "color 0.2s",
+                      }}
                     >
                       {post.title}
                     </Typography>
-                    {previewText && (
-                      <Typography
+                    <Box sx={{ position: "relative", mt: 0.9 }}>
+                      {previewText && (
+                        <Typography
+                          className="post-description"
+                          sx={{
+                            color: "#625d54",
+                            fontSize: { xs: "0.92rem", md: "0.95rem" },
+                            lineHeight: 1.7,
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            transition: "opacity 0.18s ease, filter 0.18s ease",
+                          }}
+                        >
+                          {previewText}
+                        </Typography>
+                      )}
+                      <Button
+                        className="post-action"
+                        size="small"
+                        endIcon={<OpenInNewIcon />}
                         sx={{
-                          mt: 0.9,
-                          color: "#625d54",
-                          fontSize: { xs: "0.92rem", md: "0.95rem" },
-                          lineHeight: 1.7,
-                          overflow: "hidden",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
+                          position: { xs: "static", sm: "absolute" },
+                          left: 0,
+                          top: { sm: "50%" },
+                          mt: { xs: 1, sm: 0 },
+                          minWidth: "auto",
+                          p: 0,
+                          color: "#171717",
+                          fontSize: { xs: "0.82rem", md: "0.86rem" },
+                          fontWeight: 500,
+                          opacity: { xs: 1, sm: 0 },
+                          pointerEvents: { xs: "auto", sm: "none" },
+                          transform: { xs: "none", sm: "translateY(-42%)" },
+                          transition: "opacity 0.18s ease, transform 0.18s ease",
                         }}
                       >
-                        {previewText}
-                      </Typography>
-                    )}
+                        클릭 시 해당 글로 이동합니다.{" "}
+                        <Box component="span" sx={{ fontWeight: 900 }}>
+                          자세히 보기
+                        </Box>
+                      </Button>
+                    </Box>
                   </Grid>
                   <Grid size={{ xs: 12, md: 2 }}>
                     <Stack
@@ -1072,62 +1446,10 @@ const HomePage = () => {
                   </Grid>
                 </Grid>
 
-                <Box
-                  aria-hidden={!isExpanded}
-                  sx={{
-                    mt: 1.35,
-                    ml: { xs: 0, md: "25%" },
-                    pr: { xs: 0, md: 4 },
-                    height: { xs: 54, sm: 28 },
-                    color: "#625d54",
-                    opacity: isExpanded ? 1 : 0,
-                    pointerEvents: isExpanded ? "auto" : "none",
-                    transition: "opacity 0.18s ease",
-                  }}
-                >
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1.2}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                  >
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "#8a8175", lineHeight: 1.6 }}
-                    >
-                      한 번 더 누르면 글 상세로 이동합니다
-                    </Typography>
-                    <Button
-                      size="small"
-                      endIcon={<OpenInNewIcon />}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openBlogRoute(`/blog/${post.id}`);
-                      }}
-                      sx={{
-                        minWidth: "auto",
-                        p: 0,
-                        color: "#171717",
-                        fontWeight: 800,
-                      }}
-                    >
-                      자세히 보기
-                    </Button>
-                  </Stack>
-                </Box>
               </Box>
             );
           })}
         </Stack>
-
-        <Box sx={{ display: "flex", justifyContent: "center", mt: { xs: 4.5, md: 5.5 } }}>
-          <Button
-            endIcon={<OpenInNewIcon />}
-            onClick={() => openBlogRoute(ROUTES.BLOG)}
-            sx={{ color: "#171717", fontWeight: 800 }}
-          >
-            블로그 바로가기
-          </Button>
-        </Box>
       </Container>
 
       {/* 연락 섹션 */}
