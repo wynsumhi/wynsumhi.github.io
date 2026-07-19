@@ -20,6 +20,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import {
   CloseRounded,
@@ -279,10 +280,10 @@ const ListView = ({ posts }: { posts: Post[] }) => {
           key={year}
           sx={{
             display: "grid",
-            gridTemplateColumns: YEAR_GROUP_COLUMNS,
+            gridTemplateColumns: { xs: "1fr", md: YEAR_GROUP_COLUMNS.md },
             columnGap: { xs: 1.4, md: 2.4 },
             alignItems: "start",
-            mb: { xs: 6, md: 7 },
+            mb: { xs: 4.5, md: 7 },
           }}
         >
           {/* 스티키 연도 */}
@@ -292,7 +293,7 @@ const ListView = ({ posts }: { posts: Post[] }) => {
               top: { xs: 16, md: 24 },
               zIndex: 2,
               height: TIMELINE_HEADER_HEIGHT,
-              display: "flex",
+              display: { xs: "none", md: "flex" },
               alignItems: "center",
               justifyContent: "flex-end",
               pointerEvents: "none",
@@ -315,10 +316,25 @@ const ListView = ({ posts }: { posts: Post[] }) => {
 
           {/* 연도별 글 목록 */}
           <Box sx={{ minWidth: 0 }}>
+            <Typography
+              sx={{
+                display: { xs: "block", md: "none" },
+                mb: 1.45,
+                color: "var(--blog-muted)",
+                fontSize: "0.78rem",
+                fontWeight: 850,
+                lineHeight: 1,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {year}
+            </Typography>
+
             {yearPosts.map((post, idx) => {
               const date = new Date(post.date);
               const day = date.getDate().toString().padStart(2, "0");
               const month = MONTHS[date.getMonth()];
+              const mobileDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${day}`;
 
               return (
                 <Box
@@ -326,9 +342,10 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                   onClick={() => navigate(`/blog/${post.id}`)}
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: TIMELINE_COLUMNS,
-                    gap: TIMELINE_GAP,
-                    minHeight: { xs: 136, md: 148 },
+                    gridTemplateColumns: { xs: "1fr", md: TIMELINE_COLUMNS.md },
+                    gap: { xs: 0, md: TIMELINE_GAP.md },
+                    minHeight: { xs: "auto", md: 148 },
+                    mb: { xs: 1.35, md: 0 },
                     cursor: "pointer",
                     "&:hover .post-title": { color: "var(--blog-accent)" },
                     "&:hover .post-content": {
@@ -342,7 +359,7 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                   <Box
                     sx={{
                       height: TIMELINE_HEADER_HEIGHT,
-                      display: "flex",
+                      display: { xs: "none", md: "flex" },
                       alignItems: "center",
                       justifyContent: "flex-end",
                       textAlign: "right",
@@ -365,7 +382,7 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                 <Box
                   sx={{
                     position: "relative",
-                    display: "flex",
+                    display: { xs: "none", md: "flex" },
                     justifyContent: "center",
                     "&::before": {
                       content: '""',
@@ -399,25 +416,42 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                 <Box
                   className="post-content"
                   sx={{
-                    mt: { xs: -0.9, md: -1.05 },
-                    mx: { xs: -0.6, md: -0.8 },
-                    mb: 2.4,
-                    px: { xs: 2.4, md: 3.6 },
-                    pt: { xs: 0.9, md: 1.05 },
-                    pb: { xs: 1.65, md: 2.05 },
+                    mt: { xs: 0, md: -1.05 },
+                    mx: { xs: 0, md: -0.8 },
+                    mb: { xs: 0, md: 2.4 },
+                    px: { xs: 2.05, sm: 2.35, md: 3.6 },
+                    pt: { xs: 1.7, md: 1.05 },
+                    pb: { xs: 1.75, md: 2.05 },
                     border: "1px solid transparent",
                     borderRadius: 2.4,
+                    bgcolor: { xs: "var(--blog-card-bg)", md: "transparent" },
+                    borderColor: { xs: "var(--blog-border)", md: "transparent" },
+                    boxShadow: { xs: "0 12px 34px var(--blog-card-shadow)", md: "none" },
                     transition: "background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
                   }}
                 >
+                  <Typography
+                    sx={{
+                      display: { xs: "block", md: "none" },
+                      color: "var(--blog-muted)",
+                      fontSize: "0.76rem",
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      mb: 1,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {mobileDate} · {getRelativeTime(post.date)}
+                  </Typography>
+
                   {/* 제목과 작성 시점 */}
                   <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
                       gap: 1.5,
-                      minHeight: TIMELINE_HEADER_HEIGHT,
-                      mb: 1.2,
+                      minHeight: { xs: "auto", md: TIMELINE_HEADER_HEIGHT },
+                      mb: { xs: 0.9, md: 1.2 },
                       minWidth: 0,
                     }}
                   >
@@ -427,16 +461,20 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                         color: "var(--blog-heading)",
                         fontSize: { xs: "1.08rem", md: "1.3rem" },
                         fontWeight: 850,
-                        lineHeight: 1.08,
+                        lineHeight: { xs: 1.32, md: 1.08 },
                         transition: "color 0.2s",
                         overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: { xs: 2, md: 1 },
+                        WebkitBoxOrient: "vertical",
+                        wordBreak: "keep-all",
                       }}
                     >
                       {post.title}
                     </Typography>
                     <Typography
                       sx={{
+                        display: { xs: "none", md: "block" },
                         flexShrink: 0,
                         color: "var(--blog-muted)",
                         fontSize: "0.82rem",
@@ -452,9 +490,9 @@ const ListView = ({ posts }: { posts: Post[] }) => {
                     sx={{
                       maxWidth: 860,
                       color: "var(--blog-subtle)",
-                      fontSize: "0.92rem",
-                      lineHeight: 1.75,
-                      mb: 1.3,
+                      fontSize: { xs: "0.88rem", md: "0.92rem" },
+                      lineHeight: { xs: 1.68, md: 1.75 },
+                      mb: { xs: 1.15, md: 1.3 },
                       overflow: "hidden",
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
@@ -728,10 +766,10 @@ const CardView = ({ posts }: { posts: Post[] }) => {
                   wordBreak: "keep-all",
                   overflow: "hidden",
                   display: "-webkit-box",
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: { xs: 2, sm: 3, md: 3 },
                   WebkitBoxOrient: "vertical",
-                  minHeight: { xs: "2.68em", sm: "4.02em", md: "3.48em" },
-                  maxHeight: { xs: "4.02em", md: "3.48em" },
+                  minHeight: { xs: "auto", sm: "4.02em", md: "3.48em" },
+                  maxHeight: { xs: "none", sm: "4.02em", md: "3.48em" },
                   "@media (min-width: 900px) and (max-height: 920px)": {
                     fontSize: "1.2rem",
                     lineHeight: 1.16,
@@ -1159,14 +1197,16 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width:899.95px)");
+  const activeViewMode = isMobile ? "card" : viewMode;
 
   useEffect(() => {
-    document.documentElement.dataset.blogViewMode = viewMode;
+    document.documentElement.dataset.blogViewMode = activeViewMode;
 
     return () => {
       delete document.documentElement.dataset.blogViewMode;
     };
-  }, [viewMode]);
+  }, [activeViewMode]);
 
   useEffect(() => {
     if (!isSearchOpen) return;
@@ -1256,7 +1296,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
   // 표시 개수를 초기화할 조건 키
   const collectionKey = [
     activeSection,
-    viewMode,
+    activeViewMode,
     searchKeyword.trim().toLowerCase(),
     selectedCategory,
   ].join("|");
@@ -1283,10 +1323,10 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          overflow: { xs: "visible", md: viewMode === "card" ? "hidden" : "visible" },
+          overflow: { xs: "visible", md: activeViewMode === "card" ? "hidden" : "visible" },
         }}
       >
-        {viewMode === "card" ? <CardSkeletonGrid /> : <ListSkeleton />}
+        {activeViewMode === "card" ? <CardSkeletonGrid /> : <ListSkeleton />}
       </Box>
     );
 
@@ -1315,15 +1355,15 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        overflow: { xs: "visible", md: viewMode === "card" ? "hidden" : "visible" },
+        overflow: { xs: "visible", md: activeViewMode === "card" ? "hidden" : "visible" },
       }}
     >
       {/* 목록 헤더 영역 */}
       <Box
         ref={searchFilterRef}
         sx={{
-          pb: viewMode === "card" ? { xs: 1.6, sm: 1.9, md: "clamp(0.8rem, 1.8dvh, 1.35rem)" } : 2.2,
-          mb: viewMode === "card" ? { xs: 2.2, sm: 2.7, md: "clamp(0.9rem, 2.4dvh, 2.2rem)" } : 4,
+          pb: activeViewMode === "card" ? { xs: 1.6, sm: 1.9, md: "clamp(0.8rem, 1.8dvh, 1.35rem)" } : 2.2,
+          mb: activeViewMode === "card" ? { xs: 2.2, sm: 2.7, md: "clamp(0.9rem, 2.4dvh, 2.2rem)" } : 4,
           borderBottom: "1px solid var(--blog-divider)",
         }}
       >
@@ -1381,7 +1421,7 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
           {/* 목록 도구 */}
           <Box
             sx={{
-              display: "flex",
+              display: { xs: "none", md: "flex" },
               alignItems: "center",
               justifyContent: "flex-end",
               gap: 0.45,
@@ -1622,11 +1662,11 @@ const BlogHomeContent = ({ activeSection }: BlogHomeContentProps) => {
         <PostCollection
           key={collectionKey}
           posts={filteredPosts}
-          viewMode={viewMode}
+          viewMode={activeViewMode}
         />
       )}
 
-      {viewMode === "list" && <ScrollTopButton />}
+      {activeViewMode === "list" && <ScrollTopButton />}
     </Box>
   );
 };
