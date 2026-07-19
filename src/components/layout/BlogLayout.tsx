@@ -216,8 +216,8 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
           sx={{
             flex: 1,
             ml: { xs: 0, md: "260px" },
-            px: { xs: 2, sm: 3, md: 7 },
-            py: { xs: 3, sm: 4, md: 7 },
+            px: { xs: 1.55, sm: 3, md: 7 },
+            py: { xs: 2.4, sm: 4, md: 7 },
             boxSizing: "border-box",
             maxWidth: { xs: "100vw", md: "calc(100vw - 260px)" },
             minHeight: "100dvh",
@@ -254,8 +254,8 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
               className="blog-footer"
               component="footer"
               sx={{
-                mt: { xs: 7, md: 9 },
-                pt: { xs: 2.4, md: 3 },
+                mt: { xs: 5.5, md: 9 },
+                pt: { xs: 2.1, md: 3 },
                 "@media (min-width: 900px)": {
                   "html[data-blog-view-mode='card'] &": {
                     mt: "clamp(6px, 1dvh, 10px)",
@@ -264,10 +264,11 @@ const BlogLayout = ({ children }: BlogLayoutProps) => {
                 },
                 borderTop: "1px solid var(--blog-divider)",
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "space-between",
                 gap: 2,
                 flexWrap: "wrap",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "flex-start", sm: "center" },
                 color: "var(--blog-muted)",
               }}
             >
