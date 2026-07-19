@@ -74,9 +74,9 @@ const PostNavigationCard = ({
       onClick={onClick}
       sx={{
         width: "100%",
-        minHeight: { xs: 116, md: 132 },
-        px: { xs: 2.2, md: 3 },
-        py: { xs: 2.2, md: 2.7 },
+        minHeight: { xs: 104, md: 132 },
+        px: { xs: 1.85, md: 3 },
+        py: { xs: 1.9, md: 2.7 },
         border: "1px solid var(--blog-divider)",
         borderRadius: 3,
         bgcolor: "var(--blog-panel-bg)",
@@ -302,9 +302,9 @@ const BlogPost = () => {
             alt={post.title}
             sx={{
               width: "100%",
-              maxHeight: 430,
+              maxHeight: { xs: 220, sm: 320, md: 430 },
               objectFit: "cover",
-              borderRadius: 3,
+              borderRadius: { xs: 2, md: 3 },
               display: "block",
               mb: { xs: 3, md: 4 },
             }}
@@ -319,11 +319,12 @@ const BlogPost = () => {
               component="h1"
               sx={{
                 color: "var(--blog-heading)",
-                fontSize: { xs: "1.9rem", md: "2.55rem" },
+                fontSize: { xs: "1.62rem", sm: "1.95rem", md: "2.55rem" },
                 fontWeight: 880,
-                lineHeight: 1.22,
+                lineHeight: { xs: 1.3, md: 1.22 },
                 letterSpacing: 0,
                 mb: 1.5,
+                wordBreak: "keep-all",
               }}
             >
               {post.title || "제목 없음"}
