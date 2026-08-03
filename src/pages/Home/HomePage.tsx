@@ -592,8 +592,10 @@ const HomePage = () => {
               핵심 역량
             </Typography>
             <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
-              사용자 흐름과 확장 가능한 구조, 협업 관점을 바탕으로 화면을
-              설계하고 구현합니다.
+              <Box component="span" sx={{ whiteSpace: "nowrap" }}>
+                남들이 쉽게 지나치는
+              </Box>{" "}
+              작은 디테일과 기본 원칙을 놓치지 않는 개발을 지향합니다.
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
