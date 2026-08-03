@@ -384,8 +384,9 @@ const HomePage = () => {
                   lineHeight: 1.8,
                 }}
               >
-                디자인 관점에서 화면의 흐름을 이해하고, 프론트엔드 코드로 실제
-                서비스에 맞는 UI를 구현합니다.
+                디자인 전공을 바탕으로 사용자 경험을 최우선 가치로 두고, <br />
+                AI의 응답 또한 신뢰할 수 있는 경험이 되도록 원칙과 구조를
+                설계합니다.
               </Typography>
 
               <Stack
@@ -1159,22 +1160,25 @@ const HomePage = () => {
                                     <Typography
                                       sx={{
                                         color: "#625d54",
-                                        fontSize: { xs: "0.92rem", md: "0.94rem" },
+                                        fontSize: {
+                                          xs: "0.92rem",
+                                          md: "0.94rem",
+                                        },
                                         lineHeight: 1.78,
                                         wordBreak: "keep-all",
                                       }}
                                     >
-                                      {splitSemanticSentences(project.detail.solution).map(
-                                        (sentence) => (
-                                          <Box
-                                            component="span"
-                                            key={sentence}
-                                            sx={{ display: "block" }}
-                                          >
-                                            {sentence}
-                                          </Box>
-                                        ),
-                                      )}
+                                      {splitSemanticSentences(
+                                        project.detail.solution,
+                                      ).map((sentence) => (
+                                        <Box
+                                          component="span"
+                                          key={sentence}
+                                          sx={{ display: "block" }}
+                                        >
+                                          {sentence}
+                                        </Box>
+                                      ))}
                                     </Typography>
                                   </Grid>
                                 )}
@@ -1405,7 +1409,8 @@ const HomePage = () => {
                           opacity: { xs: 1, sm: 0 },
                           pointerEvents: { xs: "auto", sm: "none" },
                           transform: { xs: "none", sm: "translateY(-42%)" },
-                          transition: "opacity 0.18s ease, transform 0.18s ease",
+                          transition:
+                            "opacity 0.18s ease, transform 0.18s ease",
                         }}
                       >
                         클릭 시 해당 글로 이동합니다.{" "}
@@ -1445,7 +1450,6 @@ const HomePage = () => {
                     </Stack>
                   </Grid>
                 </Grid>
-
               </Box>
             );
           })}
