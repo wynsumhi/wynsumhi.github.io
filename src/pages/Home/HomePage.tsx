@@ -36,7 +36,7 @@ import { cleanExcerpt, extractExcerpt } from "@/utils/markdown";
 const strengths = [
   {
     number: "01",
-    point: "Experience",
+    point: "Accessibility",
     title: "사용자 경험과 접근성 고려",
     description:
       "정보 구조와 CTA 흐름을 기준으로 화면을 설계하고, SEO와 접근성을 함께 개선합니다.",
@@ -44,7 +44,7 @@ const strengths = [
   },
   {
     number: "02",
-    point: "Structure",
+    point: "Architecture",
     title: "확장 가능한 화면 구조 설계",
     description:
       "컴포넌트 재사용성, 상태 관리, API 연동 책임을 나누어 변경에 강한 구조를 만듭니다.",
@@ -591,7 +591,15 @@ const HomePage = () => {
             <Typography variant="h3" fontWeight={800}>
               핵심 역량
             </Typography>
-            <Typography sx={{ mt: 1.5, color: "#625d54", lineHeight: 1.8 }}>
+            <Typography
+              sx={{
+                mt: 1.5,
+                color: "#625d54",
+                lineHeight: 1.8,
+                wordBreak: "keep-all",
+                overflowWrap: "normal",
+              }}
+            >
               <Box component="span" sx={{ whiteSpace: "nowrap" }}>
                 남들이 쉽게 지나치는
               </Box>{" "}
